@@ -153,8 +153,8 @@
                     <span class="cn-text hidden">杨梓聪</span>
                 </h1>
                 <div class="flex flex-wrap gap-2 mb-4">
-                    <span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded font-bold">CPC Member</span>
-                    <span class="bg-slate-200 text-slate-700 text-xs px-2 py-1 rounded font-bold">Han Ethnicity</span>
+                    <span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded font-bold">中共党员</span>
+                    <span class="bg-slate-200 text-slate-700 text-xs px-2 py-1 rounded font-bold">汉族</span>
                 </div>
                 
                 <div class="text-sm text-slate-600 space-y-2">
@@ -381,24 +381,46 @@
                     </div>
                     <div class="text-blue-700 font-bold mb-3">
                         <span class="en-text">Guangzhou Xiyang Information Technology Co., Ltd.</span>
-                        <span class="cn-text hidden">广州西洋信息科技有限公司 | 软件部</span>
+                        <span class="cn-text hidden">广州西洋信息科技有限公司</span>
+                    </div>
+                    <div class="mb-3 text-slate-600 space-y-1 text-justify">
+                        <div>
+                            <span class="en-text"><strong>Project:</strong> CablePyQT Cable Surface Defect Detection and Intelligent Reporting System</span>
+                            <span class="cn-text hidden"><strong>项目名称：</strong>CablePyQT 线缆表面缺陷检测与智能报告系统</span>
+                        </div>
+                        <div>
+                            <span class="en-text"><strong>Tech Stack:</strong> Python, PyQt5, Ultralytics YOLO, OpenCV, SQLAlchemy (SQLite), ReportLab, OpenAI/Spark API, RAG, PyTest, Git, Bash, Vibe Coding, Skills</span>
+                            <span class="cn-text hidden"><strong>技术栈：</strong>Python、PyQt5、Ultralytics YOLO、OpenCV、SQLAlchemy(SQLite)、ReportLab、OpenAI/Spark API、RAG、PyTest、Git、Bash、Vibe Coding、Skills</span>
+                        </div>
+                        <div>
+                            <span class="en-text"><strong>Overview:</strong> A desktop multi-channel real-time inspection platform for industrial quality control, covering a full-loop workflow of high-concurrency data acquisition, AI visual recognition, persistence, and RAG-powered intelligent analysis.</span>
+                            <span class="cn-text hidden"><strong>项目描述：</strong>面向工业产线质检场景的桌面端多通道实时检测平台，提供涵盖“高并发数据采集-AI视觉识别-持久化落库-RAG智能分析”的全链路闭环。</span>
+                        </div>
                     </div>
                     <ul class="list-disc list-outside ml-4 text-slate-600 space-y-2 text-justify">
                         <li>
-                            <span class="en-text">Led the <strong>Cable Defect Detection Project</strong> in collaboration with Zhuhai Key Lab. Organized student team for data annotation, completing <strong>3,500+ images</strong>, realizing industry-university research cooperation.</span>
-                            <span class="cn-text hidden">与珠海市智能视觉检测技术重点实验室合作，主导线缆缺陷检测项目的数据构建与算法研发，组织并指导大学生创新创业团队开展数据标注工作，累计完成 <strong>3500+张</strong> 线缆缺陷图像标注，实现与重点实验室的产学研合作，标注项目顺利完成。</span>
+                            <span class="en-text">Collaborated with Zhuhai Key Laboratory of Intelligent Visual Inspection Technology, led dataset construction and algorithm R&amp;D, organized and guided student innovation teams for annotation, completed <strong>3,500</strong> cable-defect labels, and co-built the <strong>CSDDdb</strong> dataset through industry-academia collaboration.</span>
+                            <span class="cn-text hidden">与珠海市智能视觉检测技术重点实验室展开合作，主导线缆缺陷检测项目的数据构建与算法研发，组织并指导大学生创新创业团队开展数据标注工作，累计完成 <strong>3500 张</strong> 线缆缺陷图像标注，实现与重点实验室的产学研合作，标注项目顺利完成，共同创建 <strong>CSDDdb</strong> 数据集。</span>
                         </li>
                         <li>
-                            <span class="en-text">Designed systematic data augmentation: scaling, random flipping, center cropping, color adjustment (brightness/contrast/saturation), and noise addition (Gaussian/Salt-and-Pepper). Developed Python/PyTorch augmentation classes with YOLO label sync, improving accuracy by ~10%.</span>
-                            <span class="cn-text hidden">设计系统化数据增强方案（保持比例缩放、随机翻转、中心裁剪、色彩调整、高斯/椒盐噪声）。使用 Python/PyTorch 编写增强类支持 YOLO 标签同步，模型准确率提升约10%。</span>
+                            <span class="en-text">Addressed long-tail data scarcity under uneven lighting and varying viewpoints by building an offline augmentation pipeline with YOLO normalized coordinate (XYWH) linkage. Decoupled the system bottom layer and implemented a rich operator library covering bbox-synchronized geometric transforms (translation, flip, orthogonal rotation) and pixel-level photometric transforms (Gaussian noise, blur, color enhancement).</span>
+                            <span class="cn-text hidden">针对光照不均、视角多变等长尾场景下的数据稀缺问题，研发了支持 YOLO 归一化坐标（XYWH）联动计算的离线数据增强流水线。系统底层解耦并实现了丰富的增强算子库，全面涵盖边界框同步跟随的空间几何变换（平移、翻转、正交旋转），以及像素级的光度学变换（高斯噪声、模糊、色彩增强）。</span>
                         </li>
                         <li>
-                            <span class="en-text">Developed image preprocessing using <strong>OpenCV</strong>: Implemented <strong>Wiener filtering</strong> for deblurring, Illumination Normalization + Adaptive Gamma for dark areas, CLAHE + Multi-scale sharpening for contrast. Used Gaussian blur + Weighted subtraction for background suppression, OTSU + Morphological operations for smoothing, and Horizontal Projection + Contour detection for precise defect positioning.</span>
-                            <span class="cn-text hidden">负责图像预处理开发（OpenCV）：实现<strong>维纳滤波</strong>去模糊、光照归一化+自适应伽马校正增强暗区、CLAHE+多尺度锐化提升对比度。利用高斯模糊+加权减法抑制背景，配合OTSU+形态学操作平滑，最后通过水平投影与轮廓检测实现精准定位。</span>
+                            <span class="en-text">Developed the image preprocessing module based on <strong>OpenCV</strong>. For irregular cable edges and weak dark-area details, designed a full pipeline using Wiener frequency-domain deblurring and Gaussian background suppression to reconstruct quality, then built multi-stage enhancement from pixel-distribution features (illumination compensation + multi-scale feature fusion), and used adaptive hybrid-threshold segmentation with morphological projection differencing to isolate background noise and visualize uneven edges plus internal black spots.</span>
+                            <span class="cn-text hidden">负责图像预处理模块的开发，基于 OpenCV 实现了一系列图像增强与缺陷提取算法。针对线缆成像边缘不规则与暗区细节弱的痛点，设计了完整的图像处理管线。采用 Wiener 频域去模糊与高斯背景抑制重构图像质量。构建了基于像素分布特征的多阶段图像增强算法（光照补偿+多尺度特征融合），并利用自适应混合阈值分割与形态学投影差分技术，精准剥离背景干扰，实现线缆不平整边缘与内部黑点的高亮可视化追踪。</span>
                         </li>
                         <li>
-                            <span class="en-text">Proposed <strong>CSDDNet</strong> (migrated LWGANet, introduced PWCSA to optimize GPA branch for small objects). Built deployment system with <strong>PyQt5 + TensorRT</strong> (Multi-thread/Real-time). Visualized segmentation of attachments, bulges, black spots, and damage.</span>
-                            <span class="cn-text hidden">提出改进型 <strong>CSDDNet</strong>（迁移LWGANet，引入PWCSA优化小目标检测）。构建基于 <strong>PyQt5+TensorRT</strong> 的系统（多线程/实时视频）。实现线缆附着物、鼓包、黑点、破损的分割与可视化。</span>
+                            <span class="en-text">For small-target defects, implemented adaptive ROI extraction with Otsu and morphology in <strong>OpenCV</strong>; smoothed background using guided filtering and enhanced weak high-frequency defects under complex backgrounds via multi-scale Sobel gradient fusion. Replaced empirical thresholds with a dynamic adaptive segmentation model based on global gradient statistics and multi-dimensional contour geometry, significantly reducing false positives while achieving high-precision real-time localization at low compute cost.</span>
+                            <span class="cn-text hidden">针对小目标缺陷检测难的问题，基于 OpenCV 实现了基于 Otsu 与形态学自适应提取目标 ROI，利用导向滤波平滑背景并结合多尺度 Sobel 融合梯度特征，显著增强复杂背景下的微弱高频缺陷；摒弃传统经验阈值，创新性构建基于全局梯度统计与多维轮廓几何特征的动态自适应分割模型，在极低算力消耗下大幅抑制误检率，实现高精度的实时缺陷定位。</span>
+                        </li>
+                        <li>
+                            <span class="en-text">Proposed and implemented the improved lightweight defect-vision model <strong>CSDDNet</strong>, migrated LWGANet to cable-defect detection, introduced PWCSA to optimize the GPA branch for better small-target capability, added a lightweight detection head, and trained multiple mainstream YOLO models.</span>
+                            <span class="cn-text hidden">提出并实现了改进型轻量化缺陷检测视觉检测模型 <strong>CSDDNet</strong>，将 LWGANet 迁移至电缆缺陷检测任务，并通过引入 PWCSA 网络优化 GPA 分支提升小目标缺陷检测能力，同时新增轻量化检测头，并训练多个主流检测 YOLO 模型。</span>
+                        </li>
+                        <li>
+                            <span class="en-text">Developed a PyQt5 + YOLO + OpenCV desktop inspection system from AI model to application-layer delivery. Supported 4-channel parallel processing, 3 video-source types, and multi-model formats (.pt/.onnx/.engine). Implemented thread-safe access with QThread + QMutex, continuous-error circuit breaking, and stream reconnection to prevent dead loops and leaks. Introduced frame skipping, async I/O, and 5-second throttled DB writes; fully decoupled UI rendering from inference and capped UI at 12 FPS (~60% fewer calls) while preserving 30 FPS lossless detection. Built a RAG reporting module with paraphrase-multilingual-MiniLM-L12-v2, Top-K retrieval, and Spark API requests/OpenAI dual fallback for better stability and report quality. Delivered accurate segmentation and visualization for cable-surface attachments, bulges, black spots, breakage, and concave-convex defects.</span>
+                            <span class="cn-text hidden">研发基于 PyQt5+YOLO+OpenCV 算子的线缆缺陷检测桌面端，实现从 AI 模型到应用层的完整落地，支持 4 通道并行、3 类视频源及多模型格式（.pt/.onnx/.engine），覆盖复杂工业场景。基于 QThread+QMutex 落地线程安全访问，构建连续错误熔断与断流重连机制，避免底层检测死循环与资源泄漏。引入帧跳过、异步 I/O 及 5s 周期节流写库策略；将 UI 渲染与底层推理彻底解耦，限制界面至 12FPS（减少约 60% 调用量），在保障 30FPS 视频流无损检测的同时实现界面极速响应。实现基于 RAG 的智能报告系统，构建 paraphrase-multilingual-MiniLM-L12-v2、Top-K 检索、Spark API requests/OpenAI 双通道回退机制，提升报告生成质量与稳定性。实现线缆表面附着物、鼓包、黑点、破损及凹凸缺陷的精准分割与可视化展示。</span>
                         </li>
                     </ul>
                 </div>
