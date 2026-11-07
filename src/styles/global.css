@@ -2,7 +2,7 @@
   --bg: #ffffff;
   --bg-soft: #f8fafc;
   --fg: #111827;
-  --muted: #64748b;
+  --muted: #5b6b82;
   --border: #e2e8f0;
   --accent: #1d4ed8;
   --q1-bg: #fffbeb;
@@ -61,7 +61,7 @@ h3 { font-size: 1.125rem; }
 .rule { border: 0; border-top: 1px solid var(--border); margin: 0; }
 
 .skip {
-  position: absolute;
+  position: fixed;
   left: -9999px;
   top: 0;
   background: var(--bg);
@@ -74,6 +74,7 @@ h3 { font-size: 1.125rem; }
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
+  background: var(--bg);
   background: color-mix(in srgb, var(--bg) 92%, transparent);
   backdrop-filter: blur(8px);
   z-index: 50;
