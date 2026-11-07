@@ -36,7 +36,16 @@
 | `public/CV.html` | 旧链接跳转 `/about` |
 | `README.md` | 本地命令、内容新增流程、部署说明 |
 
-**约定：** 所有内部链接用 `import.meta.env.BASE_URL` 或 `Astro.url` 生成，禁止写死 `/cv/`。每完成一个任务提交一次；文档与代码同属一个 commit（本计划文件已在 spec 提交内，后续不再单独改）。
+**全局约定：内部链接**
+
+- `import.meta.env.BASE_URL` 的运行时值**不带尾斜杠**（`/cv`），禁止直接写成 `${base}xxx`。
+- 所有站内链接必须经 `src/lib/url.ts` 的 `withBase(path)` 生成，例如 `href={withBase('publications')}`。
+- 当前路径判定用 `stripBase(Astro.url.pathname)`，不要手动 `replace(base, '/')`。
+- canonical 统一为 `new URL(Astro.url.pathname.replace(/\/?$/, '/'), Astro.site)`，指向带尾斜杠的最终 URL。
+- 下文任务示例中若出现 `${base}xxx` 或 `${import.meta.env.BASE_URL}xxx` 的写法，一律理解为 `withBase('xxx')`，实现时以本节为准。
+- 例外：`public/` 下的静态文件（如 `CV.html` 重定向）可以用相对路径 `./about`，因为不经构建处理。
+
+**提交约定：** 每完成一个任务提交一次；文档与代码同属一个 commit（本计划文件已在 spec 提交内，后续不再单独改）。
 
 ---
 
