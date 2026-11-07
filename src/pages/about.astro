@@ -13,6 +13,7 @@ const zhHref = new URL(withBase('about/zh'), Astro.site);
   title="About · Zicong Yang"
   description="Education, research, skills, and contact."
   langLink={{ href: withBase('about/zh'), label: '中文', lang: 'zh-CN' }}
+  profilePage
 >
   <Fragment slot="head">
     <link rel="alternate" hreflang="en" href={enHref} />

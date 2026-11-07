@@ -14,6 +14,7 @@ const zhHref = new URL(withBase('about/zh'), Astro.site);
   description="教育经历、研究方向、技能与联系方式。"
   lang="zh-CN"
   langLink={{ href: withBase('about'), label: 'English', lang: 'en' }}
+  profilePage
 >
   <Fragment slot="head">
     <link rel="alternate" hreflang="en" href={enHref} />
