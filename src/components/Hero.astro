@@ -1,13 +1,13 @@
+---
+import { site } from '../lib/site';
+---
 <section class="hero container measure">
-  <h1>Zicong Yang</h1>
-  <p>
-    Software engineer and researcher working on medical signal processing and computer vision —
-    ECG arrhythmia detection, industrial defect inspection, and applied deep learning.
-  </p>
+  <h1>{site.name}</h1>
+  <p>{site.tagline}</p>
   <div class="social">
-    <a href="https://scholar.google.com/citations?user=0Ynn-awAAAAJ" target="_blank" rel="noopener">Google Scholar</a>
-    <a href="https://orcid.org/0009-0001-0948-3606" target="_blank" rel="noopener">ORCID</a>
-    <a href="https://github.com/YZC0421" target="_blank" rel="noopener">GitHub</a>
-    <a href="mailto:402641915@qq.com">Email</a>
+    <a href={site.scholar} target="_blank" rel="noopener">Google Scholar</a>
+    <a href={site.orcid} target="_blank" rel="noopener">ORCID</a>
+    <a href={site.github} target="_blank" rel="noopener">GitHub</a>
+    <a href={`mailto:${site.email}`}>Email</a>
   </div>
 </section>

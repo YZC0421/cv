@@ -3,9 +3,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PublicationItem from '../components/PublicationItem.astro';
 import { getCollection } from 'astro:content';
 import { sortPublications } from '../lib/publications';
+import { topics } from '../lib/topics';
+import { workTitleMap } from '../lib/work';
 
 const pubs = sortPublications(await getCollection('publications'));
-const years = [...new Set(pubs.map((p) => p.data.year))].sort((a, b) => b - a);
+const years = [...new Set(pubs.map((pub) => pub.data.year))].sort((a, b) => b - a);
+const workTitles = workTitleMap(await getCollection('work'));
 ---
 <BaseLayout
   title="Publications · Zicong Yang"
@@ -15,37 +18,80 @@ const years = [...new Set(pubs.map((p) => p.data.year))].sort((a, b) => b - a);
     <h1>Publications</h1>
     <p class="muted">Peer-reviewed journal and conference papers. {pubs.length} entries.</p>
 
-    <div class="filters" role="group" aria-label="Filter publications">
-      <button type="button" data-filter="all" aria-pressed="true">All</button>
-      <button type="button" data-filter="first" aria-pressed="false">First author</button>
-      <button type="button" data-filter="Q1" aria-pressed="false">JCR Q1</button>
-      <button type="button" data-filter="EI" aria-pressed="false">EI</button>
+    <div class="filters" role="group" aria-label="Filter publications by topic">
+      <button type="button" data-group="topic" data-value="all" aria-pressed="true">All topics</button>
+      {topics.map((topic) => (
+        <button type="button" data-group="topic" data-value={topic.slug} aria-pressed="false">
+          {topic.name}
+        </button>
+      ))}
+    </div>
+
+    <div class="filters" role="group" aria-label="Filter publications by author role">
+      <button type="button" data-group="role" data-value="all" aria-pressed="true">All roles</button>
+      <button type="button" data-group="role" data-value="first" aria-pressed="false">First author</button>
+    </div>
+
+    <div class="filters" role="group" aria-label="Filter publications by year">
+      <button type="button" data-group="year" data-value="all" aria-pressed="true">All years</button>
       {years.map((year) => (
-        <button type="button" data-filter={String(year)} aria-pressed="false">{year}</button>
+        <button type="button" data-group="year" data-value={String(year)} aria-pressed="false">
+          {year}
+        </button>
       ))}
     </div>
 
     <ul class="pub-list" id="pub-list">
-      {pubs.map((pub) => <PublicationItem pub={pub} />)}
+      {pubs.map((pub) => <PublicationItem pub={pub} workTitles={workTitles} />)}
     </ul>
+    <p id="pub-status" class="muted" role="status" aria-live="polite"></p>
   </div>
 
   <script is:inline>
-    const buttons = document.querySelectorAll('.filters button');
-    const items = document.querySelectorAll('#pub-list .pub-item');
-    buttons.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
-        const filter = btn.dataset.filter;
-        items.forEach((item) => {
+    (() => {
+      const buttons = document.querySelectorAll('.filters button');
+      const rows = document.querySelectorAll('#pub-list .pub-item');
+      const status = document.getElementById('pub-status');
+      const state = { topic: 'all', role: 'all', year: 'all' };
+
+      const apply = () => {
+        let visible = 0;
+        rows.forEach((row) => {
+          const topics = (row.dataset.topics ?? '').split(' ').filter(Boolean);
           const match =
-            filter === 'all' ||
-            item.dataset.role === filter ||
-            item.dataset.indexing === filter ||
-            item.dataset.year === filter;
-          item.hidden = !match;
+            (state.topic === 'all' || topics.includes(state.topic)) &&
+            (state.role === 'all' || row.dataset.role === 'first') &&
+            (state.year === 'all' || row.dataset.year === state.year);
+          row.hidden = !match;
+          if (match) visible += 1;
+        });
+        if (status) {
+          status.textContent =
+            visible === 0
+              ? 'No publications match these filters.'
+              : `Showing ${visible} of ${rows.length} publications.`;
+        }
+      };
+
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const group = btn.dataset.group;
+          if (!group) return;
+          state[group] = btn.dataset.value;
+          document
+            .querySelectorAll(`.filters button[data-group="${group}"]`)
+            .forEach((other) => other.setAttribute('aria-pressed', String(other === btn)));
+          apply();
         });
       });
-    });
+
+      const initial = new URLSearchParams(window.location.search).get('topic');
+      if (initial) {
+        const target = [...document.querySelectorAll('.filters button[data-group="topic"]')].find(
+          (btn) => btn.dataset.value === initial
+        );
+        target?.click();
+      }
+    })();
   </script>
 </BaseLayout>

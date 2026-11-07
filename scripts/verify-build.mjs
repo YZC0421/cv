@@ -1,5 +1,5 @@
 import { readFile, access, readdir } from 'node:fs/promises';
-import { constants } from 'node:fs';
+import { constants, existsSync } from 'node:fs';
 
 const checks = [];
 
@@ -24,8 +24,14 @@ const read = async (path) => {
 const countFiles = async (dir, ext) =>
   (await readdir(dir)).filter((file) => file.endsWith(ext)).length;
 
-const countDirs = async (dir) =>
-  (await readdir(dir, { withFileTypes: true })).filter((entry) => entry.isDirectory()).length;
+const countDirs = async (dir, exclude = []) => {
+  try {
+    const entries = await readdir(dir, { withFileTypes: true });
+    return entries.filter((entry) => entry.isDirectory() && !exclude.includes(entry.name)).length;
+  } catch {
+    return -1;
+  }
+};
 
 const indexRoutes = [
   'dist/index.html',
@@ -48,7 +54,7 @@ for (const route of indexRoutes) await must(route, route);
 const publicationFiles = await countFiles('src/content/publications', '.md');
 const workFiles = await countFiles('src/content/work', '.md');
 const workDetails = await countDirs('dist/work');
-const postDetails = await countDirs('dist/blog');
+const postDetails = await countDirs('dist/blog', ['tag']);
 
 checks.push(['work detail pages match content files', workDetails === workFiles]);
 checks.push(['blog has at least one post page', postDetails >= 1]);
@@ -108,6 +114,46 @@ checks.push([
       !rss.includes(`/blog/${slug}/`) &&
       !sitemap.includes(`/blog/${slug}/`)
   ),
+]);
+
+checks.push(['publications expose topic filters', publications.includes('data-group="topic"')]);
+checks.push(['publications expose role filter', publications.includes('data-group="role"')]);
+checks.push([
+  'publication topic badges match entries',
+  (publications.match(/class="badge badge-topic"/g) ?? []).length >= publicationFiles,
+]);
+
+const workIndex = await read('dist/work/index.html');
+checks.push(['work exposes topic filter', workIndex.includes('data-value="medical-signal"')]);
+
+checks.push(['home has research areas', home.includes('Research Areas')]);
+checks.push(['home has og image', /property="og:image"/.test(home)]);
+checks.push(['home has twitter card', /name="twitter:card"/.test(home)]);
+
+await must('dist/og.png', 'dist/og.png');
+const ogPng = await readFile('dist/og.png');
+checks.push([
+  'og image is 1200x630',
+  ogPng.length > 24 && ogPng.readUInt32BE(16) === 1200 && ogPng.readUInt32BE(20) === 630,
+]);
+
+const tagPages = await countDirs('dist/blog/tag');
+const linkedTags = new Set(
+  [...blogList.matchAll(/blog\/tag\/([^/"#?]+)\//g)].map((match) => decodeURIComponent(match[1]))
+);
+checks.push(['tag pages match linked tags', tagPages === linkedTags.size]);
+
+const aboutZh = await read('dist/about/zh/index.html');
+const cvExists = existsSync('public/cv.pdf');
+checks.push([
+  'cv link matches pdf presence on home and about pages',
+  cvExists
+    ? home.includes('/cv/cv.pdf') &&
+      about.includes('/cv/cv.pdf') &&
+      aboutZh.includes('/cv/cv.pdf')
+    : !home.includes('/cv/cv.pdf') &&
+      !about.includes('/cv/cv.pdf') &&
+      !aboutZh.includes('/cv/cv.pdf'),
 ]);
 
 const failed = checks.filter(([, ok]) => !ok);

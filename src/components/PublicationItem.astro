@@ -2,23 +2,26 @@
 import type { CollectionEntry } from 'astro:content';
 import BibtexButton from './BibtexButton.astro';
 import { boldSelf, toBibtex } from '../lib/format';
+import { topicName } from '../lib/topics';
+import { withBase } from '../lib/url';
 
 interface Props {
   pub: CollectionEntry<'publications'>;
+  workTitles?: Record<string, string>;
 }
-const { pub } = Astro.props;
+const { pub, workTitles = {} } = Astro.props;
 const d = pub.data;
 const href = d.url ?? `https://doi.org/${d.doi}`;
-const bibtex =
-  d.bibtex ??
-  toBibtex({
-    title: d.title,
-    authors: d.authors,
-    venue: d.venue,
-    year: d.year,
-    doi: d.doi,
-    type: d.type,
-  });
+const bibtex = toBibtex({
+  title: d.title,
+  authors: d.authors,
+  venue: d.venue,
+  year: d.year,
+  doi: d.doi,
+  type: d.type,
+  volume: d.volume,
+  pages: d.pages,
+});
 const badgeClass =
   d.indexing === 'Q1'
     ? 'badge-q1'
@@ -28,19 +31,36 @@ const badgeClass =
         ? 'badge-ei'
         : 'badge-neutral';
 const indexingLabel = d.indexing === 'EI' ? 'EI indexed' : `JCR ${d.indexing}`;
+const roleLabel = d.role === 'first' ? 'First author' : (d.authorNote ?? 'Co-author');
+const relatedWork = d.relatedWork ?? [];
 ---
-<li class="pub-item" data-indexing={d.indexing} data-role={d.role} data-year={d.year}>
+<li
+  class="pub-item"
+  data-role={d.role}
+  data-year={d.year}
+  data-topics={d.topics.join(' ')}
+>
   <a class="pub-title" href={href} target="_blank" rel="noopener">{d.title}</a>
   <div class="pub-meta"><span set:html={boldSelf(d.authors)} /></div>
   <div class="pub-meta">
     {d.indexing !== 'none' && <span class={`badge ${badgeClass}`}>{indexingLabel}</span>}
-    {d.role === 'first' && <span class="badge badge-neutral">First author</span>}
+    <span class="badge badge-neutral">{roleLabel}</span>
+    {d.topics.map((topic) => <span class="badge badge-topic">{topicName(topic)}</span>)}
     <span>{d.venueShort ?? d.venue} · {d.year}</span>
   </div>
+  {relatedWork.length > 0 && (
+    <div class="pub-meta">
+      Related work:
+      {relatedWork.map((slug, index) => (
+        <span>
+          {index > 0 && ', '}
+          <a href={withBase(`work/${slug}`)}>{workTitles[slug] ?? slug}</a>
+        </span>
+      ))}
+    </div>
+  )}
   <div class="pub-actions">
-    <a href={`https://doi.org/${d.doi}`} target="_blank" rel="noopener" aria-label={`DOI for ${d.title}`}>
-      DOI
-    </a>
+    <a href={`https://doi.org/${d.doi}`} target="_blank" rel="noopener" aria-label={`DOI for ${d.title}`}>DOI</a>
     <BibtexButton bibtex={bibtex} />
   </div>
 </li>

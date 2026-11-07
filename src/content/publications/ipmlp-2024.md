@@ -14,8 +14,11 @@ year: 2024
 type: conference
 indexing: EI
 role: other
+authorNote: "Student 4th author"
+topics: ["industrial-vision"]
 doi: "10.1145/3700906.3700946"
 url: "https://dl.acm.org/doi/abs/10.1145/3700906.3700946"
+pages: "245--250"
 selected: false
 date: "2024-09-13"
 ---

@@ -1,0 +1,271 @@
+## Commits
+bdfe1ec feat: 项目页支持主题筛选与四段式详情
+
+## Stat
+ .../progress.md                                    |   1 +
+ .../task-5-brief.md                                | 166 +++++++++++++++++++++
+ .../task-5-report.md                               |  32 ++++
+ src/components/WorkCard.astro                      |   9 +-
+ src/pages/index.astro                              |   7 +-
+ src/pages/work/[slug].astro                        |  64 +++++---
+ src/pages/work/index.astro                         |  33 +++-
+ src/styles/global.css                              |  11 ++
+ 8 files changed, 290 insertions(+), 33 deletions(-)
+
+## Diff
+diff --git a/src/components/WorkCard.astro b/src/components/WorkCard.astro
+index 20ac52c..05a00c0 100644
+--- a/src/components/WorkCard.astro
++++ b/src/components/WorkCard.astro
+@@ -1,14 +1,19 @@
+ ---
+ import type { CollectionEntry } from 'astro:content';
++import { topicName } from '../lib/topics';
+ import { withBase } from '../lib/url';
+ 
+ interface Props {
+   item: CollectionEntry<'work'>;
+ }
+ const { item } = Astro.props;
++const topics = item.data.topics ?? [];
+ ---
+-<article class="work-card">
++<article class="work-card" data-topics={topics.join(' ')}>
+   <h3><a href={withBase(`work/${item.id}`)}>{item.data.title}</a></h3>
+   <p>{item.data.summary}</p>
+-  <div class="stack">{item.data.stack.map((tech) => <span>{tech}</span>)}</div>
++  <div class="stack">
++    {topics.map((topic) => <span class="badge badge-topic">{topicName(topic)}</span>)}
++    {item.data.stack.map((tech) => <span>{tech}</span>)}
++  </div>
+ </article>
+diff --git a/src/pages/index.astro b/src/pages/index.astro
+index d8f3834..c56f949 100644
+--- a/src/pages/index.astro
++++ b/src/pages/index.astro
+@@ -3,34 +3,31 @@ import BaseLayout from '../layouts/BaseLayout.astro';
+ import Hero from '../components/Hero.astro';
+ import ResearchAreas from '../components/ResearchAreas.astro';
+ import PublicationItem from '../components/PublicationItem.astro';
+ import WorkCard from '../components/WorkCard.astro';
+ import PostList from '../components/PostList.astro';
+ import { getCollection, getEntry } from 'astro:content';
+ import { selectHomepage } from '../lib/publications';
+ import { visiblePosts } from '../lib/posts';
+ import { validateRelations } from '../lib/relations';
+ import { withBase } from '../lib/url';
+-import { workTitleMap } from '../lib/work';
++import { sortProjects, workTitleMap } from '../lib/work';
+ 
+ const allPublications = await getCollection('publications');
+ const allWork = await getCollection('work');
+ const relationErrors = validateRelations(allPublications, allWork);
+ if (relationErrors.length > 0) {
+   throw new Error(`Content relations are invalid:\n${relationErrors.join('\n')}`);
+ }
+ 
+ const pubs = selectHomepage(allPublications);
+-const work = allWork
+-  .filter((item) => item.data.kind === 'project')
+-  .sort((a, b) => a.data.order - b.data.order || a.id.localeCompare(b.id))
+-  .slice(0, 3);
++const work = sortProjects(allWork.filter((item) => item.data.kind === 'project')).slice(0, 3);
+ const posts = visiblePosts(await getCollection('blog')).slice(0, 2);
+ const about = await getEntry('pages', 'about-en');
+ const workTitles = workTitleMap(allWork);
+ ---
+ <BaseLayout
+   title="Zicong Yang · Medical Signal Processing & Computer Vision"
+   description="Personal site of Zicong Yang: publications, engineering work, and technical writing."
+   profilePage
+ >
+   <Hero />
+diff --git a/src/pages/work/[slug].astro b/src/pages/work/[slug].astro
+index f4aff34..9f09eed 100644
+--- a/src/pages/work/[slug].astro
++++ b/src/pages/work/[slug].astro
+@@ -6,44 +6,68 @@ import { getCollection, render } from 'astro:content';
+ export async function getStaticPaths() {
+   const items = await getCollection('work');
+   return items.map((item) => ({ params: { slug: item.id }, props: { item } }));
+ }
+ 
+ interface Props {
+   item: CollectionEntry<'work'>;
+ }
+ const { item } = Astro.props;
+ const { Content } = await render(item);
++const d = item.data;
++const hasSections = Boolean(d.problem || d.approach || d.results);
++const publications = await getCollection('publications');
++const doi = (d.relatedPublications ?? [])[0];
++const related = doi ? publications.find((pub) => pub.data.doi === doi) : undefined;
+ ---
+-<BaseLayout title={`${item.data.title} · Zicong Yang`} description={item.data.summary}>
++<BaseLayout title={`${d.title} · Zicong Yang`} description={d.summary}>
+   <article class="container measure work-detail" style="padding-top:40px">
+-    <h1>{item.data.title}</h1>
+-    <p class="meta">
+-      {item.data.role} · {item.data.org} · {item.data.start} – {item.data.end}
+-    </p>
++    <h1>{d.title}</h1>
++    <p class="meta">{d.role} · {d.org} · {d.start} – {d.end}</p>
+ 
+-    <Content />
++    {d.problem && <section class="work-block"><h2>Problem</h2><p>{d.problem}</p></section>}
++    {d.approach && <section class="work-block"><h2>Approach</h2><p>{d.approach}</p></section>}
++    {d.results && <section class="work-block"><h2>Results</h2><p>{d.results}</p></section>}
+ 
+-    <h2>Results</h2>
+-    <ul>{item.data.highlights.map((highlight) => <li>{highlight}</li>)}</ul>
++    {!hasSections && (
++      <section class="work-block">
++        <h2>Highlights</h2>
++        <ul>{d.highlights.map((highlight) => <li>{highlight}</li>)}</ul>
++      </section>
++    )}
++
++    <div class="prose"><Content /></div>
++
++    <section class="work-block">
++      <h2>Role</h2>
++      <p>{d.role} at {d.org}.</p>
++    </section>
+ 
+-    {item.data.stack.length > 0 && (
+-      <>
++    {d.stack.length > 0 && (
++      <section class="work-block">
+         <h2>Stack</h2>
+-        <div class="stack">
+-          {item.data.stack.map((tech) => <span>{tech}</span>)}
+-        </div>
+-      </>
++        <div class="stack">{d.stack.map((tech) => <span>{tech}</span>)}</div>
++      </section>
+     )}
+ 
+-    {item.data.links.length > 0 && (
+-      <>
++    {d.links.length > 0 && (
++      <section class="work-block">
+         <h2>Links</h2>
+         <div class="links">
+-          {item.data.links.map((link) => (
+-            <a href={link.url} target="_blank" rel="noopener">{link.label}</a>
+-          ))}
++          {d.links.map((link) => <a href={link.url} target="_blank" rel="noopener">{link.label}</a>)}
+         </div>
+-      </>
++      </section>
++    )}
++
++    {related && (
++      <section class="work-block">
++        <h2>Related publication</h2>
++        <p>
++          <a href={`https://doi.org/${related.data.doi}`} target="_blank" rel="noopener">
++            {related.data.title}
++          </a>
++          <span class="muted"> · {related.data.venue} · {related.data.year}</span>
++        </p>
++      </section>
+     )}
+   </article>
+ </BaseLayout>
+diff --git a/src/pages/work/index.astro b/src/pages/work/index.astro
+index e3ca7de..87c217f 100644
+--- a/src/pages/work/index.astro
++++ b/src/pages/work/index.astro
+@@ -1,23 +1,21 @@
+ ---
+ import BaseLayout from '../../layouts/BaseLayout.astro';
+ import WorkCard from '../../components/WorkCard.astro';
+ import { getCollection } from 'astro:content';
++import { topics } from '../../lib/topics';
+ import { withBase } from '../../lib/url';
++import { sortExperience, sortProjects } from '../../lib/work';
+ 
+ const all = await getCollection('work');
+-const experience = all
+-  .filter((item) => item.data.kind === 'experience')
+-  .sort((a, b) => b.data.start.localeCompare(a.data.start) || a.id.localeCompare(b.id));
+-const projects = all
+-  .filter((item) => item.data.kind === 'project')
+-  .sort((a, b) => a.data.order - b.data.order || a.id.localeCompare(b.id));
++const experience = sortExperience(all.filter((item) => item.data.kind === 'experience'));
++const projects = sortProjects(all.filter((item) => item.data.kind === 'project'));
+ ---
+ <BaseLayout title="Work · Zicong Yang" description="Engineering experience and research projects.">
+   <div class="container measure" style="padding-top:40px">
+     <h1>Work</h1>
+ 
+     <section class="section">
+       <div class="section-head"><h2>Experience</h2></div>
+       <ul class="timeline">
+         {experience.map((job) => (
+           <li>
+@@ -25,14 +23,37 @@ const projects = all
+             <div class="org">{job.data.org}</div>
+             <div class="when">{job.data.start} – {job.data.end}</div>
+             <ul>{job.data.highlights.slice(0, 3).map((highlight) => <li>{highlight}</li>)}</ul>
+           </li>
+         ))}
+       </ul>
+     </section>
+ 
+     <section class="section">
+       <div class="section-head"><h2>Projects</h2></div>
++      <div class="filters" role="group" aria-label="Filter projects by topic">
++        <button type="button" data-value="all" aria-pressed="true">All topics</button>
++        {topics.map((topic) => (
++          <button type="button" data-value={topic.slug} aria-pressed="false">{topic.name}</button>
++        ))}
++      </div>
+       <div class="work-grid">{projects.map((item) => <WorkCard item={item} />)}</div>
+     </section>
+   </div>
++
++  <script is:inline>
++    (() => {
++      const buttons = document.querySelectorAll('.filters button');
++      const cards = document.querySelectorAll('.work-card');
++      buttons.forEach((btn) => {
++        btn.addEventListener('click', () => {
++          const value = btn.dataset.value;
++          buttons.forEach((other) => other.setAttribute('aria-pressed', String(other === btn)));
++          cards.forEach((card) => {
++            const cardTopics = (card.dataset.topics ?? '').split(' ').filter(Boolean);
++            card.hidden = value !== 'all' && !cardTopics.includes(value);
++          });
++        });
++      });
++    })();
++  </script>
+ </BaseLayout>
+diff --git a/src/styles/global.css b/src/styles/global.css
+index 71a60bd..75c522f 100644
+--- a/src/styles/global.css
++++ b/src/styles/global.css
+@@ -262,10 +262,21 @@ h3 { font-size: 1.125rem; }
+ .area-grid { display: grid; gap: 20px; }
+ @media (min-width: 768px) { .area-grid { grid-template-columns: 1fr 1fr; } }
+ .area { border-top: 2px solid var(--accent); padding-top: 14px; }
+ .area h3 { font-size: 1.05rem; margin-bottom: 6px; }
+ .area p { margin: 0 0 12px; font-size: 0.88rem; }
+ .area-items { list-style: none; margin: 0 0 12px; padding: 0; font-size: 0.86rem; }
+ .area-items li { margin-bottom: 8px; }
+ .area-note { display: block; color: var(--muted); font-size: 0.76rem; }
+ .area-link { font-size: 0.85rem; }
+ .badge-topic { background: var(--bg-soft); color: var(--muted); border: 1px solid var(--border); }
++
++.work-block { margin-top: 28px; }
++.work-block h2 {
++  font-size: 0.95rem;
++  letter-spacing: 0.06em;
++  text-transform: uppercase;
++  color: var(--muted);
++  font-family: var(--font-sans);
++  margin-bottom: 8px;
++}
++.work-block p { margin: 0; color: var(--fg); }

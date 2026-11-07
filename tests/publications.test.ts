@@ -4,7 +4,7 @@ import { sortPublications, selectHomepage } from '../src/lib/publications.ts';
 
 const make = (over: Record<string, unknown>) =>
   ({
-    id: String(over.id ?? Math.random()),
+    id: String(over.id ?? 'x'),
     data: {
       title: 'T',
       authors: ['Zicong Yang'],
@@ -34,6 +34,15 @@ test('selectHomepage prefers selected, then first author, then newest', () => {
   const old = make({ id: 'old', date: '2019-01-01' });
   const result = selectHomepage([selected, first, newestOther, old]);
   assert.deepEqual(result.map((p: any) => p.id), ['sel', 'first', 'new']);
+});
+
+test('sortPublications falls back to id for identical date and role', () => {
+  const b = make({ id: 'b', date: '2024-01-01' });
+  const a = make({ id: 'a', date: '2024-01-01' });
+  assert.deepEqual(
+    sortPublications([b, a]).map((pub: any) => pub.id),
+    ['a', 'b']
+  );
 });
 
 test('selectHomepage returns all entries when fewer than three', () => {

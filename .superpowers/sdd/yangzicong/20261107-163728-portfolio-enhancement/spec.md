@@ -85,7 +85,7 @@ export function topicName(slug: TopicSlug): string;
 
 ### 5.4 BibTeX
 
-生成规则补 `volume` 与 `pages`；字段为空时省略对应行。引用 key 保持 `姓氏 + 年份`，同 key 冲突时追加 `a`、`b`（按集合内顺序）。
+生成规则补 `volume` 与 `pages`；字段为空时省略对应行。引用 key 采用「姓氏 + 年份 + 标题前 8 个字母数字」，天然降低冲突概率；不实现冲突后缀计数。
 
 ## 6. 页面与交互
 

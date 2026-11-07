@@ -14,15 +14,24 @@ npm run check    # type + content schema check
 npm test         # unit tests for schema and ordering rules
 npm run build    # build to dist/
 npm run verify   # assert build output
+npm run og       # regenerate public/og.png (committed; manual only)
 ```
 
 ## Add a publication
 
 1. Create `src/content/publications/<slug>.md` with the frontmatter defined in
    `src/lib/schema.ts`.
-2. `doi` is required. `selected: true` pins an entry into the home page; the home page always
-   shows three entries, filling the remainder with first-author papers, then the newest.
+2. `doi` and `topics` (one or more of `medical-signal`, `industrial-vision`) are required.
+   `relatedWork` slugs must exist in `src/content/work/`. `volume`/`pages` only feed BibTeX.
+   `selected: true` pins an entry into the home page; the home page always shows three
+   entries, filling the remainder with first-author papers, then the newest.
 3. Run `npm run check`, `npm run build`, and `npm run verify`.
+
+## CV PDF
+
+Place the exported PDF at `public/cv.pdf`. The About pages and the home page will then show
+an additional direct download link; the print action is always available. Regenerate the PDF
+manually whenever the About content changes.
 
 ## Add a post
 
@@ -36,11 +45,14 @@ npm run verify   # assert build output
 
 1. Create `src/content/work/<slug>.md`; `kind` is `experience` or `project`.
 2. `highlights` needs at least one factual bullet; do not add claims without a source.
-3. Projects sort by `order`; experiences sort by `start`, newest first.
+3. `topics` is optional, but project cards only filter on topics they declare.
+   `relatedPublications` must reference existing DOIs.
+4. Projects sort by `order`; experiences sort by `start`, newest first.
 
 ## Deploy
 
-Pushing to `main` triggers `.github/workflows/deploy.yml`. The site is served from
+Pushing to `main` triggers `.github/workflows/deploy.yml`. Pull requests run the same
+test/check/build/verify steps but skip the deploy job. The site is served from
 `https://yzc0421.github.io/cv/`. If a custom domain is added, update `site` and `base` in
 `astro.config.mjs`, add `public/CNAME`, update `public/robots.txt`, and update the RSS/base
 assertion in `scripts/verify-build.mjs`.

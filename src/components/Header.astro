@@ -1,6 +1,7 @@
 ---
 import ThemeToggle from './ThemeToggle.astro';
 import NavLinks from './NavLinks.astro';
+import { site } from '../lib/site';
 import { stripBase, withBase } from '../lib/url';
 
 interface Props {
@@ -19,7 +20,7 @@ const isHome = current === '/';
 ---
 <header class="site-header">
   <div class="inner">
-    <a class="brand" href={withBase()} aria-current={isHome ? 'page' : undefined}>Zicong Yang</a>
+    <a class="brand" href={withBase()} aria-current={isHome ? 'page' : undefined}>{site.name}</a>
     <nav class="nav desktop-nav" aria-label="Primary">
       <NavLinks links={links} current={current} />
     </nav>

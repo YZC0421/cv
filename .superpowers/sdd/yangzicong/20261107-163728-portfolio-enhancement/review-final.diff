@@ -1,0 +1,1897 @@
+## Commits
+8511820 docs: 记录增强任务进度
+e9bb2cc fix: 收紧验收断言并补充文档
+2a508b0 chore: 锁定依赖版本并增加 PR 校验
+ecca79c fix: 完善标签页类型与分享图元信息
+0cbc49e feat: 增加标签页与社交分享图
+32e337a fix: 保留打印按钮并收拢站点常量
+58664eb feat: 支持 CV PDF 下载并收拢站点常量
+a9164d9 fix: 支持多条关联论文并补项目筛选反馈
+bdfe1ec feat: 项目页支持主题筛选与四段式详情
+dab7fc7 fix: 改进筛选状态反馈与查询参数处理
+78bb475 feat: 论文页支持主题、位次与年份筛选
+09abd33 fix: 区分主题链接并收敛排序逻辑
+b462292 feat: 首页增加研究主题区块
+6a3476a content: 校正项目文案口径与待补清单
+683aac9 content: 补充项目问题、方法与结果
+fbfe453 test: 锁定主题与 BibTeX 卷期约束
+4a403e0 feat: 增加研究主题与位次字段
+
+## Stat
+ .github/workflows/deploy.yml                       |   2 +
+ .../20261107-163728-portfolio-enhancement/gaps.md  |  26 +
+ .../progress.md                                    |  12 +
+ .../review-task-1.diff                             | 637 +++++++++++++++++++++
+ .../review-task-2.diff                             | 117 ++++
+ .../review-task-3.diff                             | 172 ++++++
+ .../review-task-4.diff                             | 269 +++++++++
+ .../review-task-5.diff                             | 271 +++++++++
+ .../review-task-6.diff                             | 222 +++++++
+ .../review-task-7.diff                             | 221 +++++++
+ .../review-task-8.diff                             | 157 +++++
+ .../task-1-brief.md                                | 306 ++++++++++
+ .../task-1-report.md                               |  44 ++
+ .../task-2-brief.md                                |  77 +++
+ .../task-2-report.md                               |  25 +
+ .../task-3-brief.md                                | 132 +++++
+ .../task-3-report.md                               |  32 ++
+ .../task-4-brief.md                                | 228 ++++++++
+ .../task-4-report.md                               |  40 ++
+ .../task-5-brief.md                                | 166 ++++++
+ .../task-5-report.md                               |  40 ++
+ .../task-6-brief.md                                |  96 ++++
+ .../task-6-report.md                               |  39 ++
+ .../task-7-brief.md                                | 103 ++++
+ .../task-7-report.md                               |  36 ++
+ .../task-8-brief.md                                | 124 ++++
+ .../task-8-report.md                               |  35 ++
+ README.md                                          |  10 +-
+ package-lock.json                                  |  21 +-
+ package.json                                       |  18 +-
+ public/og.png                                      | Bin 0 -> 25660 bytes
+ scripts/fetch-bib-meta.mjs                         |  24 +
+ scripts/make-og.mjs                                |  13 +
+ scripts/verify-build.mjs                           |  45 +-
+ src/components/Footer.astro                        |   7 +-
+ src/components/Header.astro                        |   3 +-
+ src/components/Hero.astro                          |  18 +-
+ src/components/PublicationItem.astro               |  53 +-
+ src/components/ResearchAreas.astro                 |  62 ++
+ src/components/WorkCard.astro                      |   9 +-
+ src/content/publications/cisse-2024.md             |   2 +
+ src/content/publications/cvidl-2024-garbage.md     |   3 +
+ src/content/publications/cvidl-2024-wheat.md       |   2 +
+ src/content/publications/ipmlp-2024.md             |   3 +
+ src/content/publications/mst-2025.md               |   5 +
+ .../publications/scientific-reports-2024.md        |   3 +
+ src/content/work/coca-cola-consumer-analysis.md    |   3 +
+ src/content/work/guangzhou-xiyang.md               |   1 +
+ src/content/work/ningbo-haizhimingshi.md           |   1 +
+ src/content/work/rural-revitalization.md           |   3 +
+ .../work/sudden-cardiac-death-prediction.md        |   5 +
+ src/content/work/wordle-analysis.md                |   3 +
+ src/layouts/BaseLayout.astro                       |  19 +-
+ src/layouts/PageLayout.astro                       |   8 +
+ src/layouts/PostLayout.astro                       |   5 +-
+ src/lib/format.ts                                  |  21 +-
+ src/lib/posts.ts                                   |   4 +
+ src/lib/publications.ts                            |   4 +-
+ src/lib/relations.ts                               |  28 +
+ src/lib/schema.ts                                  |  14 +-
+ src/lib/site.ts                                    |  18 +
+ src/lib/topics.ts                                  |  20 +
+ src/lib/work.ts                                    |  23 +
+ src/pages/about.astro                              |   3 +-
+ src/pages/about/zh.astro                           |   3 +-
+ src/pages/blog/index.astro                         |   7 +-
+ src/pages/blog/tag/[tag].astro                     |  29 +
+ src/pages/index.astro                              |  32 +-
+ src/pages/publications.astro                       |  88 ++-
+ src/pages/work/[slug].astro                        |  66 ++-
+ src/pages/work/index.astro                         |  44 +-
+ src/styles/global.css                              |  24 +-
+ tests/format.test.ts                               |  28 +
+ tests/relations.test.ts                            |  37 ++
+ tests/schema.test.ts                               |  32 ++
+ tests/topics.test.ts                               |  17 +
+ 76 files changed, 4390 insertions(+), 130 deletions(-)
+
+## Note
+package-lock.json, .superpowers/** and binary public/og.png are excluded.
+
+## Diff
+diff --git a/.github/workflows/deploy.yml b/.github/workflows/deploy.yml
+index a8c12a4..740a00c 100644
+--- a/.github/workflows/deploy.yml
++++ b/.github/workflows/deploy.yml
+@@ -1,10 +1,11 @@
+ name: Deploy to GitHub Pages
+ 
+ on:
+   push:
+     branches: [main]
++  pull_request:
+   workflow_dispatch:
+ 
+ permissions:
+   contents: read
+   pages: write
+@@ -32,10 +33,11 @@ jobs:
+       - uses: actions/upload-pages-artifact@v3
+         with:
+           path: dist
+ 
+   deploy:
++    if: github.event_name != 'pull_request'
+     needs: build
+     runs-on: ubuntu-latest
+     environment:
+       name: github-pages
+       url: ${{ steps.deployment.outputs.page_url }}
+diff --git a/README.md b/README.md
+index 661b72d..89ac449 100644
+--- a/README.md
++++ b/README.md
+@@ -12,20 +12,27 @@ npm run dev      # http://localhost:4321/cv/
+ npm run preview  # preview the built site
+ npm run check    # type + content schema check
+ npm test         # unit tests for schema and ordering rules
+ npm run build    # build to dist/
+ npm run verify   # assert build output
++npm run og       # regenerate public/og.png (committed; manual only)
+ ```
+ 
+ ## Add a publication
+ 
+ 1. Create `src/content/publications/<slug>.md` with the frontmatter defined in
+    `src/lib/schema.ts`.
+ 2. `doi` is required. `selected: true` pins an entry into the home page; the home page always
+    shows three entries, filling the remainder with first-author papers, then the newest.
+ 3. Run `npm run check`, `npm run build`, and `npm run verify`.
+ 
++## CV PDF
++
++Place the exported PDF at `public/cv.pdf`. The About pages and the home page will show a
++direct download link; without the file they fall back to the print action. Regenerate the
++PDF manually whenever the About content changes.
++
+ ## Add a post
+ 
+ 1. Create `src/content/blog/<slug>.md`; `lang` is `en` or `zh`, `tags` needs at least one
+    entry, `summary` at most 160 characters.
+ 2. `draft: true` keeps it out of the list, RSS, and sitemap.
+@@ -38,11 +45,12 @@ npm run verify   # assert build output
+ 2. `highlights` needs at least one factual bullet; do not add claims without a source.
+ 3. Projects sort by `order`; experiences sort by `start`, newest first.
+ 
+ ## Deploy
+ 
+-Pushing to `main` triggers `.github/workflows/deploy.yml`. The site is served from
++Pushing to `main` triggers `.github/workflows/deploy.yml`. Pull requests run the same
++test/check/build/verify steps but skip the deploy job. The site is served from
+ `https://yzc0421.github.io/cv/`. If a custom domain is added, update `site` and `base` in
+ `astro.config.mjs`, add `public/CNAME`, update `public/robots.txt`, and update the RSS/base
+ assertion in `scripts/verify-build.mjs`.
+ 
+ ## Rollback
+diff --git a/package.json b/package.json
+index 1166d15..bf1e416 100644
+--- a/package.json
++++ b/package.json
+@@ -7,19 +7,21 @@
+     "dev": "astro dev",
+     "build": "astro build",
+     "preview": "astro preview",
+     "check": "astro check",
+     "test": "tsx --test tests/*.test.ts",
+-    "verify": "node scripts/verify-build.mjs"
++    "verify": "node scripts/verify-build.mjs",
++    "og": "node scripts/make-og.mjs"
+   },
+   "devDependencies": {
+-    "@astrojs/check": "^0.9.12",
+-    "tsx": "^4.23.15",
+-    "typescript": "^6.0.3"
++    "@astrojs/check": "0.9.12",
++    "sharp": "0.34.5",
++    "tsx": "4.23.15",
++    "typescript": "6.0.3"
+   },
+   "dependencies": {
+-    "@astrojs/rss": "^4.0.19",
+-    "@astrojs/sitemap": "^3.7.4",
+-    "astro": "^5.18.2",
+-    "zod": "^3.25.76"
++    "@astrojs/rss": "4.0.19",
++    "@astrojs/sitemap": "3.7.4",
++    "astro": "5.18.2",
++    "zod": "3.25.76"
+   }
+ }
+diff --git a/scripts/fetch-bib-meta.mjs b/scripts/fetch-bib-meta.mjs
+new file mode 100644
+index 0000000..c27ce30
+--- /dev/null
++++ b/scripts/fetch-bib-meta.mjs
+@@ -0,0 +1,24 @@
++const targets = [
++  { file: 'scientific-reports-2024', doi: '10.1038/s41598-024-71700-z' },
++  { file: 'cisse-2024', doi: '10.1007/978-3-031-57037-7_7' },
++  { file: 'mst-2025', doi: '10.1088/1361-6501/ae10d3' },
++  { file: 'cvidl-2024-wheat', doi: '10.1109/cvidl62147.2024.10604082' },
++  { file: 'cvidl-2024-garbage', doi: '10.1109/cvidl62147.2024.10604280' },
++  { file: 'ipmlp-2024', doi: '10.1145/3700906.3700946' },
++];
++
++for (const target of targets) {
++  try {
++    const res = await fetch(`https://api.crossref.org/works/${encodeURIComponent(target.doi)}`, {
++      headers: { 'User-Agent': 'cv-site-build/1.0 (mailto:402641915@qq.com)' },
++    });
++    if (!res.ok) {
++      console.log(`${target.file}: fetch failed (${res.status})`);
++      continue;
++    }
++    const { message } = await res.json();
++    console.log(`${target.file}: volume=${message.volume ?? ''} pages=${message.page ?? ''}`);
++  } catch (error) {
++    console.log(`${target.file}: ${error.message}`);
++  }
++}
+diff --git a/scripts/make-og.mjs b/scripts/make-og.mjs
+new file mode 100644
+index 0000000..3c8c5f4
+--- /dev/null
++++ b/scripts/make-og.mjs
+@@ -0,0 +1,13 @@
++import sharp from 'sharp';
++import { mkdir } from 'node:fs/promises';
++
++const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
++  <rect width="1200" height="630" fill="#0b1120"/>
++  <text x="80" y="290" font-family="Georgia, serif" font-size="92" fill="#e5e7eb">Zicong Yang</text>
++  <text x="80" y="360" font-family="Helvetica, Arial, sans-serif" font-size="30" fill="#94a3b8">Medical Signal Processing · Industrial Visual Inspection</text>
++  <rect x="80" y="420" width="120" height="4" fill="#60a5fa"/>
++</svg>`;
++
++await mkdir('public', { recursive: true });
++await sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toFile('public/og.png');
++console.log('wrote public/og.png');
+diff --git a/scripts/verify-build.mjs b/scripts/verify-build.mjs
+index 656cbc3..1030329 100644
+--- a/scripts/verify-build.mjs
++++ b/scripts/verify-build.mjs
+@@ -1,7 +1,7 @@
+ import { readFile, access, readdir } from 'node:fs/promises';
+-import { constants } from 'node:fs';
++import { constants, existsSync } from 'node:fs';
+ 
+ const checks = [];
+ 
+ const must = async (path, label) => {
+   try {
+@@ -22,12 +22,18 @@ const read = async (path) => {
+ };
+ 
+ const countFiles = async (dir, ext) =>
+   (await readdir(dir)).filter((file) => file.endsWith(ext)).length;
+ 
+-const countDirs = async (dir) =>
+-  (await readdir(dir, { withFileTypes: true })).filter((entry) => entry.isDirectory()).length;
++const countDirs = async (dir, exclude = []) => {
++  try {
++    const entries = await readdir(dir, { withFileTypes: true });
++    return entries.filter((entry) => entry.isDirectory() && !exclude.includes(entry.name)).length;
++  } catch {
++    return -1;
++  }
++};
+ 
+ const indexRoutes = [
+   'dist/index.html',
+   'dist/publications/index.html',
+   'dist/work/index.html',
+@@ -46,11 +52,11 @@ const indexRoutes = [
+ for (const route of indexRoutes) await must(route, route);
+ 
+ const publicationFiles = await countFiles('src/content/publications', '.md');
+ const workFiles = await countFiles('src/content/work', '.md');
+ const workDetails = await countDirs('dist/work');
+-const postDetails = await countDirs('dist/blog');
++const postDetails = await countDirs('dist/blog', ['tag']);
+ 
+ checks.push(['work detail pages match content files', workDetails === workFiles]);
+ checks.push(['blog has at least one post page', postDetails >= 1]);
+ 
+ const home = await read('dist/index.html');
+@@ -108,10 +114,41 @@ checks.push([
+       !rss.includes(`/blog/${slug}/`) &&
+       !sitemap.includes(`/blog/${slug}/`)
+   ),
+ ]);
+ 
++checks.push(['publications expose topic filters', publications.includes('data-group="topic"')]);
++checks.push(['publications expose role filter', publications.includes('data-group="role"')]);
++checks.push(['publications expose topic badges', publications.includes('badge-topic')]);
++
++const workIndex = await read('dist/work/index.html');
++checks.push(['work exposes topic filter', workIndex.includes('data-value="medical-signal"')]);
++
++checks.push(['home has research areas', home.includes('Research Areas')]);
++checks.push(['home has og image', /property="og:image"/.test(home)]);
++checks.push(['home has twitter card', /name="twitter:card"/.test(home)]);
++await must('dist/og.png', 'dist/og.png');
++
++const tagPages = await countDirs('dist/blog/tag');
++const tagSet = new Set();
++for (const file of blogFiles) {
++  const slug = file.replace(/\.md$/, '');
++  if (hiddenPosts.includes(slug)) continue;
++  const source = await readFile(`src/content/blog/${file}`, 'utf8');
++  const match = source.match(/^tags:\s*\[(.+)\]$/m);
++  if (match) {
++    for (const tag of match[1].split(',')) tagSet.add(tag.trim().replace(/["']/g, ''));
++  }
++}
++checks.push(['tag pages match visible tags', tagPages === tagSet.size]);
++
++const cvExists = existsSync('public/cv.pdf');
++checks.push([
++  'cv link matches pdf presence',
++  cvExists ? home.includes('/cv/cv.pdf') : !home.includes('/cv/cv.pdf'),
++]);
++
+ const failed = checks.filter(([, ok]) => !ok);
+ for (const [label, ok] of checks) console.log(`${ok ? 'ok  ' : 'FAIL'} ${label}`);
+ 
+ if (failed.length) {
+   console.error(`\n${failed.length} check(s) failed`);
+diff --git a/src/components/Footer.astro b/src/components/Footer.astro
+index ddc8231..c82b439 100644
+--- a/src/components/Footer.astro
++++ b/src/components/Footer.astro
+@@ -1,12 +1,13 @@
+ ---
++import { site } from '../lib/site';
+ import { withBase } from '../lib/url';
+ 
+ const year = new Date().getFullYear();
+ ---
+ <footer class="site-footer">
+   <div class="container">
+-    © {year} Zicong Yang · <a href={withBase('rss.xml')}>RSS</a> ·
+-    <a href="https://scholar.google.com/citations?user=0Ynn-awAAAAJ">Scholar</a> ·
+-    <a href="https://orcid.org/0009-0001-0948-3606">ORCID</a>
++    © {year} {site.name} · <a href={withBase('rss.xml')}>RSS</a> ·
++    <a href={site.scholar}>Scholar</a> ·
++    <a href={site.orcid}>ORCID</a>
+   </div>
+ </footer>
+diff --git a/src/components/Header.astro b/src/components/Header.astro
+index 66ca7bb..c9d4c06 100644
+--- a/src/components/Header.astro
++++ b/src/components/Header.astro
+@@ -1,8 +1,9 @@
+ ---
+ import ThemeToggle from './ThemeToggle.astro';
+ import NavLinks from './NavLinks.astro';
++import { site } from '../lib/site';
+ import { stripBase, withBase } from '../lib/url';
+ 
+ interface Props {
+   langLink?: { href: string; label: string; lang: string };
+ }
+@@ -17,11 +18,11 @@ const links = [
+ const current = stripBase(Astro.url.pathname);
+ const isHome = current === '/';
+ ---
+ <header class="site-header">
+   <div class="inner">
+-    <a class="brand" href={withBase()} aria-current={isHome ? 'page' : undefined}>Zicong Yang</a>
++    <a class="brand" href={withBase()} aria-current={isHome ? 'page' : undefined}>{site.name}</a>
+     <nav class="nav desktop-nav" aria-label="Primary">
+       <NavLinks links={links} current={current} />
+     </nav>
+     <details class="nav-details">
+       <summary class="nav-toggle">Menu</summary>
+diff --git a/src/components/Hero.astro b/src/components/Hero.astro
+index a3098ca..2238d0c 100644
+--- a/src/components/Hero.astro
++++ b/src/components/Hero.astro
+@@ -1,13 +1,13 @@
++---
++import { site } from '../lib/site';
++---
+ <section class="hero container measure">
+-  <h1>Zicong Yang</h1>
+-  <p>
+-    Software engineer and researcher working on medical signal processing and computer vision —
+-    ECG arrhythmia detection, industrial defect inspection, and applied deep learning.
+-  </p>
++  <h1>{site.name}</h1>
++  <p>{site.tagline}</p>
+   <div class="social">
+-    <a href="https://scholar.google.com/citations?user=0Ynn-awAAAAJ" target="_blank" rel="noopener">Google Scholar</a>
+-    <a href="https://orcid.org/0009-0001-0948-3606" target="_blank" rel="noopener">ORCID</a>
+-    <a href="https://github.com/YZC0421" target="_blank" rel="noopener">GitHub</a>
+-    <a href="mailto:402641915@qq.com">Email</a>
++    <a href={site.scholar} target="_blank" rel="noopener">Google Scholar</a>
++    <a href={site.orcid} target="_blank" rel="noopener">ORCID</a>
++    <a href={site.github} target="_blank" rel="noopener">GitHub</a>
++    <a href={`mailto:${site.email}`}>Email</a>
+   </div>
+ </section>
+diff --git a/src/components/PublicationItem.astro b/src/components/PublicationItem.astro
+index 1fc1265..aa0f13c 100644
+--- a/src/components/PublicationItem.astro
++++ b/src/components/PublicationItem.astro
+@@ -1,46 +1,67 @@
+ ---
+ import type { CollectionEntry } from 'astro:content';
+ import BibtexButton from './BibtexButton.astro';
+ import { boldSelf, toBibtex } from '../lib/format';
++import { topicName } from '../lib/topics';
++import { withBase } from '../lib/url';
+ 
+ interface Props {
+   pub: CollectionEntry<'publications'>;
++  workTitles?: Record<string, string>;
+ }
+-const { pub } = Astro.props;
++const { pub, workTitles = {} } = Astro.props;
+ const d = pub.data;
+ const href = d.url ?? `https://doi.org/${d.doi}`;
+-const bibtex =
+-  d.bibtex ??
+-  toBibtex({
+-    title: d.title,
+-    authors: d.authors,
+-    venue: d.venue,
+-    year: d.year,
+-    doi: d.doi,
+-    type: d.type,
+-  });
++const bibtex = toBibtex({
++  title: d.title,
++  authors: d.authors,
++  venue: d.venue,
++  year: d.year,
++  doi: d.doi,
++  type: d.type,
++  volume: d.volume,
++  pages: d.pages,
++});
+ const badgeClass =
+   d.indexing === 'Q1'
+     ? 'badge-q1'
+     : d.indexing === 'Q4'
+       ? 'badge-q4'
+       : d.indexing === 'EI'
+         ? 'badge-ei'
+         : 'badge-neutral';
+ const indexingLabel = d.indexing === 'EI' ? 'EI indexed' : `JCR ${d.indexing}`;
++const roleLabel = d.role === 'first' ? 'First author' : (d.authorNote ?? 'Co-author');
++const relatedWork = d.relatedWork ?? [];
+ ---
+-<li class="pub-item" data-indexing={d.indexing} data-role={d.role} data-year={d.year}>
++<li
++  class="pub-item"
++  data-indexing={d.indexing}
++  data-role={d.role}
++  data-year={d.year}
++  data-topics={d.topics.join(' ')}
++>
+   <a class="pub-title" href={href} target="_blank" rel="noopener">{d.title}</a>
+   <div class="pub-meta"><span set:html={boldSelf(d.authors)} /></div>
+   <div class="pub-meta">
+     {d.indexing !== 'none' && <span class={`badge ${badgeClass}`}>{indexingLabel}</span>}
+-    {d.role === 'first' && <span class="badge badge-neutral">First author</span>}
++    <span class="badge badge-neutral">{roleLabel}</span>
++    {d.topics.map((topic) => <span class="badge badge-topic">{topicName(topic)}</span>)}
+     <span>{d.venueShort ?? d.venue} · {d.year}</span>
+   </div>
++  {relatedWork.length > 0 && (
++    <div class="pub-meta">
++      Related work:
++      {relatedWork.map((slug, index) => (
++        <span>
++          {index > 0 && ', '}
++          <a href={withBase(`work/${slug}`)}>{workTitles[slug] ?? slug}</a>
++        </span>
++      ))}
++    </div>
++  )}
+   <div class="pub-actions">
+-    <a href={`https://doi.org/${d.doi}`} target="_blank" rel="noopener" aria-label={`DOI for ${d.title}`}>
+-      DOI
+-    </a>
++    <a href={`https://doi.org/${d.doi}`} target="_blank" rel="noopener" aria-label={`DOI for ${d.title}`}>DOI</a>
+     <BibtexButton bibtex={bibtex} />
+   </div>
+ </li>
+diff --git a/src/components/ResearchAreas.astro b/src/components/ResearchAreas.astro
+new file mode 100644
+index 0000000..15e8991
+--- /dev/null
++++ b/src/components/ResearchAreas.astro
+@@ -0,0 +1,62 @@
++---
++import { getCollection } from 'astro:content';
++import { topics } from '../lib/topics';
++import { sortPublications } from '../lib/publications';
++import { sortWork } from '../lib/work';
++import { withBase } from '../lib/url';
++
++const [publications, work] = await Promise.all([
++  getCollection('publications'),
++  getCollection('work'),
++]);
++
++const areas = topics
++  .map((topic) => {
++    const papers = sortPublications(
++      publications.filter(
++        (pub) => pub.data.topics.includes(topic.slug) && pub.data.role === 'first'
++      )
++    );
++    const entries = sortWork(work.filter((item) => item.data.topics?.includes(topic.slug)));
++    return { ...topic, paper: papers[0], entry: entries[0] };
++  })
++  .filter((area) => area.paper || area.entry);
++---
++{areas.length > 0 && (
++  <section class="section container measure">
++    <div class="section-head"><h2>Research Areas</h2></div>
++    <div class="area-grid">
++      {areas.map((area) => (
++        <article class="area">
++          <h3>{area.name}</h3>
++          <p class="muted">{area.blurb}</p>
++          <ul class="area-items">
++            {area.paper && (
++              <li>
++                <a href={`https://doi.org/${area.paper.data.doi}`} target="_blank" rel="noopener">
++                  {area.paper.data.title}
++                </a>
++                <span class="area-note">
++                  {area.paper.data.venueShort ?? area.paper.data.venue} · {area.paper.data.year}
++                </span>
++              </li>
++            )}
++            {area.entry && (
++              <li>
++                <a href={withBase(`work/${area.entry.id}`)}>{area.entry.data.title}</a>
++                <span class="area-note">{area.entry.data.org}</span>
++              </li>
++            )}
++          </ul>
++          <a
++            class="area-link"
++            href={`${withBase('publications')}?topic=${area.slug}`}
++            aria-label={`View all publications on ${area.name}`}
++          >
++            View all →
++          </a>
++        </article>
++      ))}
++    </div>
++  </section>
++)}
+diff --git a/src/components/WorkCard.astro b/src/components/WorkCard.astro
+index 20ac52c..05a00c0 100644
+--- a/src/components/WorkCard.astro
++++ b/src/components/WorkCard.astro
+@@ -1,14 +1,19 @@
+ ---
+ import type { CollectionEntry } from 'astro:content';
++import { topicName } from '../lib/topics';
+ import { withBase } from '../lib/url';
+ 
+ interface Props {
+   item: CollectionEntry<'work'>;
+ }
+ const { item } = Astro.props;
++const topics = item.data.topics ?? [];
+ ---
+-<article class="work-card">
++<article class="work-card" data-topics={topics.join(' ')}>
+   <h3><a href={withBase(`work/${item.id}`)}>{item.data.title}</a></h3>
+   <p>{item.data.summary}</p>
+-  <div class="stack">{item.data.stack.map((tech) => <span>{tech}</span>)}</div>
++  <div class="stack">
++    {topics.map((topic) => <span class="badge badge-topic">{topicName(topic)}</span>)}
++    {item.data.stack.map((tech) => <span>{tech}</span>)}
++  </div>
+ </article>
+diff --git a/src/content/publications/cisse-2024.md b/src/content/publications/cisse-2024.md
+index 834e2f3..d5504f1 100644
+--- a/src/content/publications/cisse-2024.md
++++ b/src/content/publications/cisse-2024.md
+@@ -9,12 +9,14 @@ authors:
+ venue: "Studies in Computational Intelligence"
+ year: 2024
+ type: conference
+ indexing: Q4
+ role: first
++topics: ["medical-signal"]
+ doi: "10.1007/978-3-031-57037-7_7"
+ url: "https://doi.org/10.1007/978-3-031-57037-7_7"
++pages: "87--103"
+ selected: false
+ date: "2024-01-01"
+ ---
+ 
+ A ResNet-GRU fusion model with simplified self-attention for ECG classification on PTB-XL.
+diff --git a/src/content/publications/cvidl-2024-garbage.md b/src/content/publications/cvidl-2024-garbage.md
+index b702b40..6c80a08 100644
+--- a/src/content/publications/cvidl-2024-garbage.md
++++ b/src/content/publications/cvidl-2024-garbage.md
+@@ -9,12 +9,15 @@ venue: "2024 5th International Conference on Computer Vision, Image and Deep Lea
+ venueShort: "CVIDL 2024"
+ year: 2024
+ type: conference
+ indexing: EI
+ role: second
++authorNote: "Student 2nd author"
++topics: ["industrial-vision"]
+ doi: "10.1109/cvidl62147.2024.10604280"
+ url: "https://ieeexplore.ieee.org/abstract/document/10604280"
++pages: "334--338"
+ selected: false
+ date: "2024-04-19"
+ ---
+ 
+ Data-centric improvements to YOLOv5 for garbage identification and classification. Second
+diff --git a/src/content/publications/cvidl-2024-wheat.md b/src/content/publications/cvidl-2024-wheat.md
+index 43f3b2e..19d600b 100644
+--- a/src/content/publications/cvidl-2024-wheat.md
++++ b/src/content/publications/cvidl-2024-wheat.md
+@@ -11,12 +11,14 @@ venue: "2024 5th International Conference on Computer Vision, Image and Deep Lea
+ venueShort: "CVIDL 2024"
+ year: 2024
+ type: conference
+ indexing: EI
+ role: first
++topics: ["industrial-vision"]
+ doi: "10.1109/cvidl62147.2024.10604082"
+ url: "https://ieeexplore.ieee.org/abstract/document/10604082"
++pages: "339--343"
+ selected: true
+ date: "2024-04-01"
+ ---
+ 
+ Wheat disease recognition with improved spatial and channel reconstruction convolution and a
+diff --git a/src/content/publications/ipmlp-2024.md b/src/content/publications/ipmlp-2024.md
+index bdf2638..6826d7e 100644
+--- a/src/content/publications/ipmlp-2024.md
++++ b/src/content/publications/ipmlp-2024.md
+@@ -12,12 +12,15 @@ venue: "Proceedings of the International Conference on Image Processing, Machine
+ venueShort: "IPMLP 2024"
+ year: 2024
+ type: conference
+ indexing: EI
+ role: other
++authorNote: "Student 4th author"
++topics: ["industrial-vision"]
+ doi: "10.1145/3700906.3700946"
+ url: "https://dl.acm.org/doi/abs/10.1145/3700906.3700946"
++pages: "245--250"
+ selected: false
+ date: "2024-09-13"
+ ---
+ 
+ Surface waste identification with an improved YOLOv8 detector. Fourth author among student
+diff --git a/src/content/publications/mst-2025.md b/src/content/publications/mst-2025.md
+index 7d1ccb2..315eda2 100644
+--- a/src/content/publications/mst-2025.md
++++ b/src/content/publications/mst-2025.md
+@@ -9,12 +9,17 @@ venue: "Measurement Science and Technology"
+ venueShort: "Meas Sci Technol"
+ year: 2025
+ type: journal
+ indexing: Q1
+ role: third
++authorNote: "Student 3rd author"
++topics: ["industrial-vision"]
+ doi: "10.1088/1361-6501/ae10d3"
+ url: "https://iopscience.iop.org/article/10.1088/1361-6501/ae10d3/meta"
++volume: "36"
++pages: "116107"
++relatedWork: ["guangzhou-xiyang"]
+ selected: false
+ date: "2025-11-07"
+ ---
+ 
+ Diffusion-model-based data synthesis for industrial defect detection. Third author among
+diff --git a/src/content/publications/scientific-reports-2024.md b/src/content/publications/scientific-reports-2024.md
+index a6b0755..b6b428e 100644
+--- a/src/content/publications/scientific-reports-2024.md
++++ b/src/content/publications/scientific-reports-2024.md
+@@ -14,12 +14,15 @@ venue: "Scientific Reports"
+ venueShort: "Sci Rep"
+ year: 2024
+ type: journal
+ indexing: Q1
+ role: first
++topics: ["medical-signal"]
+ doi: "10.1038/s41598-024-71700-z"
+ url: "https://www.nature.com/articles/s41598-024-71700-z"
++volume: "14"
++relatedWork: ["sudden-cardiac-death-prediction"]
+ selected: true
+ date: "2024-09-06"
+ ---
+ 
+ A multiscale spatio-temporal fusion network with coordinated channel-spatial attention for
+diff --git a/src/content/work/coca-cola-consumer-analysis.md b/src/content/work/coca-cola-consumer-analysis.md
+index 811d12c..ce535ab 100644
+--- a/src/content/work/coca-cola-consumer-analysis.md
++++ b/src/content/work/coca-cola-consumer-analysis.md
+@@ -4,10 +4,13 @@ org: "CP Group Cup Market Research Competition"
+ kind: project
+ role: "Lead"
+ start: "2023-01"
+ end: "2025-05"
+ summary: "Consumer demand analysis over 120,756 JD.com reviews with BERT sentiment analysis."
++problem: "Brand teams lacked a quantitative view of consumer sentiment across a very large review corpus."
++approach: "Crawled 120,756 JD.com reviews and applied BERT sentiment analysis to build word clouds and user profiles."
++results: "National Third Prize in the CP Group Cup market research competition."
+ stack: ["BERT", "Python", "Crawlers"]
+ highlights:
+   - "Collected 120,756 Coca-Cola product reviews from JD.com with automated crawlers."
+   - "Applied BERT sentiment analysis to generate word clouds and user profiles."
+   - "Won a National Third Prize in the CP Group Cup market research competition."
+diff --git a/src/content/work/guangzhou-xiyang.md b/src/content/work/guangzhou-xiyang.md
+index 93c5d16..cda8a88 100644
+--- a/src/content/work/guangzhou-xiyang.md
++++ b/src/content/work/guangzhou-xiyang.md
+@@ -4,10 +4,11 @@ org: "Guangzhou Xiyang Information Technology Co., Ltd."
+ kind: experience
+ role: "Software Engineer"
+ start: "2025-01"
+ end: "2025-09"
+ summary: "Cable surface defect detection and intelligent reporting, from model research to desktop delivery."
++topics: ["industrial-vision"]
+ stack: ["Python", "PyQt5", "YOLO", "OpenCV", "SQLAlchemy", "RAG"]
+ highlights:
+   - "Annotated 3,500 cable-defect images and co-built the CSDDdb dataset with a municipal key laboratory."
+   - "Built an offline augmentation pipeline with YOLO XYWH-linked geometric and photometric transforms for long-tail cases."
+   - "Developed OpenCV preprocessing with Wiener deblurring, background suppression, and adaptive threshold segmentation."
+diff --git a/src/content/work/ningbo-haizhimingshi.md b/src/content/work/ningbo-haizhimingshi.md
+index 24418e1..c3e21dd 100644
+--- a/src/content/work/ningbo-haizhimingshi.md
++++ b/src/content/work/ningbo-haizhimingshi.md
+@@ -4,10 +4,11 @@ org: "Ningbo Haizhimingshi Technology Co., Ltd."
+ kind: experience
+ role: "Algorithm Intern"
+ start: "2024-09"
+ end: "2024-12"
+ summary: "Soft-shell crab detection with YOLOv5s for an automatic sorting system."
++topics: ["industrial-vision"]
+ stack: ["YOLOv5", "Python", "OpenCV"]
+ highlights:
+   - "Built a multi-scene soft-shell crab dataset."
+   - "Trained YOLOv5s with tuned learning rate and loss: Precision 92.3%, Recall 89.7%, mAP 90.5%, F1 90.9%."
+   - "Optimized inference to 45 FPS to meet the real-time requirement of automatic sorting."
+diff --git a/src/content/work/rural-revitalization.md b/src/content/work/rural-revitalization.md
+index 4d13ccd..2faf98d 100644
+--- a/src/content/work/rural-revitalization.md
++++ b/src/content/work/rural-revitalization.md
+@@ -4,10 +4,13 @@ org: "National Excellent Research Report Award"
+ kind: project
+ role: "Second Lead"
+ start: "2023-07"
+ end: "2025-11"
+ summary: "Survey-based research on agriculture-plus-tourism rural revitalization pathways."
++problem: "Rural revitalization planning lacked data on tea yield, fertilization, and machinery power for the surveyed region."
++approach: "Distributed 379 questionnaires (97% valid), integrated government data, and used machine learning to predict yield, fertilization, and total machinery power."
++results: "Report recognized as a National Excellent Research Report; the accompanying paper was published as a second-author CNKI-indexed article."
+ stack: ["Machine Learning", "Statistics"]
+ highlights:
+   - "Distributed 379 questionnaires with a 97% valid response rate and integrated government data."
+   - "Predicted tea yield, fertilization volume, and total machinery power with machine learning."
+   - "Report recognized as a National Excellent Research Report; the paper was published as second author."
+diff --git a/src/content/work/sudden-cardiac-death-prediction.md b/src/content/work/sudden-cardiac-death-prediction.md
+index c8c0db8..f014055 100644
+--- a/src/content/work/sudden-cardiac-death-prediction.md
++++ b/src/content/work/sudden-cardiac-death-prediction.md
+@@ -4,20 +4,25 @@ org: "Guangdong Provincial Student Innovation Program"
+ kind: project
+ role: "Project Lead"
+ start: "2023-03"
+ end: "2024-06"
+ summary: "End-to-end ECG research project that produced two first-author papers."
++topics: ["medical-signal"]
++problem: "Multi-lead ECG arrhythmia detection is limited by noisy signals and weak cross-lead temporal modeling, which constrains classification accuracy on public datasets."
++approach: "Converted multi-lead ECG to 2D grayscale images, fused grayscale features, and designed STFAC-ECGNet with coordinated channel-spatial attention and temporal fusion."
++results: "Improved classification accuracy vs. baseline on PTB-XL and CPSC2018, producing two first-author papers (JCR Q1 and Q4)."
+ stack: ["PyTorch", "CNN/RNN", "Attention", "PTB-XL"]
+ highlights:
+   - "Led proposal, design, implementation, publication, and final acceptance."
+   - "Designed STFAC-ECGNet with coordinated channel-spatial attention and temporal fusion."
+   - "Published two first-author papers (JCR Q1 and Q4)."
+ links:
+   - label: "Scientific Reports (Q1)"
+     url: "https://www.nature.com/articles/s41598-024-71700-z"
+   - label: "CISSE 2024 (Q4)"
+     url: "https://doi.org/10.1007/978-3-031-57037-7_7"
++relatedPublications: ["10.1038/s41598-024-71700-z"]
+ order: 1
+ ---
+ 
+ Led the project end-to-end and designed a multiscale spatio-temporal fusion network for
+ multi-lead ECG classification on PTB-XL and CPSC2018.
+diff --git a/src/content/work/wordle-analysis.md b/src/content/work/wordle-analysis.md
+index 153484e..dec7a2f 100644
+--- a/src/content/work/wordle-analysis.md
++++ b/src/content/work/wordle-analysis.md
+@@ -4,10 +4,13 @@ org: "MCM"
+ kind: project
+ role: "Lead"
+ start: "2023-02"
+ end: "2023-05"
+ summary: "Difficulty modeling and player-trend prediction for the NYT Wordle game."
++problem: "Wordle difficulty is driven by word structure, but the game had no quantitative difficulty model to explain player behavior."
++approach: "Used Python corpora and machine-learning statistics on word frequency, syllables, and repeated letters, then trained a BiGRU model to predict player trends."
++results: "Won the MCM Meritorious Winner award (top 7%)."
+ stack: ["Python", "BiGRU", "Machine Learning"]
+ highlights:
+   - "Analyzed word frequency, syllables, and letter repetition to build difficulty metrics."
+   - "Implemented a BiGRU model to predict player behavior trends."
+   - "Won the MCM Meritorious Winner award (top 7%)."
+diff --git a/src/layouts/BaseLayout.astro b/src/layouts/BaseLayout.astro
+index 31ffd50..4608c0f 100644
+--- a/src/layouts/BaseLayout.astro
++++ b/src/layouts/BaseLayout.astro
+@@ -1,10 +1,11 @@
+ ---
+ import '../styles/global.css';
+ import Header from '../components/Header.astro';
+ import Footer from '../components/Footer.astro';
+ import PublicationScripts from '../components/PublicationScripts.astro';
++import { site } from '../lib/site';
+ import { withBase } from '../lib/url';
+ 
+ interface Props {
+   title: string;
+   description: string;
+@@ -22,25 +23,22 @@ const {
+   langLink,
+   profilePage = false,
+   noindex = false,
+ } = Astro.props;
+ const canonical = new URL(Astro.url.pathname.replace(/\/?$/, '/'), Astro.site);
++const ogImage = new URL(withBase('og.png'), Astro.site);
+ const personId = `${new URL(withBase(), Astro.site).href}#person`;
+ const profile = {
+   '@context': 'https://schema.org',
+   '@graph': [
+     { '@type': 'ProfilePage', mainEntity: { '@id': personId } },
+     {
+       '@type': 'Person',
+       '@id': personId,
+-      name: 'Zicong Yang',
++      name: site.name,
+       jobTitle: 'Software Engineer',
+-      sameAs: [
+-        'https://scholar.google.com/citations?user=0Ynn-awAAAAJ',
+-        'https://orcid.org/0009-0001-0948-3606',
+-        'https://github.com/YZC0421',
+-      ],
++      sameAs: [site.scholar, site.orcid, site.github],
+     },
+   ],
+ };
+ ---
+ <!doctype html>
+@@ -54,10 +52,19 @@ const profile = {
+     <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
+     <meta property="og:title" content={title} />
+     <meta property="og:description" content={description} />
+     <meta property="og:type" content={type} />
+     <meta property="og:url" content={canonical} />
++    <meta property="og:image" content={ogImage} />
++    <meta property="og:image:width" content="1200" />
++    <meta property="og:image:height" content="630" />
++    <meta
++      property="og:image:alt"
++      content="Zicong Yang — Medical Signal Processing and Industrial Visual Inspection"
++    />
++    <meta name="twitter:card" content="summary_large_image" />
++    <meta name="twitter:image" content={ogImage} />
+     <slot name="head" />
+     {profilePage && <script type="application/ld+json" set:html={JSON.stringify(profile)} />}
+     <script is:inline>
+       (() => {
+         let saved = null;
+diff --git a/src/layouts/PageLayout.astro b/src/layouts/PageLayout.astro
+index 0b0f414..f63e6d6 100644
+--- a/src/layouts/PageLayout.astro
++++ b/src/layouts/PageLayout.astro
+@@ -1,17 +1,20 @@
+ ---
+ import BaseLayout from './BaseLayout.astro';
++import { hasCvPdf } from '../lib/site';
++import { withBase } from '../lib/url';
+ 
+ interface Props {
+   title: string;
+   description: string;
+   lang?: string;
+   langLink?: { href: string; label: string; lang: string };
+   heading: string;
+   updated: string;
+   updatedLabel: string;
+   printLabel: string;
++  downloadLabel: string;
+   enHref: string | URL;
+   zhHref: string | URL;
+ }
+ const {
+   title,
+@@ -20,13 +23,15 @@ const {
+   langLink,
+   heading,
+   updated,
+   updatedLabel,
+   printLabel,
++  downloadLabel,
+   enHref,
+   zhHref,
+ } = Astro.props;
++const cvAvailable = hasCvPdf();
+ ---
+ <BaseLayout
+   title={title}
+   description={description}
+   lang={lang}
+@@ -42,10 +47,13 @@ const {
+     <div class="page-head">
+       <h1>{heading}</h1>
+       <span class="muted">{updatedLabel} {updated}</span>
+     </div>
+     <div class="about-actions">
++      {cvAvailable && (
++        <a class="cv-download" href={withBase('cv.pdf')}>{downloadLabel}</a>
++      )}
+       <button type="button" onclick="window.print()">{printLabel}</button>
+     </div>
+     <div class="prose"><slot /></div>
+   </div>
+ </BaseLayout>
+diff --git a/src/layouts/PostLayout.astro b/src/layouts/PostLayout.astro
+index cbeda88..0970c7b 100644
+--- a/src/layouts/PostLayout.astro
++++ b/src/layouts/PostLayout.astro
+@@ -1,8 +1,9 @@
+ ---
+ import BaseLayout from './BaseLayout.astro';
+ import Toc from '../components/Toc.astro';
++import { withBase } from '../lib/url';
+ 
+ interface Props {
+   title: string;
+   description: string;
+   date: string;
+@@ -33,11 +34,13 @@ const hasToc = headings.some(
+         <h1>{title}</h1>
+         <div class="post-meta">
+           <time datetime={date}>{date}</time>
+           <span class="lang-badge">{lang === 'zh' ? '中文' : 'EN'}</span>
+           <span>{readingLabel}</span>
+-          {tags.map((tag) => <span class="lang-badge">{tag}</span>)}
++          {tags.map((tag) => (
++            <a class="lang-badge" href={withBase(`blog/tag/${tag}`)}>{tag}</a>
++          ))}
+         </div>
+       </header>
+       {hasToc && (
+         <details class="toc-mobile">
+           <summary>Table of contents</summary>
+diff --git a/src/lib/format.ts b/src/lib/format.ts
+index 0e4b04d..e66b18d 100644
+--- a/src/lib/format.ts
++++ b/src/lib/format.ts
+@@ -21,22 +21,29 @@ export function toBibtex(input: {
+   authors: string[];
+   venue: string;
+   year: number;
+   doi: string;
+   type: 'journal' | 'conference';
++  volume?: string;
++  pages?: string;
+ }): string {
+   const surname = input.authors[0]?.split(' ').pop() ?? 'anon';
+   const slug = input.title
+     .toLowerCase()
+     .replace(/[^a-z0-9]+/g, '')
+     .slice(0, 8);
+   const key = `${surname}${input.year}${slug}`;
+   const kind = input.type === 'journal' ? 'article' : 'inproceedings';
+   const venueField = input.type === 'journal' ? 'journal' : 'booktitle';
+-  return `@${kind}{${key},
+-  author = {${input.authors.join(' and ')}},
+-  title = {${input.title}},
+-  ${venueField} = {${input.venue}},
+-  year = {${input.year}},
+-  doi = {${input.doi}}
+-}`;
++  const lines = [
++    `@${kind}{${key},`,
++    `  author = {${input.authors.join(' and ')}},`,
++    `  title = {${input.title}},`,
++    `  ${venueField} = {${input.venue}},`,
++    `  year = {${input.year}},`,
++    ...(input.volume ? [`  volume = {${input.volume}},`] : []),
++    ...(input.pages ? [`  pages = {${input.pages}},`] : []),
++    `  doi = {${input.doi}}`,
++    '}',
++  ];
++  return lines.join('\n');
+ }
+diff --git a/src/lib/posts.ts b/src/lib/posts.ts
+index 6b5f653..7677d40 100644
+--- a/src/lib/posts.ts
++++ b/src/lib/posts.ts
+@@ -6,5 +6,9 @@ type Post = CollectionEntry<'blog'>;
+ export function visiblePosts<T extends Post>(posts: T[], today = localToday()): T[] {
+   return posts
+     .filter((post) => !post.data.draft && post.data.date <= today)
+     .sort((a, b) => b.data.date.localeCompare(a.data.date) || a.id.localeCompare(b.id));
+ }
++
++export function postTags<T extends Post>(posts: T[]): string[] {
++  return [...new Set(posts.flatMap((post) => post.data.tags))].sort();
++}
+diff --git a/src/lib/publications.ts b/src/lib/publications.ts
+index 44f6371..e452804 100644
+--- a/src/lib/publications.ts
++++ b/src/lib/publications.ts
+@@ -6,11 +6,13 @@ const roleRank: Record<string, number> = { first: 0, second: 1, third: 2, other:
+ 
+ export function sortPublications<T extends Pub>(items: T[]): T[] {
+   return [...items].sort((a, b) => {
+     const byDate = b.data.date.localeCompare(a.data.date);
+     if (byDate !== 0) return byDate;
+-    return (roleRank[a.data.role] ?? 3) - (roleRank[b.data.role] ?? 3);
++    const byRole = (roleRank[a.data.role] ?? 3) - (roleRank[b.data.role] ?? 3);
++    if (byRole !== 0) return byRole;
++    return a.id.localeCompare(b.id);
+   });
+ }
+ 
+ export function selectHomepage<T extends Pub>(items: T[], limit = 3): T[] {
+   const chosen: T[] = [];
+diff --git a/src/lib/relations.ts b/src/lib/relations.ts
+new file mode 100644
+index 0000000..bfea148
+--- /dev/null
++++ b/src/lib/relations.ts
+@@ -0,0 +1,28 @@
++import type { CollectionEntry } from 'astro:content';
++
++type Pub = CollectionEntry<'publications'>;
++type Work = CollectionEntry<'work'>;
++
++export function validateRelations(publications: Pub[], work: Work[]): string[] {
++  const workIds = new Set(work.map((item) => item.id));
++  const dois = new Set(publications.map((pub) => pub.data.doi));
++  const errors: string[] = [];
++
++  for (const pub of publications) {
++    for (const slug of pub.data.relatedWork ?? []) {
++      if (!workIds.has(slug)) {
++        errors.push(`publications/${pub.id}.md: relatedWork "${slug}" not found`);
++      }
++    }
++  }
++
++  for (const item of work) {
++    for (const doi of item.data.relatedPublications ?? []) {
++      if (!dois.has(doi)) {
++        errors.push(`work/${item.id}.md: relatedPublications "${doi}" not found`);
++      }
++    }
++  }
++
++  return errors;
++}
+diff --git a/src/lib/schema.ts b/src/lib/schema.ts
+index 7864c51..6da25bd 100644
+--- a/src/lib/schema.ts
++++ b/src/lib/schema.ts
+@@ -1,22 +1,28 @@
+ import { z } from 'zod';
++import { topicSlugs } from './topics';
+ 
+ const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date must be YYYY-MM-DD');
+ const month = z.string().regex(/^\d{4}-\d{2}$/, 'month must be YYYY-MM');
++const topic = z.enum(topicSlugs);
+ 
+ export const publicationSchema = z.object({
+   title: z.string().min(1),
+   authors: z.array(z.string().min(1)).min(1),
+   venue: z.string().min(1),
+   venueShort: z.string().optional(),
+   year: z.number().int().min(2000).max(2100),
+   type: z.enum(['journal', 'conference']),
+   indexing: z.enum(['Q1', 'Q2', 'Q3', 'Q4', 'EI', 'none']).default('none'),
+   role: z.enum(['first', 'second', 'third', 'other']),
++  authorNote: z.string().max(40).optional(),
++  topics: z.array(topic).min(1),
+   doi: z.string().min(3),
+   url: z.string().url().optional(),
+-  bibtex: z.string().optional(),
++  volume: z.string().optional(),
++  pages: z.string().optional(),
++  relatedWork: z.array(z.string()).default([]),
+   selected: z.boolean().default(false),
+   date: isoDate,
+ });
+ 
+ export const workSchema = z
+@@ -30,11 +36,15 @@ export const workSchema = z
+     summary: z.string().min(1).max(200),
+     stack: z.array(z.string()).default([]),
+     links: z
+       .array(z.object({ label: z.string().min(1), url: z.string().url() }))
+       .default([]),
+-    cover: z.string().optional(),
++    topics: z.array(topic).default([]),
++    problem: z.string().max(600).optional(),
++    approach: z.string().max(600).optional(),
++    results: z.string().max(600).optional(),
++    relatedPublications: z.array(z.string()).default([]),
+     highlights: z.array(z.string().min(1)).min(1),
+     order: z.number().int().default(0),
+   })
+   .refine((w) => w.end === 'present' || w.start <= w.end, {
+     message: 'start must not be later than end',
+diff --git a/src/lib/site.ts b/src/lib/site.ts
+new file mode 100644
+index 0000000..585a012
+--- /dev/null
++++ b/src/lib/site.ts
+@@ -0,0 +1,18 @@
++import { existsSync } from 'node:fs';
++import { fileURLToPath } from 'node:url';
++
++const CV_FILE = fileURLToPath(new URL('../../public/cv.pdf', import.meta.url));
++
++export const site = {
++  name: 'Zicong Yang',
++  tagline:
++    'Software engineer and researcher working on medical signal processing and computer vision — ECG arrhythmia detection, industrial defect inspection, and applied deep learning.',
++  email: '402641915@qq.com',
++  github: 'https://github.com/YZC0421',
++  scholar: 'https://scholar.google.com/citations?user=0Ynn-awAAAAJ',
++  orcid: 'https://orcid.org/0009-0001-0948-3606',
++};
++
++export function hasCvPdf(): boolean {
++  return existsSync(CV_FILE);
++}
+diff --git a/src/lib/topics.ts b/src/lib/topics.ts
+new file mode 100644
+index 0000000..124a58e
+--- /dev/null
++++ b/src/lib/topics.ts
+@@ -0,0 +1,20 @@
++export const topicSlugs = ['medical-signal', 'industrial-vision'] as const;
++
++export type TopicSlug = (typeof topicSlugs)[number];
++
++export const topics: { slug: TopicSlug; name: string; blurb: string }[] = [
++  {
++    slug: 'medical-signal',
++    name: 'Medical Signal Processing',
++    blurb: 'ECG arrhythmia detection and cardiac risk modelling with multiscale deep networks.',
++  },
++  {
++    slug: 'industrial-vision',
++    name: 'Industrial Visual Inspection',
++    blurb: 'Defect detection and lightweight deployment for manufacturing and agriculture.',
++  },
++];
++
++export function topicName(slug: TopicSlug): string {
++  return topics.find((topic) => topic.slug === slug)?.name ?? slug;
++}
+diff --git a/src/lib/work.ts b/src/lib/work.ts
+new file mode 100644
+index 0000000..4640f47
+--- /dev/null
++++ b/src/lib/work.ts
+@@ -0,0 +1,23 @@
++import type { CollectionEntry } from 'astro:content';
++
++type Work = CollectionEntry<'work'>;
++
++export function sortProjects<T extends Work>(items: T[]): T[] {
++  return [...items].sort(
++    (a, b) => a.data.order - b.data.order || a.id.localeCompare(b.id)
++  );
++}
++
++export function sortWork<T extends Work>(items: T[]): T[] {
++  return [...items].sort(
++    (a, b) => b.data.start.localeCompare(a.data.start) || a.id.localeCompare(b.id)
++  );
++}
++
++export function sortExperience<T extends Work>(items: T[]): T[] {
++  return sortWork(items);
++}
++
++export function workTitleMap<T extends Work>(items: T[]): Record<string, string> {
++  return Object.fromEntries(items.map((item) => [item.id, item.data.title]));
++}
+diff --git a/src/pages/about.astro b/src/pages/about.astro
+index 4cae955..b795d20 100644
+--- a/src/pages/about.astro
++++ b/src/pages/about.astro
+@@ -14,11 +14,12 @@ const zhHref = new URL(withBase('about/zh'), Astro.site);
+   description="Education, research, skills, and contact."
+   langLink={{ href: withBase('about/zh'), label: '中文', lang: 'zh-CN' }}
+   heading={entry.data.title}
+   updated={entry.data.updated}
+   updatedLabel="Updated"
+-  printLabel="Download CV (PDF)"
++  printLabel="Print / Save as PDF"
++  downloadLabel="Download CV (PDF)"
+   enHref={enHref}
+   zhHref={zhHref}
+ >
+   <Content />
+ </PageLayout>
+diff --git a/src/pages/about/zh.astro b/src/pages/about/zh.astro
+index 7d63ee4..b4596f1 100644
+--- a/src/pages/about/zh.astro
++++ b/src/pages/about/zh.astro
+@@ -15,11 +15,12 @@ const zhHref = new URL(withBase('about/zh'), Astro.site);
+   lang="zh-CN"
+   langLink={{ href: withBase('about'), label: 'English', lang: 'en' }}
+   heading={entry.data.title}
+   updated={entry.data.updated}
+   updatedLabel="更新于"
+-  printLabel="下载 CV (PDF)"
++  printLabel="打印 / 存为 PDF"
++  downloadLabel="下载 CV (PDF)"
+   enHref={enHref}
+   zhHref={zhHref}
+ >
+   <Content />
+ </PageLayout>
+diff --git a/src/pages/blog/index.astro b/src/pages/blog/index.astro
+index 5a77cc2..cfb43fe 100644
+--- a/src/pages/blog/index.astro
++++ b/src/pages/blog/index.astro
+@@ -1,14 +1,14 @@
+ ---
+ import BaseLayout from '../../layouts/BaseLayout.astro';
+ import TagFilter from '../../components/TagFilter.astro';
+ import { getCollection } from 'astro:content';
+-import { visiblePosts } from '../../lib/posts';
++import { postTags, visiblePosts } from '../../lib/posts';
+ import { withBase } from '../../lib/url';
+ 
+ const posts = visiblePosts(await getCollection('blog'));
+-const tags = [...new Set(posts.flatMap((post) => post.data.tags))].sort();
++const tags = postTags(posts);
+ ---
+ <BaseLayout
+   title="Writing · Zicong Yang"
+   description="Notes on software engineering, computer vision, and research."
+   lang="zh-CN"
+@@ -24,10 +24,13 @@ const tags = [...new Set(posts.flatMap((post) => post.data.tags))].sort();
+       {posts.map((post) => (
+         <li data-tags={post.data.tags.join('|')}>
+           <time datetime={post.data.date}>{post.data.date}</time>
+           <a href={withBase(`blog/${post.id}`)}>{post.data.title}</a>
+           <span class="lang-badge">{post.data.lang === 'zh' ? '中文' : 'EN'}</span>
++          {post.data.tags.map((tag) => (
++            <a class="lang-badge" href={withBase(`blog/tag/${tag}`)}>{tag}</a>
++          ))}
+         </li>
+       ))}
+     </ul>
+   </div>
+ 
+diff --git a/src/pages/blog/tag/[tag].astro b/src/pages/blog/tag/[tag].astro
+new file mode 100644
+index 0000000..d20e1f5
+--- /dev/null
++++ b/src/pages/blog/tag/[tag].astro
+@@ -0,0 +1,29 @@
++---
++import type { CollectionEntry } from 'astro:content';
++import BaseLayout from '../../../layouts/BaseLayout.astro';
++import PostList from '../../../components/PostList.astro';
++import { getCollection } from 'astro:content';
++import { postTags, visiblePosts } from '../../../lib/posts';
++import { withBase } from '../../../lib/url';
++
++export async function getStaticPaths() {
++  const posts = visiblePosts(await getCollection('blog'));
++  return postTags(posts).map((tag) => ({
++    params: { tag },
++    props: { tag, posts: posts.filter((post) => post.data.tags.includes(tag)) },
++  }));
++}
++
++interface Props {
++  tag: string;
++  posts: CollectionEntry<'blog'>[];
++}
++const { tag, posts } = Astro.props;
++---
++<BaseLayout title={`#${tag} · Writing`} description={`Posts tagged ${tag}.`} lang="zh-CN">
++  <div class="container measure" style="padding-top:40px">
++    <h1>#{tag}</h1>
++    <p class="muted"><a href={withBase('blog')}>← All writing</a></p>
++    <PostList posts={posts} />
++  </div>
++</BaseLayout>
+diff --git a/src/pages/index.astro b/src/pages/index.astro
+index 1342a8d..79bd051 100644
+--- a/src/pages/index.astro
++++ b/src/pages/index.astro
+@@ -1,37 +1,51 @@
+ ---
+ import BaseLayout from '../layouts/BaseLayout.astro';
+ import Hero from '../components/Hero.astro';
++import ResearchAreas from '../components/ResearchAreas.astro';
+ import PublicationItem from '../components/PublicationItem.astro';
+ import WorkCard from '../components/WorkCard.astro';
+ import PostList from '../components/PostList.astro';
+ import { getCollection, getEntry } from 'astro:content';
+ import { selectHomepage } from '../lib/publications';
+ import { visiblePosts } from '../lib/posts';
++import { validateRelations } from '../lib/relations';
++import { hasCvPdf } from '../lib/site';
+ import { withBase } from '../lib/url';
++import { sortProjects, workTitleMap } from '../lib/work';
+ 
+-const pubs = selectHomepage(await getCollection('publications'));
+-const work = (await getCollection('work'))
+-  .filter((item) => item.data.kind === 'project')
+-  .sort((a, b) => a.data.order - b.data.order)
+-  .slice(0, 3);
++const allPublications = await getCollection('publications');
++const allWork = await getCollection('work');
++const relationErrors = validateRelations(allPublications, allWork);
++if (relationErrors.length > 0) {
++  throw new Error(`Content relations are invalid:\n${relationErrors.join('\n')}`);
++}
++
++const pubs = selectHomepage(allPublications);
++const work = sortProjects(allWork.filter((item) => item.data.kind === 'project')).slice(0, 3);
+ const posts = visiblePosts(await getCollection('blog')).slice(0, 2);
+ const about = await getEntry('pages', 'about-en');
++const workTitles = workTitleMap(allWork);
++const cvAvailable = hasCvPdf();
+ ---
+ <BaseLayout
+   title="Zicong Yang · Medical Signal Processing & Computer Vision"
+   description="Personal site of Zicong Yang: publications, engineering work, and technical writing."
+   profilePage
+ >
+   <Hero />
+ 
++  <ResearchAreas />
++
+   <section class="section container measure">
+     <div class="section-head">
+       <h2>Selected Publications</h2>
+       <a href={withBase('publications')}>All publications →</a>
+     </div>
+-    <ul class="pub-list">{pubs.map((pub) => <PublicationItem pub={pub} />)}</ul>
++    <ul class="pub-list">
++      {pubs.map((pub) => <PublicationItem pub={pub} workTitles={workTitles} />)}
++    </ul>
+   </section>
+ 
+   {work.length > 0 && (
+     <section class="section container measure">
+       <div class="section-head">
+@@ -55,9 +69,13 @@ const about = await getEntry('pages', 'about-en');
+   <section class="section container measure">
+     <div class="section-head"><h2>About</h2></div>
+     <p class="muted">{about?.data.summary}</p>
+     <div class="links">
+       <a href={withBase('about')}>More about me →</a>
+-      <a href={withBase('about')}>CV (print / PDF)</a>
++      {cvAvailable ? (
++        <a href={withBase('cv.pdf')}>Download CV (PDF)</a>
++      ) : (
++        <a href={withBase('about')}>CV (print / PDF)</a>
++      )}
+     </div>
+   </section>
+ </BaseLayout>
+diff --git a/src/pages/publications.astro b/src/pages/publications.astro
+index 893b63d..ff0b424 100644
+--- a/src/pages/publications.astro
++++ b/src/pages/publications.astro
+@@ -1,51 +1,97 @@
+ ---
+ import BaseLayout from '../layouts/BaseLayout.astro';
+ import PublicationItem from '../components/PublicationItem.astro';
+ import { getCollection } from 'astro:content';
+ import { sortPublications } from '../lib/publications';
++import { topics } from '../lib/topics';
++import { workTitleMap } from '../lib/work';
+ 
+ const pubs = sortPublications(await getCollection('publications'));
+-const years = [...new Set(pubs.map((p) => p.data.year))].sort((a, b) => b - a);
++const years = [...new Set(pubs.map((pub) => pub.data.year))].sort((a, b) => b - a);
++const workTitles = workTitleMap(await getCollection('work'));
+ ---
+ <BaseLayout
+   title="Publications · Zicong Yang"
+   description="Peer-reviewed publications on medical signal processing and computer vision."
+ >
+   <div class="container measure" style="padding-top:40px">
+     <h1>Publications</h1>
+     <p class="muted">Peer-reviewed journal and conference papers. {pubs.length} entries.</p>
+ 
+-    <div class="filters" role="group" aria-label="Filter publications">
+-      <button type="button" data-filter="all" aria-pressed="true">All</button>
+-      <button type="button" data-filter="first" aria-pressed="false">First author</button>
+-      <button type="button" data-filter="Q1" aria-pressed="false">JCR Q1</button>
+-      <button type="button" data-filter="EI" aria-pressed="false">EI</button>
++    <div class="filters" role="group" aria-label="Filter publications by topic">
++      <button type="button" data-group="topic" data-value="all" aria-pressed="true">All topics</button>
++      {topics.map((topic) => (
++        <button type="button" data-group="topic" data-value={topic.slug} aria-pressed="false">
++          {topic.name}
++        </button>
++      ))}
++    </div>
++
++    <div class="filters" role="group" aria-label="Filter publications by author role">
++      <button type="button" data-group="role" data-value="all" aria-pressed="true">All roles</button>
++      <button type="button" data-group="role" data-value="first" aria-pressed="false">First author</button>
++    </div>
++
++    <div class="filters" role="group" aria-label="Filter publications by year">
++      <button type="button" data-group="year" data-value="all" aria-pressed="true">All years</button>
+       {years.map((year) => (
+-        <button type="button" data-filter={String(year)} aria-pressed="false">{year}</button>
++        <button type="button" data-group="year" data-value={String(year)} aria-pressed="false">
++          {year}
++        </button>
+       ))}
+     </div>
+ 
+     <ul class="pub-list" id="pub-list">
+-      {pubs.map((pub) => <PublicationItem pub={pub} />)}
++      {pubs.map((pub) => <PublicationItem pub={pub} workTitles={workTitles} />)}
+     </ul>
++    <p id="pub-status" class="muted" role="status" aria-live="polite"></p>
+   </div>
+ 
+   <script is:inline>
+-    const buttons = document.querySelectorAll('.filters button');
+-    const items = document.querySelectorAll('#pub-list .pub-item');
+-    buttons.forEach((btn) => {
+-      btn.addEventListener('click', () => {
+-        buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+-        const filter = btn.dataset.filter;
+-        items.forEach((item) => {
++    (() => {
++      const buttons = document.querySelectorAll('.filters button');
++      const rows = document.querySelectorAll('#pub-list .pub-item');
++      const status = document.getElementById('pub-status');
++      const state = { topic: 'all', role: 'all', year: 'all' };
++
++      const apply = () => {
++        let visible = 0;
++        rows.forEach((row) => {
++          const topics = (row.dataset.topics ?? '').split(' ').filter(Boolean);
+           const match =
+-            filter === 'all' ||
+-            item.dataset.role === filter ||
+-            item.dataset.indexing === filter ||
+-            item.dataset.year === filter;
+-          item.hidden = !match;
++            (state.topic === 'all' || topics.includes(state.topic)) &&
++            (state.role === 'all' || row.dataset.role === 'first') &&
++            (state.year === 'all' || row.dataset.year === state.year);
++          row.hidden = !match;
++          if (match) visible += 1;
++        });
++        if (status) {
++          status.textContent =
++            visible === 0
++              ? 'No publications match these filters.'
++              : `Showing ${visible} of ${rows.length} publications.`;
++        }
++      };
++
++      buttons.forEach((btn) => {
++        btn.addEventListener('click', () => {
++          const group = btn.dataset.group;
++          if (!group) return;
++          state[group] = btn.dataset.value;
++          document
++            .querySelectorAll(`.filters button[data-group="${group}"]`)
++            .forEach((other) => other.setAttribute('aria-pressed', String(other === btn)));
++          apply();
+         });
+       });
+-    });
++
++      const initial = new URLSearchParams(window.location.search).get('topic');
++      if (initial) {
++        const target = [...document.querySelectorAll('.filters button[data-group="topic"]')].find(
++          (btn) => btn.dataset.value === initial
++        );
++        target?.click();
++      }
++    })();
+   </script>
+ </BaseLayout>
+diff --git a/src/pages/work/[slug].astro b/src/pages/work/[slug].astro
+index f4aff34..20d5ab2 100644
+--- a/src/pages/work/[slug].astro
++++ b/src/pages/work/[slug].astro
+@@ -11,39 +11,65 @@ export async function getStaticPaths() {
+ interface Props {
+   item: CollectionEntry<'work'>;
+ }
+ const { item } = Astro.props;
+ const { Content } = await render(item);
++const d = item.data;
++const hasSections = Boolean(d.problem || d.approach || d.results);
++const dois = d.relatedPublications ?? [];
++const publications = dois.length > 0 ? await getCollection('publications') : [];
++const relatedPublications = publications.filter((pub) => dois.includes(pub.data.doi));
+ ---
+-<BaseLayout title={`${item.data.title} · Zicong Yang`} description={item.data.summary}>
++<BaseLayout title={`${d.title} · Zicong Yang`} description={d.summary}>
+   <article class="container measure work-detail" style="padding-top:40px">
+-    <h1>{item.data.title}</h1>
+-    <p class="meta">
+-      {item.data.role} · {item.data.org} · {item.data.start} – {item.data.end}
+-    </p>
++    <h1>{d.title}</h1>
++    <p class="meta">{d.role} · {d.org} · {d.start} – {d.end}</p>
+ 
+-    <Content />
++    {d.problem && <section class="work-block"><h2>Problem</h2><p>{d.problem}</p></section>}
++    {d.approach && <section class="work-block"><h2>Approach</h2><p>{d.approach}</p></section>}
++    {d.results && <section class="work-block"><h2>Results</h2><p>{d.results}</p></section>}
+ 
+-    <h2>Results</h2>
+-    <ul>{item.data.highlights.map((highlight) => <li>{highlight}</li>)}</ul>
++    {!hasSections && (
++      <section class="work-block">
++        <h2>Highlights</h2>
++        <ul>{d.highlights.map((highlight) => <li>{highlight}</li>)}</ul>
++      </section>
++    )}
++
++    <div class="prose"><Content /></div>
++
++    <section class="work-block">
++      <h2>Role</h2>
++      <p>{d.role === d.title ? d.summary : `${d.role} at ${d.org}.`}</p>
++    </section>
+ 
+-    {item.data.stack.length > 0 && (
+-      <>
++    {d.stack.length > 0 && (
++      <section class="work-block">
+         <h2>Stack</h2>
+-        <div class="stack">
+-          {item.data.stack.map((tech) => <span>{tech}</span>)}
+-        </div>
+-      </>
++        <div class="stack">{d.stack.map((tech) => <span>{tech}</span>)}</div>
++      </section>
+     )}
+ 
+-    {item.data.links.length > 0 && (
+-      <>
++    {d.links.length > 0 && (
++      <section class="work-block">
+         <h2>Links</h2>
+         <div class="links">
+-          {item.data.links.map((link) => (
+-            <a href={link.url} target="_blank" rel="noopener">{link.label}</a>
+-          ))}
++          {d.links.map((link) => <a href={link.url} target="_blank" rel="noopener">{link.label}</a>)}
+         </div>
+-      </>
++      </section>
++    )}
++
++    {relatedPublications.length > 0 && (
++      <section class="work-block">
++        <h2>Related publications</h2>
++        {relatedPublications.map((pub) => (
++          <p>
++            <a href={`https://doi.org/${pub.data.doi}`} target="_blank" rel="noopener">
++              {pub.data.title}
++            </a>
++            <span class="muted"> · {pub.data.venue} · {pub.data.year}</span>
++          </p>
++        ))}
++      </section>
+     )}
+   </article>
+ </BaseLayout>
+diff --git a/src/pages/work/index.astro b/src/pages/work/index.astro
+index e3ca7de..d96ad54 100644
+--- a/src/pages/work/index.astro
++++ b/src/pages/work/index.astro
+@@ -1,18 +1,16 @@
+ ---
+ import BaseLayout from '../../layouts/BaseLayout.astro';
+ import WorkCard from '../../components/WorkCard.astro';
+ import { getCollection } from 'astro:content';
++import { topics } from '../../lib/topics';
+ import { withBase } from '../../lib/url';
++import { sortExperience, sortProjects } from '../../lib/work';
+ 
+ const all = await getCollection('work');
+-const experience = all
+-  .filter((item) => item.data.kind === 'experience')
+-  .sort((a, b) => b.data.start.localeCompare(a.data.start) || a.id.localeCompare(b.id));
+-const projects = all
+-  .filter((item) => item.data.kind === 'project')
+-  .sort((a, b) => a.data.order - b.data.order || a.id.localeCompare(b.id));
++const experience = sortExperience(all.filter((item) => item.data.kind === 'experience'));
++const projects = sortProjects(all.filter((item) => item.data.kind === 'project'));
+ ---
+ <BaseLayout title="Work · Zicong Yang" description="Engineering experience and research projects.">
+   <div class="container measure" style="padding-top:40px">
+     <h1>Work</h1>
+ 
+@@ -30,9 +28,43 @@ const projects = all
+       </ul>
+     </section>
+ 
+     <section class="section">
+       <div class="section-head"><h2>Projects</h2></div>
++      <div class="filters" role="group" aria-label="Filter projects by topic">
++        <button type="button" data-value="all" aria-pressed="true">All topics</button>
++        {topics.map((topic) => (
++          <button type="button" data-value={topic.slug} aria-pressed="false">{topic.name}</button>
++        ))}
++      </div>
+       <div class="work-grid">{projects.map((item) => <WorkCard item={item} />)}</div>
++      <p id="work-status" class="muted" role="status" aria-live="polite"></p>
+     </section>
+   </div>
++
++  <script is:inline>
++    (() => {
++      const buttons = document.querySelectorAll('.filters button');
++      const cards = document.querySelectorAll('.work-card');
++      const status = document.getElementById('work-status');
++
++      buttons.forEach((btn) => {
++        btn.addEventListener('click', () => {
++          const value = btn.dataset.value;
++          buttons.forEach((other) => other.setAttribute('aria-pressed', String(other === btn)));
++          let visible = 0;
++          cards.forEach((card) => {
++            const cardTopics = (card.dataset.topics ?? '').split(' ').filter(Boolean);
++            card.hidden = value !== 'all' && !cardTopics.includes(value);
++            if (!card.hidden) visible += 1;
++          });
++          if (status) {
++            status.textContent =
++              visible === 0
++                ? 'No projects in this topic yet.'
++                : `Showing ${visible} of ${cards.length} projects.`;
++          }
++        });
++      });
++    })();
++  </script>
+ </BaseLayout>
+diff --git a/src/styles/global.css b/src/styles/global.css
+index 5adb062..1535395 100644
+--- a/src/styles/global.css
++++ b/src/styles/global.css
+@@ -221,11 +221,11 @@ h3 { font-size: 1.125rem; }
+ 
+ .page-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+ .lang-link { font-size: 0.82rem; color: var(--muted); }
+ .lang-link:hover { color: var(--accent); }
+ .about-actions { display: flex; flex-wrap: wrap; gap: 16px; margin: 20px 0 32px; font-size: 0.88rem; }
+-.about-actions button {
++.about-actions :is(button, .cv-download) {
+   font: inherit;
+   background: none;
+   border: 1px solid var(--border);
+   border-radius: 6px;
+   padding: 4px 10px;
+@@ -256,5 +256,27 @@ h3 { font-size: 1.125rem; }
+ .astro-code { background-color: var(--shiki-light-bg); border-radius: 8px; }
+ .astro-code span { color: var(--shiki-light); }
+ [data-theme='dark'] .astro-code { background-color: var(--shiki-dark-bg); }
+ [data-theme='dark'] .astro-code span { color: var(--shiki-dark); }
+ .next-prev { display: flex; justify-content: space-between; gap: 16px; margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 0.88rem; }
++
++.area-grid { display: grid; gap: 20px; }
++@media (min-width: 768px) { .area-grid { grid-template-columns: 1fr 1fr; } }
++.area { border-top: 2px solid var(--accent); padding-top: 14px; }
++.area h3 { font-size: 1.05rem; margin-bottom: 6px; }
++.area p { margin: 0 0 12px; font-size: 0.88rem; }
++.area-items { list-style: none; margin: 0 0 12px; padding: 0; font-size: 0.86rem; }
++.area-items li { margin-bottom: 8px; }
++.area-note { display: block; color: var(--muted); font-size: 0.76rem; }
++.area-link { font-size: 0.85rem; }
++.badge-topic { background: var(--bg-soft); color: var(--muted); border: 1px solid var(--border); }
++
++.work-block { margin-top: 28px; }
++.work-block h2 {
++  font-size: 0.95rem;
++  letter-spacing: 0.06em;
++  text-transform: uppercase;
++  color: var(--muted);
++  font-family: var(--font-sans);
++  margin-bottom: 8px;
++}
++.work-block p { margin: 0; color: var(--fg); }
+diff --git a/tests/format.test.ts b/tests/format.test.ts
+index c7f0374..5e457fb 100644
+--- a/tests/format.test.ts
++++ b/tests/format.test.ts
+@@ -69,5 +69,33 @@ test('toBibtex produces an inproceedings entry with booktitle', () => {
+     type: 'conference',
+   });
+   assert.match(bib, /@inproceedings\{/);
+   assert.match(bib, /booktitle = \{CVIDL 2024\}/);
+ });
++
++test('toBibtex includes volume and pages when provided', () => {
++  const bib = toBibtex({
++    title: 'A paper',
++    authors: ['Zicong Yang'],
++    venue: 'Measurement Science and Technology',
++    year: 2025,
++    doi: '10.1088/example',
++    type: 'journal',
++    volume: '36',
++    pages: '116107',
++  });
++  assert.match(bib, /volume = \{36\}/);
++  assert.match(bib, /pages = \{116107\}/);
++});
++
++test('toBibtex omits volume and pages when absent', () => {
++  const bib = toBibtex({
++    title: 'A paper',
++    authors: ['Zicong Yang'],
++    venue: 'Scientific Reports',
++    year: 2024,
++    doi: '10.1038/example',
++    type: 'journal',
++  });
++  assert.equal(bib.includes('volume'), false);
++  assert.equal(bib.includes('pages'), false);
++});
+diff --git a/tests/relations.test.ts b/tests/relations.test.ts
+new file mode 100644
+index 0000000..eb6a5dc
+--- /dev/null
++++ b/tests/relations.test.ts
+@@ -0,0 +1,37 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { validateRelations } from '../src/lib/relations.ts';
++
++const pub = (over: Record<string, unknown> = {}) =>
++  ({
++    id: 'paper',
++    data: { doi: '10.1/x', relatedWork: [], ...over },
++  }) as any;
++
++const work = (over: Record<string, unknown> = {}) =>
++  ({
++    id: 'project',
++    data: { relatedPublications: [], ...over },
++  }) as any;
++
++test('validateRelations accepts resolvable references', () => {
++  assert.deepEqual(
++    validateRelations(
++      [pub({ relatedWork: ['project'] })],
++      [work({ relatedPublications: ['10.1/x'] })]
++    ),
++    []
++  );
++});
++
++test('validateRelations reports missing work slugs', () => {
++  const errors = validateRelations([pub({ relatedWork: ['missing'] })], [work()]);
++  assert.equal(errors.length, 1);
++  assert.match(errors[0]!, /relatedWork "missing" not found/);
++});
++
++test('validateRelations reports missing dois', () => {
++  const errors = validateRelations([pub()], [work({ relatedPublications: ['10.9/x'] })]);
++  assert.equal(errors.length, 1);
++  assert.match(errors[0]!, /relatedPublications "10\.9\/x" not found/);
++});
+diff --git a/tests/schema.test.ts b/tests/schema.test.ts
+index 18303b0..3471e56 100644
+--- a/tests/schema.test.ts
++++ b/tests/schema.test.ts
+@@ -8,10 +8,11 @@ const paper = {
+   venue: 'Scientific Reports',
+   year: 2024,
+   type: 'journal' as const,
+   indexing: 'Q1' as const,
+   role: 'first' as const,
++  topics: ['medical-signal'],
+   doi: '10.1038/s41598-024-71700-z',
+   date: '2024-09-01',
+ };
+ 
+ test('publication accepts a valid entry', () => {
+@@ -82,5 +83,36 @@ test('publication rejects an invalid date format', () => {
+ test('publication ignores unknown frontmatter fields', () => {
+   const result = publicationSchema.safeParse({ ...paper, unknownField: 'ignored' });
+   assert.equal(result.success, true);
+   assert.equal('unknownField' in (result.success ? result.data : {}), false);
+ });
++
++test('publication rejects missing topics', () => {
++  const { topics, ...rest } = paper;
++  assert.equal(publicationSchema.safeParse(rest).success, false);
++});
++
++test('publication rejects an empty topics list', () => {
++  assert.equal(publicationSchema.safeParse({ ...paper, topics: [] }).success, false);
++});
++
++test('publication rejects an authorNote longer than 40 characters', () => {
++  assert.equal(
++    publicationSchema.safeParse({ ...paper, authorNote: 'x'.repeat(41) }).success,
++    false
++  );
++});
++
++test('work rejects a problem statement longer than 600 characters', () => {
++  const job = {
++    title: 'Project',
++    org: 'Lab',
++    kind: 'project' as const,
++    role: 'Lead',
++    start: '2024-01',
++    end: '2024-06',
++    summary: 'Short summary.',
++    highlights: ['A highlight'],
++    problem: 'x'.repeat(601),
++  };
++  assert.equal(workSchema.safeParse(job).success, false);
++});
+diff --git a/tests/topics.test.ts b/tests/topics.test.ts
+new file mode 100644
+index 0000000..71f93e4
+--- /dev/null
++++ b/tests/topics.test.ts
+@@ -0,0 +1,17 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { topicName, topicSlugs, topics } from '../src/lib/topics.ts';
++
++test('topic slugs are unique and non-empty', () => {
++  assert.equal(new Set(topicSlugs).size, topicSlugs.length);
++  assert.ok(topicSlugs.every((slug) => slug.length > 0));
++});
++
++test('every topic has a name and blurb', () => {
++  assert.ok(topics.every((topic) => topic.name.length > 0 && topic.blurb.length > 0));
++});
++
++test('topicName resolves known slugs and falls back to the slug', () => {
++  assert.equal(topicName('medical-signal'), 'Medical Signal Processing');
++  assert.equal(topicName('unknown' as never), 'unknown');
++});

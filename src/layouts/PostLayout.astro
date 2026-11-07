@@ -1,6 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import Toc from '../components/Toc.astro';
+import { withBase } from '../lib/url';
 
 interface Props {
   title: string;
@@ -35,7 +36,9 @@ const hasToc = headings.some(
           <time datetime={date}>{date}</time>
           <span class="lang-badge">{lang === 'zh' ? '中文' : 'EN'}</span>
           <span>{readingLabel}</span>
-          {tags.map((tag) => <span class="lang-badge">{tag}</span>)}
+          {tags.map((tag) => (
+            <a class="lang-badge" href={withBase(`blog/tag/${encodeURIComponent(tag)}`)}>{tag}</a>
+          ))}
         </div>
       </header>
       {hasToc && (
