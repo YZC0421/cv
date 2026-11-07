@@ -43,3 +43,16 @@
 
 - zod 4 与 Astro 5 content collections 的类型不兼容（`ZodType` 结构差异），已降至 v3；后续若升级 Astro 需同步评估。
 - 空内容目录会产生 glob-loader 警告，任务 3 起写入真实内容后消失。
+
+## 审查补充（测试覆盖）
+
+审查指出规格明列的失败条件未全部断言，已补 6 个测试：
+
+- `publication` 空 `authors` 拒绝。
+- `year: 2101` 拒绝。
+- `date: 2024/09/01` 拒绝。
+- 未知 frontmatter 字段被忽略且不进入 `data`。
+- `selectHomepage` 对"既 selected 又是一作"的条目去重，结果仍为 3 条。
+- `toBibtex` 的会议分支输出 `@inproceedings` 与 `booktitle`。
+
+验证：`npm test` 17/17 通过。

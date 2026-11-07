@@ -66,3 +66,21 @@ test('blog rejects summary longer than 160 chars', () => {
   };
   assert.equal(blogSchema.safeParse(post).success, false);
 });
+
+test('publication rejects empty authors', () => {
+  assert.equal(publicationSchema.safeParse({ ...paper, authors: [] }).success, false);
+});
+
+test('publication rejects a year above 2100', () => {
+  assert.equal(publicationSchema.safeParse({ ...paper, year: 2101 }).success, false);
+});
+
+test('publication rejects an invalid date format', () => {
+  assert.equal(publicationSchema.safeParse({ ...paper, date: '2024/09/01' }).success, false);
+});
+
+test('publication ignores unknown frontmatter fields', () => {
+  const result = publicationSchema.safeParse({ ...paper, unknownField: 'ignored' });
+  assert.equal(result.success, true);
+  assert.equal('unknownField' in (result.success ? result.data : {}), false);
+});

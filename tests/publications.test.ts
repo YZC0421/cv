@@ -40,3 +40,12 @@ test('selectHomepage returns all entries when fewer than three', () => {
   const one = make({ id: 'one' });
   assert.equal(selectHomepage([one]).length, 1);
 });
+
+test('selectHomepage deduplicates an entry that is both selected and first-authored', () => {
+  const both = make({ id: 'both', selected: true, role: 'first', date: '2025-01-01' });
+  const other = make({ id: 'other', date: '2024-01-01' });
+  const third = make({ id: 'third', date: '2023-01-01' });
+  const result = selectHomepage([both, other, third]);
+  assert.deepEqual(result.map((p: any) => p.id), ['both', 'other', 'third']);
+  assert.equal(new Set(result.map((p: any) => p.id)).size, 3);
+});
