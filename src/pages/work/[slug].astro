@@ -15,9 +15,9 @@ const { item } = Astro.props;
 const { Content } = await render(item);
 const d = item.data;
 const hasSections = Boolean(d.problem || d.approach || d.results);
-const publications = await getCollection('publications');
-const doi = (d.relatedPublications ?? [])[0];
-const related = doi ? publications.find((pub) => pub.data.doi === doi) : undefined;
+const dois = d.relatedPublications ?? [];
+const publications = dois.length > 0 ? await getCollection('publications') : [];
+const relatedPublications = publications.filter((pub) => dois.includes(pub.data.doi));
 ---
 <BaseLayout title={`${d.title} · Zicong Yang`} description={d.summary}>
   <article class="container measure work-detail" style="padding-top:40px">
@@ -39,7 +39,7 @@ const related = doi ? publications.find((pub) => pub.data.doi === doi) : undefin
 
     <section class="work-block">
       <h2>Role</h2>
-      <p>{d.role} at {d.org}.</p>
+      <p>{d.role === d.title ? d.summary : `${d.role} at ${d.org}.`}</p>
     </section>
 
     {d.stack.length > 0 && (
@@ -58,15 +58,17 @@ const related = doi ? publications.find((pub) => pub.data.doi === doi) : undefin
       </section>
     )}
 
-    {related && (
+    {relatedPublications.length > 0 && (
       <section class="work-block">
-        <h2>Related publication</h2>
-        <p>
-          <a href={`https://doi.org/${related.data.doi}`} target="_blank" rel="noopener">
-            {related.data.title}
-          </a>
-          <span class="muted"> · {related.data.venue} · {related.data.year}</span>
-        </p>
+        <h2>Related publications</h2>
+        {relatedPublications.map((pub) => (
+          <p>
+            <a href={`https://doi.org/${pub.data.doi}`} target="_blank" rel="noopener">
+              {pub.data.title}
+            </a>
+            <span class="muted"> · {pub.data.venue} · {pub.data.year}</span>
+          </p>
+        ))}
       </section>
     )}
   </article>

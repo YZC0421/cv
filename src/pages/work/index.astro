@@ -37,6 +37,7 @@ const projects = sortProjects(all.filter((item) => item.data.kind === 'project')
         ))}
       </div>
       <div class="work-grid">{projects.map((item) => <WorkCard item={item} />)}</div>
+      <p id="work-status" class="muted" role="status" aria-live="polite"></p>
     </section>
   </div>
 
@@ -44,14 +45,24 @@ const projects = sortProjects(all.filter((item) => item.data.kind === 'project')
     (() => {
       const buttons = document.querySelectorAll('.filters button');
       const cards = document.querySelectorAll('.work-card');
+      const status = document.getElementById('work-status');
+
       buttons.forEach((btn) => {
         btn.addEventListener('click', () => {
           const value = btn.dataset.value;
           buttons.forEach((other) => other.setAttribute('aria-pressed', String(other === btn)));
+          let visible = 0;
           cards.forEach((card) => {
             const cardTopics = (card.dataset.topics ?? '').split(' ').filter(Boolean);
             card.hidden = value !== 'all' && !cardTopics.includes(value);
+            if (!card.hidden) visible += 1;
           });
+          if (status) {
+            status.textContent =
+              visible === 0
+                ? 'No projects in this topic yet.'
+                : `Showing ${visible} of ${cards.length} projects.`;
+          }
         });
       });
     })();

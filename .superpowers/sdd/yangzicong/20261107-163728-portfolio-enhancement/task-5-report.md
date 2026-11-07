@@ -30,3 +30,11 @@
 
 - `Role` 段目前只有一句 `role at org`，信息量偏低；若需要更具体的职责描述，可从 highlights 中拆出，但会与三段内容重复。
 - 项目卡片只有心源性猝死带主题徽标；另外三个应用类项目无主题，符合规格。
+
+## 审查修复
+
+- `relatedPublications` 改为遍历全部 DOI，标题改为 `Related publications`，无关联时短路查询。
+- `/work` 筛选增加 `role="status"` 反馈：显示可见数量或 `No projects in this topic yet.`。
+- Role 段在职位名与标题相同时改为输出 `summary`，避免同一信息重复三次。
+
+验证：`npm run check` 0 errors；`npm run build` 17 页；详情页含 `Related publications`；`/work` 含 `id="work-status"`。
