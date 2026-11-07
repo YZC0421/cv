@@ -2,13 +2,10 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TagFilter from '../../components/TagFilter.astro';
 import { getCollection } from 'astro:content';
-import { localToday } from '../../lib/date';
+import { visiblePosts } from '../../lib/posts';
 import { withBase } from '../../lib/url';
 
-const today = localToday();
-const posts = (await getCollection('blog'))
-  .filter((post) => !post.data.draft && post.data.date <= today)
-  .sort((a, b) => b.data.date.localeCompare(a.data.date));
+const posts = visiblePosts(await getCollection('blog'));
 const tags = [...new Set(posts.flatMap((post) => post.data.tags))].sort();
 ---
 <BaseLayout title="Writing · Zicong Yang" description="Notes on software engineering, computer vision, and research.">

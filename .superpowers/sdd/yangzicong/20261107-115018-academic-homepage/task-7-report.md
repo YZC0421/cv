@@ -42,3 +42,18 @@
 - **阅读时长**：`src/lib/format.ts` 新增 `readingMinutes()`，按中文字符 400/分钟、英文词 200/分钟估算；`PostLayout` 显示 `N min read`。新增 2 个单元测试。
 
 验证：`npm test` 20/20；`npm run build` 成功；产物显示 `2 min read` 与脚注标记；`npm run check` 0 errors。
+
+## 审查修复
+
+审查判定"需要修复"，两项关键与若干重要项已处理：
+
+- **桌面目录吸顶**：`.toc-aside` 在 ≥1024px 时 `position: sticky; top: 80px; align-self: start`，移动端隐藏；移动端目录改为 `<details>` 折叠。
+- **标签筛选失效**：新增全局 `[hidden] { display: none !important; }`，覆盖 `.post-list li { display: flex }` 对 `hidden` 属性的压制。
+- **深色代码高亮**：补充 `.astro-code` 与 `[data-theme='dark']` 下的 `--shiki-light/dark` 变量规则。
+- **过滤规则去重**：新增 `src/lib/posts.ts` 的 `visiblePosts()`，首页、列表、详情、RSS 四处统一调用；新增 2 个单元测试。
+- **空上下篇**：`(prev || next)` 条件渲染，单篇文章时不再出现空白分隔线。
+- **中文阅读时长**：`lang: zh` 显示"约 N 分钟"。
+- **示例文章修正**：BASE_URL 段落改为实际构建观察；打印样式改为"下一步"口吻，避免把未实现功能写成既成事实。
+- **RSS**：补 `<language>zh-CN</language>`。
+
+验证：`npm test` 22/22；`npm run build` 成功；产物含 `toc-aside`、`sticky`、`shiki-dark`；单篇文章页无空 `next-prev`；`npm run check` 0 errors。

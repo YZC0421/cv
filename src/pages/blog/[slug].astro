@@ -2,17 +2,15 @@
 import type { CollectionEntry } from 'astro:content';
 import PostLayout from '../../layouts/PostLayout.astro';
 import { getCollection, render } from 'astro:content';
-import { localToday } from '../../lib/date';
 import { readingMinutes } from '../../lib/format';
+import { visiblePosts } from '../../lib/posts';
 import { withBase } from '../../lib/url';
 
 export async function getStaticPaths() {
-  const today = localToday();
-  const posts = await getCollection('blog', ({ data }) => !data.draft && data.date <= today);
-  const sorted = posts.sort((a, b) => b.data.date.localeCompare(a.data.date));
-  return sorted.map((post, index) => ({
+  const posts = visiblePosts(await getCollection('blog'));
+  return posts.map((post, index) => ({
     params: { slug: post.id },
-    props: { post, prev: sorted[index + 1], next: sorted[index - 1] },
+    props: { post, prev: posts[index + 1], next: posts[index - 1] },
   }));
 }
 
@@ -35,8 +33,10 @@ const readingTime = readingMinutes(post.body ?? '');
   readingTime={readingTime}
 >
   <Content />
-  <div class="next-prev" slot="footer">
-    <span>{prev ? <a href={withBase(`blog/${prev.id}`)}>← {prev.data.title}</a> : null}</span>
-    <span>{next ? <a href={withBase(`blog/${next.id}`)}>{next.data.title} →</a> : null}</span>
-  </div>
+  {(prev || next) && (
+    <div class="next-prev" slot="footer">
+      <span>{prev ? <a href={withBase(`blog/${prev.id}`)}>← {prev.data.title}</a> : null}</span>
+      <span>{next ? <a href={withBase(`blog/${next.id}`)}>{next.data.title} →</a> : null}</span>
+    </div>
+  )}
 </PostLayout>

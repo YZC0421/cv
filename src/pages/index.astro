@@ -6,20 +6,15 @@ import WorkCard from '../components/WorkCard.astro';
 import PostList from '../components/PostList.astro';
 import { getCollection } from 'astro:content';
 import { selectHomepage } from '../lib/publications';
-import { localToday } from '../lib/date';
+import { visiblePosts } from '../lib/posts';
 import { withBase } from '../lib/url';
-
-const today = localToday();
 
 const pubs = selectHomepage(await getCollection('publications'));
 const work = (await getCollection('work'))
   .filter((item) => item.data.kind === 'project')
   .sort((a, b) => a.data.order - b.data.order)
   .slice(0, 3);
-const posts = (await getCollection('blog'))
-  .filter((post) => !post.data.draft && post.data.date <= today)
-  .sort((a, b) => b.data.date.localeCompare(a.data.date))
-  .slice(0, 2);
+const posts = visiblePosts(await getCollection('blog')).slice(0, 2);
 ---
 <BaseLayout
   title="Zicong Yang · Medical Signal Processing & Computer Vision"

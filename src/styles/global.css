@@ -192,5 +192,15 @@ h3 { font-size: 1.125rem; }
 .post-grid { display: grid; gap: 32px; }
 @media (min-width: 1024px) { .post-grid { grid-template-columns: 680px 200px; justify-content: center; } }
 .toc-mobile { margin: 20px 0; }
+.toc-mobile summary { cursor: pointer; font-size: 0.85rem; color: var(--muted); margin-bottom: 10px; }
 @media (min-width: 1024px) { .toc-mobile { display: none; } }
+.toc-aside { display: none; }
+@media (min-width: 1024px) {
+  .toc-aside { display: block; position: sticky; top: 80px; align-self: start; }
+}
+[hidden] { display: none !important; }
+.astro-code { background-color: var(--shiki-light-bg); border-radius: 8px; }
+.astro-code span { color: var(--shiki-light); }
+[data-theme='dark'] .astro-code { background-color: var(--shiki-dark-bg); }
+[data-theme='dark'] .astro-code span { color: var(--shiki-dark); }
 .next-prev { display: flex; justify-content: space-between; gap: 16px; margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 0.88rem; }
