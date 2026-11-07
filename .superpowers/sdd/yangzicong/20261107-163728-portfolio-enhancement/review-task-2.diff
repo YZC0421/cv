@@ -1,0 +1,117 @@
+## Commits
+683aac9 content: 补充项目问题、方法与结果
+
+## Stat
+ .../20261107-163728-portfolio-enhancement/gaps.md  | 20 ++++++
+ .../progress.md                                    |  1 +
+ .../task-2-brief.md                                | 77 ++++++++++++++++++++++
+ .../task-2-report.md                               | 25 +++++++
+ src/content/work/coca-cola-consumer-analysis.md    |  3 +
+ src/content/work/rural-revitalization.md           |  3 +
+ .../work/sudden-cardiac-death-prediction.md        |  3 +
+ src/content/work/wordle-analysis.md                |  3 +
+ 8 files changed, 135 insertions(+)
+
+## Diff
+diff --git a/src/content/work/coca-cola-consumer-analysis.md b/src/content/work/coca-cola-consumer-analysis.md
+index 811d12c..ce535ab 100644
+--- a/src/content/work/coca-cola-consumer-analysis.md
++++ b/src/content/work/coca-cola-consumer-analysis.md
+@@ -1,17 +1,20 @@
+ ---
+ title: "Consumer Demand Analysis (Coca-Cola)"
+ org: "CP Group Cup Market Research Competition"
+ kind: project
+ role: "Lead"
+ start: "2023-01"
+ end: "2025-05"
+ summary: "Consumer demand analysis over 120,756 JD.com reviews with BERT sentiment analysis."
++problem: "Brand teams lacked a quantitative view of consumer sentiment across a very large review corpus."
++approach: "Crawled 120,756 JD.com reviews and applied BERT sentiment analysis to build word clouds and user profiles."
++results: "National Third Prize in the CP Group Cup market research competition."
+ stack: ["BERT", "Python", "Crawlers"]
+ highlights:
+   - "Collected 120,756 Coca-Cola product reviews from JD.com with automated crawlers."
+   - "Applied BERT sentiment analysis to generate word clouds and user profiles."
+   - "Won a National Third Prize in the CP Group Cup market research competition."
+ order: 3
+ ---
+ 
+ Led the data-mining work for a brand research project on Coca-Cola consumer demand.
+diff --git a/src/content/work/rural-revitalization.md b/src/content/work/rural-revitalization.md
+index 4d13ccd..50624c1 100644
+--- a/src/content/work/rural-revitalization.md
++++ b/src/content/work/rural-revitalization.md
+@@ -1,17 +1,20 @@
+ ---
+ title: "“Agriculture + Tourism” Rural Revitalization"
+ org: "National Excellent Research Report Award"
+ kind: project
+ role: "Second Lead"
+ start: "2023-07"
+ end: "2025-11"
+ summary: "Survey-based research on agriculture-plus-tourism rural revitalization pathways."
++problem: "Rural revitalization planning lacked data on tea yield, fertilization, and machinery power for the surveyed region."
++approach: "Collected 379 questionnaires (97% valid), integrated government data, and used machine learning to predict yield, fertilization, and total machinery power."
++results: "Report recognized as a National Excellent Research Report; the accompanying paper was published as a second-author CNKI-indexed article."
+ stack: ["Machine Learning", "Statistics"]
+ highlights:
+   - "Distributed 379 questionnaires with a 97% valid response rate and integrated government data."
+   - "Predicted tea yield, fertilization volume, and total machinery power with machine learning."
+   - "Report recognized as a National Excellent Research Report; the paper was published as second author."
+ order: 4
+ ---
+ 
+ Handled data collection and mining for a rural revitalization research project.
+diff --git a/src/content/work/sudden-cardiac-death-prediction.md b/src/content/work/sudden-cardiac-death-prediction.md
+index ad66978..bde4c54 100644
+--- a/src/content/work/sudden-cardiac-death-prediction.md
++++ b/src/content/work/sudden-cardiac-death-prediction.md
+@@ -1,19 +1,22 @@
+ ---
+ title: "Sudden Cardiac Death Prediction Model"
+ org: "Guangdong Provincial Student Innovation Program"
+ kind: project
+ role: "Project Lead"
+ start: "2023-03"
+ end: "2024-06"
+ summary: "End-to-end ECG research project that produced two first-author papers."
+ topics: ["medical-signal"]
++problem: "Multi-lead ECG arrhythmia detection suffers from noisy signals and weak cross-lead temporal modelling, which limits classification accuracy on public datasets."
++approach: "Converted multi-lead ECG to 2D grayscale images, fused grayscale features, and designed STFAC-ECGNet with coordinated channel-spatial attention and temporal fusion."
++results: "Improved classification accuracy on PTB-XL and CPSC2018, producing two first-author papers (JCR Q1 and Q4)."
+ stack: ["PyTorch", "CNN/RNN", "Attention", "PTB-XL"]
+ highlights:
+   - "Led proposal, design, implementation, publication, and final acceptance."
+   - "Designed STFAC-ECGNet with coordinated channel-spatial attention and temporal fusion."
+   - "Published two first-author papers (JCR Q1 and Q4)."
+ links:
+   - label: "Scientific Reports (Q1)"
+     url: "https://www.nature.com/articles/s41598-024-71700-z"
+   - label: "CISSE 2024 (Q4)"
+     url: "https://doi.org/10.1007/978-3-031-57037-7_7"
+diff --git a/src/content/work/wordle-analysis.md b/src/content/work/wordle-analysis.md
+index 153484e..2c3342c 100644
+--- a/src/content/work/wordle-analysis.md
++++ b/src/content/work/wordle-analysis.md
+@@ -1,17 +1,20 @@
+ ---
+ title: "NYT Wordle Game Analysis"
+ org: "MCM"
+ kind: project
+ role: "Lead"
+ start: "2023-02"
+ end: "2023-05"
+ summary: "Difficulty modeling and player-trend prediction for the NYT Wordle game."
++problem: "Wordle difficulty is driven by word structure, but the game had no quantitative difficulty model for scheduling or player-behaviour analysis."
++approach: "Used Python corpora and machine-learning statistics on word frequency, syllables, and repeated letters, then trained a BiGRU model to predict player trends."
++results: "Won the MCM Meritorious Winner award (top 7%)."
+ stack: ["Python", "BiGRU", "Machine Learning"]
+ highlights:
+   - "Analyzed word frequency, syllables, and letter repetition to build difficulty metrics."
+   - "Implemented a BiGRU model to predict player behavior trends."
+   - "Won the MCM Meritorious Winner award (top 7%)."
+ order: 2
+ ---
+ 
+ Led the analysis of Wordle difficulty factors and future player trends for the MCM competition.

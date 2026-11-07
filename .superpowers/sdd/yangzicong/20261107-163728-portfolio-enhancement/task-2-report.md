@@ -2,7 +2,7 @@
 
 ## 实现了什么
 
-- 4 个项目补 `problem` / `approach` / `results`，内容只从现有 `highlights` 与 CV 事实提炼，未新增无法验证的结论：
+- 4 个项目补 `problem` / `approach` / `results`，内容以现有 `highlights` 与 CV 事实为主；`problem` 段落是任务规格推导的背景框定，不含数字与用途主张：
   - `sudden-cardiac-death-prediction`：ECG 噪声与跨导联建模 → 灰度图与 STFAC-ECGNet → PTB-XL/CPSC2018 精度提升与两篇一作。
   - `wordle-analysis`：缺少量化难度模型 → 语料统计与 BiGRU → MCM M 奖（前 7%）。
   - `coca-cola-consumer-analysis`：缺少大规模评论情感视图 → 120,756 条评论与 BERT → 全国三等奖。

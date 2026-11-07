@@ -13,6 +13,12 @@
 
 - Scientific Reports 的 article number（Crossref 未返回页码，目前只填了卷号 14）。
 - CVIDL 两篇的会议地点与出版者信息（BibTeX 可选字段）。
+- 乡村振兴项目的二作 CNKI 论文：题名、DOI 或收录证明；站内暂无对应条目，读者无法互相验证。
+
+## 关联
+
+- Wordle、可口可乐调研、乡村振兴三个项目目前没有关联论文（`relatedPublications` 为空）；若后续有对应发表，提供 DOI 后可补互链。
+- 心源性猝死项目已关联 Scientific Reports，CISSE 论文暂未关联，可按需补。
 
 ## 站点
 
