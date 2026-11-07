@@ -1,0 +1,254 @@
+## Commits
+3f7e9aa feat: 增加中英 About 页与打印样式
+
+## Stat
+ .../20261107-115018-academic-homepage/progress.md  |   1 +
+ .../review-task-7-fix2.diff                        | 166 +++++++++++++++++
+ .../task-8-brief.md                                | 204 +++++++++++++++++++++
+ .../task-8-report.md                               |  35 ++++
+ public/CV.html                                     |  12 ++
+ src/content/blog/from-single-page-to-astro.md      |   2 +-
+ src/content/pages/about.en.md                      |  41 +++++
+ src/content/pages/about.zh.md                      |  37 ++++
+ src/pages/about.astro                              |  21 +++
+ src/pages/about/zh.astro                           |  25 +++
+ src/styles/global.css                              |  22 +++
+ 11 files changed, 565 insertions(+), 1 deletion(-)
+
+## Diff
+diff --git a/public/CV.html b/public/CV.html
+new file mode 100644
+index 0000000..c876a04
+--- /dev/null
++++ b/public/CV.html
+@@ -0,0 +1,12 @@
++<!doctype html>
++<html lang="en">
++  <head>
++    <meta charset="utf-8" />
++    <meta http-equiv="refresh" content="0; url=./about" />
++    <link rel="canonical" href="./about" />
++    <title>CV · Zicong Yang</title>
++  </head>
++  <body>
++    <p>This page has moved to <a href="./about">/about</a>.</p>
++  </body>
++</html>
+diff --git a/src/content/blog/from-single-page-to-astro.md b/src/content/blog/from-single-page-to-astro.md
+index 7076248..729ff49 100644
+--- a/src/content/blog/from-single-page-to-astro.md
++++ b/src/content/blog/from-single-page-to-astro.md
+@@ -27,21 +27,21 @@ draft: false
+ ```bash
+ npm test
+ npm run check
+ npm run build
+ ```
+ 
+ ## 得到什么
+ 
+ - 新增一篇论文只需新增一个文件。
+ - 构建产物零 CDN 依赖，断网也能正常显示。
+-- 中英内容各自拥有稳定 URL，canonical 指向正确（`hreflang` 待补）。
++- 中英内容各自拥有稳定 URL，canonical 与 `hreflang` 均正确。
+ - 下一步会给 About 页补打印样式，届时可直接输出 PDF。
+ 
+ ## 没做什么
+ 
+ 没有加评论、站内搜索和访问统计。论文只有六条、文章不足十篇时，这些能力带来的维护
+ 成本高于收益。
+ 
+ ## 一个容易踩的坑
+ 
+ 第一版页面构建出来后，导航链接全部变成了 `/cvpublications` 这样的坏路径。原因是用
+diff --git a/src/content/pages/about.en.md b/src/content/pages/about.en.md
+new file mode 100644
+index 0000000..4c8c31c
+--- /dev/null
++++ b/src/content/pages/about.en.md
+@@ -0,0 +1,41 @@
++---
++title: "About"
++updated: "2026-11-07"
++---
++
++## Education
++
++**B.E. in Software Engineering**, Zhuhai College of Science and Technology (formerly Jilin
++University Zhuhai College), 2021.09 – 2025.07. GPA 3.64/4.0, top 1% of the major.
++
++## Research
++
++My work focuses on medical signal processing and industrial visual inspection. I designed
++STFAC-ECGNet, a multiscale spatio-temporal fusion network for multi-lead ECG arrhythmia
++detection, published in *Scientific Reports* (JCR Q1, first author). I also work on
++diffusion-model-based defect detection and lightweight detection networks for cable surface
++inspection.
++
++## Skills
++
++Python, C++, Java, PyTorch, OpenCV, Ultralytics YOLO, ONNX/TensorRT, PyQt5, SQLAlchemy,
++RAG, Git, Linux.
++
++## Awards
++
++National Scholarship; Top 10 Student; First-Class Scholarship (three consecutive years);
++MCM Meritorious Winner (top 7%); National Third Prize, CP Group Cup Market Analysis
++Competition; National Excellent Research Report.
++
++## Intellectual Property
++
++Two patents (agricultural product component detection device; transport oxygenated crab box
++structure) and five software copyrights in cross-border e-commerce and agricultural trade
++systems.
++
++## Contact
++
++[402641915@qq.com](mailto:402641915@qq.com) ·
++[Google Scholar](https://scholar.google.com/citations?user=0Ynn-awAAAAJ) ·
++[ORCID](https://orcid.org/0009-0001-0948-3606) ·
++[GitHub](https://github.com/YZC0421)
+diff --git a/src/content/pages/about.zh.md b/src/content/pages/about.zh.md
+new file mode 100644
+index 0000000..480175f
+--- /dev/null
++++ b/src/content/pages/about.zh.md
+@@ -0,0 +1,37 @@
++---
++title: "关于"
++updated: "2026-11-07"
++---
++
++## 教育经历
++
++**软件工程 本科**，珠海科技学院（原吉林大学珠海学院），2021.09 – 2025.07。
++GPA 3.64/4.0，专业前 1%。
++
++## 研究方向
++
++主要关注医学信号处理与工业视觉检测。设计 STFAC-ECGNet 多尺度时空融合网络，用于多导联
++心电心律失常检测，成果发表于 *Scientific Reports*（JCR Q1，第一作者）。另参与基于扩散
++模型的缺陷检测与线缆表面轻量化检测网络研究。
++
++## 技能
++
++Python、C++、Java、PyTorch、OpenCV、Ultralytics YOLO、ONNX/TensorRT、PyQt5、
++SQLAlchemy、RAG、Git、Linux。
++
++## 荣誉
++
++国家奖学金、十佳大学生、连续三年一等奖学金、美国大学生数学建模竞赛 M 奖（国际前 7%）、
++正大杯市场调研大赛全国三等奖、国家级优秀调研报告。
++
++## 知识产权
++
++发明专利两项（农业产品成分检测装置、运输充氧蟹盒结构），软件著作权五项，覆盖跨境电商
++与农产品国际贸易系统。
++
++## 联系方式
++
++[402641915@qq.com](mailto:402641915@qq.com) ·
++[Google Scholar](https://scholar.google.com/citations?user=0Ynn-awAAAAJ) ·
++[ORCID](https://orcid.org/0009-0001-0948-3606) ·
++[GitHub](https://github.com/YZC0421)
+diff --git a/src/pages/about.astro b/src/pages/about.astro
+new file mode 100644
+index 0000000..01b3ac0
+--- /dev/null
++++ b/src/pages/about.astro
+@@ -0,0 +1,21 @@
++---
++import BaseLayout from '../layouts/BaseLayout.astro';
++import { getEntry, render } from 'astro:content';
++import { withBase } from '../lib/url';
++
++const entry = await getEntry('pages', 'abouten');
++if (!entry) throw new Error('about.en.md is missing');
++const { Content } = await render(entry);
++---
++<BaseLayout title="About · Zicong Yang" description="Education, research, skills, and contact.">
++  <Fragment slot="head">
++    <link rel="alternate" hreflang="zh-CN" href={new URL(withBase('about/zh'), Astro.site)} />
++  </Fragment>
++  <div class="container measure" style="padding-top:40px">
++    <div class="about-actions">
++      <button type="button" onclick="window.print()">Download CV (PDF)</button>
++      <a href={withBase('about/zh')} hreflang="zh-CN">中文</a>
++    </div>
++    <div class="prose"><Content /></div>
++  </div>
++</BaseLayout>
+diff --git a/src/pages/about/zh.astro b/src/pages/about/zh.astro
+new file mode 100644
+index 0000000..9db4642
+--- /dev/null
++++ b/src/pages/about/zh.astro
+@@ -0,0 +1,25 @@
++---
++import BaseLayout from '../../layouts/BaseLayout.astro';
++import { getEntry, render } from 'astro:content';
++import { withBase } from '../../lib/url';
++
++const entry = await getEntry('pages', 'aboutzh');
++if (!entry) throw new Error('about.zh.md is missing');
++const { Content } = await render(entry);
++---
++<BaseLayout
++  title="关于 · 杨梓聪"
++  description="教育经历、研究方向、技能与联系方式。"
++  lang="zh-CN"
++>
++  <Fragment slot="head">
++    <link rel="alternate" hreflang="en" href={new URL(withBase('about'), Astro.site)} />
++  </Fragment>
++  <div class="container measure" style="padding-top:40px">
++    <div class="about-actions">
++      <button type="button" onclick="window.print()">下载 CV (PDF)</button>
++      <a href={withBase('about')} hreflang="en">English</a>
++    </div>
++    <div class="prose"><Content /></div>
++  </div>
++</BaseLayout>
+diff --git a/src/styles/global.css b/src/styles/global.css
+index 4080931..663278e 100644
+--- a/src/styles/global.css
++++ b/src/styles/global.css
+@@ -211,16 +211,38 @@ h3 { font-size: 1.125rem; }
+   width: 1px;
+   height: 1px;
+   padding: 0;
+   margin: -1px;
+   overflow: hidden;
+   clip: rect(0, 0, 0, 0);
+   white-space: nowrap;
+   border: 0;
+ }
+ [data-footnotes] { margin-top: 40px; font-size: 0.9rem; color: var(--muted); }
++
++.about-actions { display: flex; flex-wrap: wrap; gap: 16px; margin: 20px 0 32px; font-size: 0.88rem; }
++.about-actions button {
++  font: inherit;
++  background: none;
++  border: 1px solid var(--border);
++  border-radius: 6px;
++  padding: 4px 10px;
++  color: var(--accent);
++  cursor: pointer;
++}
++
++@page { size: A4; margin: 16mm; }
++
++@media print {
++  .site-header, .site-footer, .skip, .about-actions { display: none !important; }
++  body { background: #fff; color: #000; font-size: 11pt; }
++  .container { max-width: none; padding: 0; }
++  a { color: #000; text-decoration: none; }
++  h2 { break-after: avoid; }
++  li, .print-block { break-inside: avoid; }
++}
+ .post-list li[hidden] { display: none; }
+ .astro-code { background-color: var(--shiki-light-bg); border-radius: 8px; }
+ .astro-code span { color: var(--shiki-light); }
+ [data-theme='dark'] .astro-code { background-color: var(--shiki-dark-bg); }
+ [data-theme='dark'] .astro-code span { color: var(--shiki-dark); }
+ .next-prev { display: flex; justify-content: space-between; gap: 16px; margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 0.88rem; }

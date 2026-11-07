@@ -33,3 +33,16 @@
 ## 疑虑
 
 - 打印样式无法在本环境自动验证分页效果，最终验收任务会记录人工检查点。
+
+## 审查修复
+
+- **打印断页**：`break-inside: avoid` 从 `li/.print-block` 改为 `.prose p, li, .print-block`，About 页的段落现在真正受控。
+- **深色打印**：`@media print` 内重置 `--bg/--fg/--muted/--border/--accent`，深色主题下打印不再是近白字。
+- **H1**：两页渲染 frontmatter `title` 为 `<h1>`，并显示 `updated`。
+- **语言入口进导航**：`BaseLayout` 与 `Header` 支持可选 `langLink`，About 页在主导航右侧显示"中文 / English"，带 `hreflang` 与 `lang`。
+- **完整 hreflang**：两页均输出 `en`、`zh-CN`、`x-default` 三组，含自引用。
+- **集合 id 稳定**：文件改名为 `about-en.md` / `about-zh.md`，id 变为 `about-en` / `about-zh`，不再依赖去点号的隐式行为。
+- **内容与范围**：`Linux` 改为简历中确有出处的 `Bash`；示例文章的 `hreflang` 描述限定为 About 页；`CV.html` 去掉相对 canonical。
+- **其余**：打印时显式隐藏 `.theme-toggle`。
+
+验证：`npm run build` 16 页成功；两页 `<h1>` 分别为 About / 关于；`hreflang` 三组齐全；导航含 `lang-link`；`break-inside` 规则入产物；`npm run check` 0 errors。

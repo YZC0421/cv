@@ -17,7 +17,7 @@ GPA 3.64/4.0，专业前 1%。
 ## 技能
 
 Python、C++、Java、PyTorch、OpenCV、Ultralytics YOLO、ONNX/TensorRT、PyQt5、
-SQLAlchemy、RAG、Git、Linux。
+SQLAlchemy、RAG、Git、Bash。
 
 ## 荣誉
 

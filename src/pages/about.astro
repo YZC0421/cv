@@ -3,18 +3,29 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { getEntry, render } from 'astro:content';
 import { withBase } from '../lib/url';
 
-const entry = await getEntry('pages', 'abouten');
-if (!entry) throw new Error('about.en.md is missing');
+const entry = await getEntry('pages', 'about-en');
+if (!entry) throw new Error('about-en.md is missing');
 const { Content } = await render(entry);
+const enHref = new URL(withBase('about'), Astro.site);
+const zhHref = new URL(withBase('about/zh'), Astro.site);
 ---
-<BaseLayout title="About · Zicong Yang" description="Education, research, skills, and contact.">
+<BaseLayout
+  title="About · Zicong Yang"
+  description="Education, research, skills, and contact."
+  langLink={{ href: withBase('about/zh'), label: '中文', lang: 'zh-CN' }}
+>
   <Fragment slot="head">
-    <link rel="alternate" hreflang="zh-CN" href={new URL(withBase('about/zh'), Astro.site)} />
+    <link rel="alternate" hreflang="en" href={enHref} />
+    <link rel="alternate" hreflang="zh-CN" href={zhHref} />
+    <link rel="alternate" hreflang="x-default" href={enHref} />
   </Fragment>
   <div class="container measure" style="padding-top:40px">
+    <div class="page-head">
+      <h1>{entry.data.title}</h1>
+      <span class="muted">Updated {entry.data.updated}</span>
+    </div>
     <div class="about-actions">
       <button type="button" onclick="window.print()">Download CV (PDF)</button>
-      <a href={withBase('about/zh')} hreflang="zh-CN">中文</a>
     </div>
     <div class="prose"><Content /></div>
   </div>

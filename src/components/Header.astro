@@ -3,6 +3,11 @@ import ThemeToggle from './ThemeToggle.astro';
 import NavLinks from './NavLinks.astro';
 import { stripBase, withBase } from '../lib/url';
 
+interface Props {
+  langLink?: { href: string; label: string; lang: string };
+}
+const { langLink } = Astro.props;
+
 const links = [
   { path: 'publications', label: 'Publications' },
   { path: 'work', label: 'Work' },
@@ -24,6 +29,11 @@ const isHome = current === '/';
         <NavLinks links={links} current={current} />
       </nav>
     </details>
+    {langLink && (
+      <a class="lang-link" href={langLink.href} hreflang={langLink.lang} lang={langLink.lang}>
+        {langLink.label}
+      </a>
+    )}
     <ThemeToggle />
   </div>
 </header>

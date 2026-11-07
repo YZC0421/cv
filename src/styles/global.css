@@ -219,6 +219,9 @@ h3 { font-size: 1.125rem; }
 }
 [data-footnotes] { margin-top: 40px; font-size: 0.9rem; color: var(--muted); }
 
+.page-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+.lang-link { font-size: 0.82rem; color: var(--muted); }
+.lang-link:hover { color: var(--accent); }
 .about-actions { display: flex; flex-wrap: wrap; gap: 16px; margin: 20px 0 32px; font-size: 0.88rem; }
 .about-actions button {
   font: inherit;
@@ -233,12 +236,21 @@ h3 { font-size: 1.125rem; }
 @page { size: A4; margin: 16mm; }
 
 @media print {
-  .site-header, .site-footer, .skip, .about-actions { display: none !important; }
+  :root,
+  [data-theme='dark'] {
+    --bg: #fff;
+    --bg-soft: #fff;
+    --fg: #000;
+    --muted: #333;
+    --border: #999;
+    --accent: #000;
+  }
+  .site-header, .site-footer, .skip, .about-actions, .theme-toggle { display: none !important; }
   body { background: #fff; color: #000; font-size: 11pt; }
   .container { max-width: none; padding: 0; }
   a { color: #000; text-decoration: none; }
   h2 { break-after: avoid; }
-  li, .print-block { break-inside: avoid; }
+  .prose p, li, .print-block { break-inside: avoid; }
 }
 .post-list li[hidden] { display: none; }
 .astro-code { background-color: var(--shiki-light-bg); border-radius: 8px; }

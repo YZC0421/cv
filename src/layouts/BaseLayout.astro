@@ -10,8 +10,9 @@ interface Props {
   description: string;
   lang?: string;
   type?: 'website' | 'article';
+  langLink?: { href: string; label: string; lang: string };
 }
-const { title, description, lang = 'en', type = 'website' } = Astro.props;
+const { title, description, lang = 'en', type = 'website', langLink } = Astro.props;
 const canonical = new URL(Astro.url.pathname.replace(/\/?$/, '/'), Astro.site);
 ---
 <!doctype html>
@@ -45,7 +46,7 @@ const canonical = new URL(Astro.url.pathname.replace(/\/?$/, '/'), Astro.site);
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
-    <Header />
+    <Header langLink={langLink} />
     <main id="main" tabindex="-1"><slot /></main>
     <Footer />
     <PublicationScripts />

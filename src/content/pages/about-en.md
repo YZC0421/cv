@@ -19,7 +19,7 @@ inspection.
 ## Skills
 
 Python, C++, Java, PyTorch, OpenCV, Ultralytics YOLO, ONNX/TensorRT, PyQt5, SQLAlchemy,
-RAG, Git, Linux.
+RAG, Git, Bash.
 
 ## Awards
 
