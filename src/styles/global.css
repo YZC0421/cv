@@ -223,7 +223,7 @@ h3 { font-size: 1.125rem; }
 .lang-link { font-size: 0.82rem; color: var(--muted); }
 .lang-link:hover { color: var(--accent); }
 .about-actions { display: flex; flex-wrap: wrap; gap: 16px; margin: 20px 0 32px; font-size: 0.88rem; }
-.about-actions button {
+.about-actions :is(button, .cv-download) {
   font: inherit;
   background: none;
   border: 1px solid var(--border);

@@ -1,4 +1,7 @@
 import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
+const CV_FILE = fileURLToPath(new URL('../../public/cv.pdf', import.meta.url));
 
 export const site = {
   name: 'Zicong Yang',
@@ -11,5 +14,5 @@ export const site = {
 };
 
 export function hasCvPdf(): boolean {
-  return existsSync('public/cv.pdf');
+  return existsSync(CV_FILE);
 }

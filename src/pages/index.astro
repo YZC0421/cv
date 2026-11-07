@@ -25,6 +25,7 @@ const work = sortProjects(allWork.filter((item) => item.data.kind === 'project')
 const posts = visiblePosts(await getCollection('blog')).slice(0, 2);
 const about = await getEntry('pages', 'about-en');
 const workTitles = workTitleMap(allWork);
+const cvAvailable = hasCvPdf();
 ---
 <BaseLayout
   title="Zicong Yang · Medical Signal Processing & Computer Vision"
@@ -70,7 +71,7 @@ const workTitles = workTitleMap(allWork);
     <p class="muted">{about?.data.summary}</p>
     <div class="links">
       <a href={withBase('about')}>More about me →</a>
-      {hasCvPdf() ? (
+      {cvAvailable ? (
         <a href={withBase('cv.pdf')}>Download CV (PDF)</a>
       ) : (
         <a href={withBase('about')}>CV (print / PDF)</a>

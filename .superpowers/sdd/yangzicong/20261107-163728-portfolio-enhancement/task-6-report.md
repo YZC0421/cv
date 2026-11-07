@@ -27,3 +27,13 @@
 
 - PDF 与内容会不同步，README 已说明需手动重新导出。
 - `site.tagline` 含破折号与长句，与首页 Hero 原文本一致。
+
+## 审查修复
+
+- 下载链接与打印按钮并存（不再互斥），英文页打印文案改为 `Print / Save as PDF`，中文页为 `打印 / 存为 PDF`；下载文案按语言传入（`downloadLabel`）。
+- `.cv-download` 与打印按钮共享 `.about-actions` 的描边样式。
+- `hasCvPdf()` 改为按模块位置解析 `public/cv.pdf`（`fileURLToPath(new URL('../../public/cv.pdf', import.meta.url))`），不依赖构建工作目录。
+- `Header` 品牌名与 `BaseLayout` 的 JSON-LD `name`/`sameAs` 改读 `site`。
+- 首页在 frontmatter 求值一次 `cvAvailable`。
+
+验证：`npm run check` 0 errors；三态：无 PDF 时 `cv.pdf` 命中 0；放入空文件后 `/about` 与首页各 1 次且打印按钮仍在；删除后回到 0。
