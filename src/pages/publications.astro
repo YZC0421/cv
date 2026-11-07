@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PublicationItem from '../components/PublicationItem.astro';
+import PublicationScripts from '../components/PublicationScripts.astro';
+import { getCollection } from 'astro:content';
+import { sortPublications } from '../lib/publications';
+
+const pubs = sortPublications(await getCollection('publications'));
+const years = [...new Set(pubs.map((p) => p.data.year))].sort((a, b) => b - a);
+---
+<BaseLayout
+  title="Publications · Zicong Yang"
+  description="Peer-reviewed publications on medical signal processing and computer vision."
+>
+  <div class="container measure" style="padding-top:40px">
+    <h1>Publications</h1>
+    <p class="muted">Peer-reviewed journal and conference papers. {pubs.length} entries.</p>
+
+    <div class="filters" role="group" aria-label="Filter publications">
+      <button type="button" data-filter="all" aria-pressed="true">All</button>
+      <button type="button" data-filter="first" aria-pressed="false">First author</button>
+      <button type="button" data-filter="Q1" aria-pressed="false">JCR Q1</button>
+      <button type="button" data-filter="EI" aria-pressed="false">EI</button>
+      {years.map((year) => (
+        <button type="button" data-filter={String(year)} aria-pressed="false">{year}</button>
+      ))}
+    </div>
+
+    <ul class="pub-list" id="pub-list">
+      {pubs.map((pub) => <PublicationItem pub={pub} />)}
+    </ul>
+  </div>
+
+  <PublicationScripts />
+
+  <script is:inline>
+    const buttons = document.querySelectorAll('.filters button');
+    const items = document.querySelectorAll('#pub-list .pub-item');
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+        const filter = btn.dataset.filter;
+        items.forEach((item) => {
+          const match =
+            filter === 'all' ||
+            item.dataset.role === filter ||
+            item.dataset.indexing === filter ||
+            item.dataset.year === filter;
+          item.hidden = !match;
+        });
+      });
+    });
+  </script>
+</BaseLayout>

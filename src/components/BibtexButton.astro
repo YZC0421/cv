@@ -1,0 +1,13 @@
+---
+interface Props {
+  bibtex: string;
+}
+const { bibtex } = Astro.props;
+---
+<span class="bibtex-block">
+  <button type="button" class="copy-btn" data-bibtex={bibtex}>Copy BibTeX</button>
+  <details class="bibtex">
+    <summary>Show BibTeX</summary>
+    <pre><code>{bibtex}</code></pre>
+  </details>
+</span>
