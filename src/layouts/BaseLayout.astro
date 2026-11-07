@@ -25,6 +25,7 @@ const {
   noindex = false,
 } = Astro.props;
 const canonical = new URL(Astro.url.pathname.replace(/\/?$/, '/'), Astro.site);
+const ogImage = new URL(withBase('og.png'), Astro.site);
 const personId = `${new URL(withBase(), Astro.site).href}#person`;
 const profile = {
   '@context': 'https://schema.org',
@@ -53,6 +54,8 @@ const profile = {
     <meta property="og:description" content={description} />
     <meta property="og:type" content={type} />
     <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
     <slot name="head" />
     {profilePage && <script type="application/ld+json" set:html={JSON.stringify(profile)} />}
     <script is:inline>
