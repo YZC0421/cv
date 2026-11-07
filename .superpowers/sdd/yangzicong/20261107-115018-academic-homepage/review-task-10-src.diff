@@ -1,0 +1,199 @@
+## Commits
+f07dc76 chore: 增加构建校验、部署流水线与项目文档
+
+## Stat
+ .github/workflows/deploy.yml                       |  43 ++
+ .../20261107-115018-academic-homepage/progress.md  |   1 +
+ .../task-10-brief.md                               | 281 ++++++++
+ .../task-10-report.md                              |  32 +
+ CV.html                                            | 785 ---------------------
+ README.md                                          |  57 ++
+ index.html                                         | 785 ---------------------
+ scripts/verify-build.mjs                           |  63 ++
+ 8 files changed, 477 insertions(+), 1570 deletions(-)
+
+## Note
+Deleted root index.html and CV.html are excluded from the diff body; public/CV.html redirect remains.
+
+## Diff
+diff --git a/.github/workflows/deploy.yml b/.github/workflows/deploy.yml
+new file mode 100644
+index 0000000..834388e
+--- /dev/null
++++ b/.github/workflows/deploy.yml
+@@ -0,0 +1,43 @@
++name: Deploy to GitHub Pages
++
++on:
++  push:
++    branches: [main]
++  workflow_dispatch:
++
++permissions:
++  contents: read
++  pages: write
++  id-token: write
++
++concurrency:
++  group: pages
++  cancel-in-progress: false
++
++jobs:
++  build:
++    runs-on: ubuntu-latest
++    steps:
++      - uses: actions/checkout@v4
++      - uses: actions/setup-node@v4
++        with:
++          node-version: 22
++          cache: npm
++      - run: npm ci
++      - run: npm test
++      - run: npm run check
++      - run: npm run build
++      - run: npm run verify
++      - uses: actions/upload-pages-artifact@v3
++        with:
++          path: dist
++
++  deploy:
++    needs: build
++    runs-on: ubuntu-latest
++    environment:
++      name: github-pages
++      url: ${{ steps.deployment.outputs.page_url }}
++    steps:
++      - id: deployment
++        uses: actions/deploy-pages@v4
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000..25f7c7b
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,57 @@
++# cv
++
++Personal academic site of Zicong Yang: publications, work, and writing.
++
++Built with Astro 5, statically generated, deployed to GitHub Pages.
++
++## Local
++
++```bash
++npm install
++npm run dev      # http://localhost:4321/cv/
++npm run check    # type + content schema check
++npm test         # unit tests for schema and ordering rules
++npm run build    # build to dist/
++npm run verify   # assert build output
++```
++
++## Add a publication
++
++1. Create `src/content/publications/<slug>.md` with the frontmatter defined in
++   `src/lib/schema.ts`.
++2. `doi` is required. Set `selected: true` only for entries that should appear on the home
++   page.
++3. Run `npm run check` and `npm run build`.
++
++## Add a post
++
++1. Create `src/content/blog/<slug>.md`; `lang` is `en` or `zh`, `tags` needs at least one
++   entry, `summary` at most 160 characters.
++2. `draft: true` keeps it out of the list, RSS, and sitemap.
++3. Future dates publish automatically: entries dated after the build day are excluded.
++
++## Add a project or experience
++
++1. Create `src/content/work/<slug>.md`; `kind` is `experience` or `project`.
++2. `highlights` needs at least one factual bullet; do not add claims without a source.
++3. Projects sort by `order`; experiences sort by `start`, newest first.
++
++## Deploy
++
++Pushing to `main` triggers `.github/workflows/deploy.yml`. The site is served from
++`https://yzc0421.github.io/cv/`. If a custom domain is added, update `site` and `base` in
++`astro.config.mjs`, add `public/CNAME`, and update `public/robots.txt`.
++
++## Rollback
++
++Re-run the last successful `Deploy to GitHub Pages` workflow, or `git revert` the offending
++content commit. Build configuration changes revert the same way; no manual cleanup on Pages
++is required.
++
++## Notes
++
++- No runtime CDN dependencies and no external fonts.
++- Content is validated by Zod at build time; invalid frontmatter fails the build.
++- Paper metadata was cross-checked against Crossref and confirmed manually.
++- All internal links go through `withBase` in `src/lib/url.ts`; do not concatenate
++  `import.meta.env.BASE_URL` directly.
+diff --git a/scripts/verify-build.mjs b/scripts/verify-build.mjs
+new file mode 100644
+index 0000000..e7ab9e3
+--- /dev/null
++++ b/scripts/verify-build.mjs
+@@ -0,0 +1,63 @@
++import { readFile, access } from 'node:fs/promises';
++import { constants } from 'node:fs';
++
++const checks = [];
++
++const must = async (path, label) => {
++  try {
++    await access(path, constants.R_OK);
++    checks.push([label, true]);
++    return true;
++  } catch {
++    checks.push([label, false]);
++    return false;
++  }
++};
++
++const routes = [
++  'dist/index.html',
++  'dist/publications/index.html',
++  'dist/work/index.html',
++  'dist/work/guangzhou-xiyang/index.html',
++  'dist/work/sudden-cardiac-death-prediction/index.html',
++  'dist/blog/index.html',
++  'dist/blog/from-single-page-to-astro/index.html',
++  'dist/about/index.html',
++  'dist/about/zh/index.html',
++  'dist/404.html',
++  'dist/rss.xml',
++  'dist/sitemap-index.xml',
++  'dist/robots.txt',
++  'dist/favicon.svg',
++  'dist/CV.html',
++];
++
++for (const route of routes) await must(route, route);
++
++const home = await readFile('dist/index.html', 'utf8');
++checks.push(['home shows 3 publications', (home.match(/class="pub-item"/g) ?? []).length === 3]);
++checks.push(['home shows 3 work cards', (home.match(/class="work-card"/g) ?? []).length === 3]);
++
++const pubs = await readFile('dist/publications/index.html', 'utf8');
++checks.push(['publications has 6 entries', (pubs.match(/class="pub-item"/g) ?? []).length === 6]);
++checks.push(['publications include doi links', pubs.includes('doi.org')]);
++
++const rss = await readFile('dist/rss.xml', 'utf8');
++checks.push(['rss has items', rss.includes('<item>')]);
++checks.push(['rss channel link includes base', rss.includes('<link>https://yzc0421.github.io/cv/</link>')]);
++
++const about = await readFile('dist/about/index.html', 'utf8');
++checks.push(['about has h1', about.includes('<h1>About</h1>')]);
++checks.push(['about includes hreflang', about.includes('hreflang="zh-CN"')]);
++
++const notFound = await readFile('dist/404.html', 'utf8');
++checks.push(['404 is noindex', notFound.includes('name="robots" content="noindex"')]);
++
++const failed = checks.filter(([, ok]) => !ok);
++for (const [label, ok] of checks) console.log(`${ok ? 'ok  ' : 'FAIL'} ${label}`);
++
++if (failed.length) {
++  console.error(`\n${failed.length} check(s) failed`);
++  process.exit(1);
++}
++console.log('\nall checks passed');

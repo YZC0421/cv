@@ -9,6 +9,7 @@ Built with Astro 5, statically generated, deployed to GitHub Pages.
 ```bash
 npm install
 npm run dev      # http://localhost:4321/cv/
+npm run preview  # preview the built site
 npm run check    # type + content schema check
 npm test         # unit tests for schema and ordering rules
 npm run build    # build to dist/
@@ -19,9 +20,9 @@ npm run verify   # assert build output
 
 1. Create `src/content/publications/<slug>.md` with the frontmatter defined in
    `src/lib/schema.ts`.
-2. `doi` is required. Set `selected: true` only for entries that should appear on the home
-   page.
-3. Run `npm run check` and `npm run build`.
+2. `doi` is required. `selected: true` pins an entry into the home page; the home page always
+   shows three entries, filling the remainder with first-author papers, then the newest.
+3. Run `npm run check`, `npm run build`, and `npm run verify`.
 
 ## Add a post
 
@@ -40,7 +41,8 @@ npm run verify   # assert build output
 
 Pushing to `main` triggers `.github/workflows/deploy.yml`. The site is served from
 `https://yzc0421.github.io/cv/`. If a custom domain is added, update `site` and `base` in
-`astro.config.mjs`, add `public/CNAME`, and update `public/robots.txt`.
+`astro.config.mjs`, add `public/CNAME`, update `public/robots.txt`, and update the RSS/base
+assertion in `scripts/verify-build.mjs`.
 
 ## Rollback
 
