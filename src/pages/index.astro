@@ -6,9 +6,10 @@ import WorkCard from '../components/WorkCard.astro';
 import PostList from '../components/PostList.astro';
 import { getCollection } from 'astro:content';
 import { selectHomepage } from '../lib/publications';
+import { localToday } from '../lib/date';
 import { withBase } from '../lib/url';
 
-const today = new Date().toISOString().slice(0, 10);
+const today = localToday();
 
 const pubs = selectHomepage(await getCollection('publications'));
 const work = (await getCollection('work'))
@@ -34,13 +35,15 @@ const posts = (await getCollection('blog'))
     <ul class="pub-list">{pubs.map((pub) => <PublicationItem pub={pub} />)}</ul>
   </section>
 
-  <section class="section container measure">
-    <div class="section-head">
-      <h2>Selected Work</h2>
-      <a href={withBase('work')}>All work →</a>
-    </div>
-    <div class="work-grid">{work.map((item) => <WorkCard item={item} />)}</div>
-  </section>
+  {work.length > 0 && (
+    <section class="section container measure">
+      <div class="section-head">
+        <h2>Selected Work</h2>
+        <a href={withBase('work')}>All work →</a>
+      </div>
+      <div class="work-grid">{work.map((item) => <WorkCard item={item} />)}</div>
+    </section>
+  )}
 
   {posts.length > 0 && (
     <section class="section container measure">
