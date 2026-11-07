@@ -14,6 +14,24 @@ interface Props {
 }
 const { title, description, lang = 'en', type = 'website', langLink } = Astro.props;
 const canonical = new URL(Astro.url.pathname.replace(/\/?$/, '/'), Astro.site);
+const personId = `${new URL(withBase(), Astro.site).href}#person`;
+const profile = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    { '@type': 'ProfilePage', mainEntity: { '@id': personId } },
+    {
+      '@type': 'Person',
+      '@id': personId,
+      name: 'Zicong Yang',
+      jobTitle: 'Software Engineer',
+      sameAs: [
+        'https://scholar.google.com/citations?user=0Ynn-awAAAAJ',
+        'https://orcid.org/0009-0001-0948-3606',
+        'https://github.com/YZC0421',
+      ],
+    },
+  ],
+};
 ---
 <!doctype html>
 <html lang={lang}>
@@ -29,6 +47,7 @@ const canonical = new URL(Astro.url.pathname.replace(/\/?$/, '/'), Astro.site);
     <meta property="og:type" content={type} />
     <meta property="og:url" content={canonical} />
     <slot name="head" />
+    <script type="application/ld+json" set:html={JSON.stringify(profile)} />
     <script is:inline>
       (() => {
         let saved = null;

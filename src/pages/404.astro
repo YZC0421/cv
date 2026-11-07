@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../lib/url';
+---
+<BaseLayout title="Not found · Zicong Yang" description="Page not found.">
+  <div class="container measure" style="padding:80px 24px">
+    <h1>404</h1>
+    <p class="muted">This page does not exist.</p>
+    <p><a href={withBase()}>Back to home →</a></p>
+  </div>
+</BaseLayout>
