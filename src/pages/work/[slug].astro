@@ -17,23 +17,33 @@ const { Content } = await render(item);
 <BaseLayout title={`${item.data.title} · Zicong Yang`} description={item.data.summary}>
   <article class="container measure work-detail" style="padding-top:40px">
     <h1>{item.data.title}</h1>
-    <div class="meta">
+    <p class="meta">
       {item.data.role} · {item.data.org} · {item.data.start} – {item.data.end}
-    </div>
-    <p>{item.data.summary}</p>
-    <ul>{item.data.highlights.map((highlight) => <li>{highlight}</li>)}</ul>
+    </p>
+
     <Content />
+
+    <h2>Results</h2>
+    <ul>{item.data.highlights.map((highlight) => <li>{highlight}</li>)}</ul>
+
     {item.data.stack.length > 0 && (
-      <div class="stack" style="margin-top:24px">
-        {item.data.stack.map((tech) => <span>{tech}</span>)}
-      </div>
+      <>
+        <h2>Stack</h2>
+        <div class="stack">
+          {item.data.stack.map((tech) => <span>{tech}</span>)}
+        </div>
+      </>
     )}
+
     {item.data.links.length > 0 && (
-      <div class="links">
-        {item.data.links.map((link) => (
-          <a href={link.url} target="_blank" rel="noopener">{link.label}</a>
-        ))}
-      </div>
+      <>
+        <h2>Links</h2>
+        <div class="links">
+          {item.data.links.map((link) => (
+            <a href={link.url} target="_blank" rel="noopener">{link.label}</a>
+          ))}
+        </div>
+      </>
     )}
   </article>
 </BaseLayout>

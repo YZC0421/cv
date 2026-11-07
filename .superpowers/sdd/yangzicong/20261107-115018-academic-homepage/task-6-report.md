@@ -35,3 +35,18 @@
 
 - 经历时间线只显示前 3 条要点，完整内容在详情页；这是规格允许的紧凑处理。
 - 项目详情页的正文较短，后续可补充截图与方法细节，但需要你提供素材。
+
+## 审查修复
+
+- 详情页改为分区：概览正文 → `Results` → `Stack` → `Links`，移除与正文重复的 `summary` 段落。
+- `sudden-cardiac-death-prediction` 补两条真实外链（Scientific Reports、CISSE 2024 DOI），外链分支现在至少有一页可达。
+- 经历与项目排序增加 `id` 次级键，避免同月数据顺序不稳定。
+- 时间线末项去掉悬空竖线。
+- 修正三处内容表述：`campus-startup` 职位名补回 `(Startup)`、`wordle-analysis` 的 org 改为 `MCM`、`rural-revitalization` 的 org 改为报告奖项名。
+- `ningbo-jiasi` 把被压缩的"模型评估"与"WOI 换水判断"拆成两条。
+
+验证：`npm run build` 成功（12 页），`grep` 确认详情页渲染出外链，`npm run check` 0 errors。
+
+## 流程补记
+
+- 审查时发现 `task-6-brief.md` 未生成（前序遗漏），已用 `scripts/task-brief` 补生成并随本任务提交。

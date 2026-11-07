@@ -1,6 +1,6 @@
 ---
 title: "NYT Wordle Game Analysis"
-org: "MCM/ICM"
+org: "MCM"
 kind: project
 role: "Lead"
 start: "2023-02"

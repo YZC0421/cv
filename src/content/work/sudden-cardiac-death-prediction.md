@@ -11,6 +11,11 @@ highlights:
   - "Led proposal, design, implementation, publication, and final acceptance."
   - "Designed STFAC-ECGNet with coordinated channel-spatial attention and temporal fusion."
   - "Published two first-author papers (JCR Q1 and Q4)."
+links:
+  - label: "Scientific Reports (Q1)"
+    url: "https://www.nature.com/articles/s41598-024-71700-z"
+  - label: "CISSE 2024 (Q4)"
+    url: "https://doi.org/10.1007/978-3-031-57037-7_7"
 order: 1
 ---
 

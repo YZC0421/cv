@@ -10,7 +10,8 @@ stack: ["GRU", "LSTM", "Transformer", "Random Forest", "XGBoost"]
 highlights:
   - "Developed a water-quality model with 95.2% accuracy, 93.8% recall, and 94.5% F1."
   - "Designed GRU/LSTM/Transformer models for 24-hour forecasts and anomaly warnings."
-  - "Led multi-sensor data collection; used Random Forest and XGBoost with a WOI index for water-change decisions."
+  - "Led multi-sensor data collection and evaluated models with Random Forest and XGBoost."
+  - "Computed a water-quality index from dissolved oxygen and turbidity to decide water changes."
 order: 0
 ---
 

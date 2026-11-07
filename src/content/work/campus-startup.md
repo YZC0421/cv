@@ -1,5 +1,5 @@
 ---
-title: "Independent Operator"
+title: "Independent Operator (Startup)"
 org: "Campus Startup Project"
 kind: experience
 role: "Operator"

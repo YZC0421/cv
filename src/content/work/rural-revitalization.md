@@ -1,6 +1,6 @@
 ---
 title: "“Agriculture + Tourism” Rural Revitalization"
-org: "National Youth League Research Program"
+org: "National Excellent Research Report Award"
 kind: project
 role: "Second Lead"
 start: "2023-07"

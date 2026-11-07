@@ -168,6 +168,7 @@ h3 { font-size: 1.125rem; }
 .timeline .org { color: var(--accent); font-weight: 600; font-size: 0.9rem; }
 .timeline .when { font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .timeline ul { margin: 8px 0 0; padding-left: 18px; color: var(--muted); font-size: 0.88rem; }
+.timeline li:last-child { padding-bottom: 0; }
 .work-detail h1 { margin-bottom: 8px; }
 .work-detail .meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 24px; }
 .work-detail ul { padding-left: 20px; }

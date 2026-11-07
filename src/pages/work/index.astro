@@ -7,10 +7,10 @@ import { withBase } from '../../lib/url';
 const all = await getCollection('work');
 const experience = all
   .filter((item) => item.data.kind === 'experience')
-  .sort((a, b) => b.data.start.localeCompare(a.data.start));
+  .sort((a, b) => b.data.start.localeCompare(a.data.start) || a.id.localeCompare(b.id));
 const projects = all
   .filter((item) => item.data.kind === 'project')
-  .sort((a, b) => a.data.order - b.data.order);
+  .sort((a, b) => a.data.order - b.data.order || a.id.localeCompare(b.id));
 ---
 <BaseLayout title="Work · Zicong Yang" description="Engineering experience and research projects.">
   <div class="container measure" style="padding-top:40px">
