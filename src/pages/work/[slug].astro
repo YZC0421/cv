@@ -13,37 +13,61 @@ interface Props {
 }
 const { item } = Astro.props;
 const { Content } = await render(item);
+const d = item.data;
+const hasSections = Boolean(d.problem || d.approach || d.results);
+const publications = await getCollection('publications');
+const doi = (d.relatedPublications ?? [])[0];
+const related = doi ? publications.find((pub) => pub.data.doi === doi) : undefined;
 ---
-<BaseLayout title={`${item.data.title} · Zicong Yang`} description={item.data.summary}>
+<BaseLayout title={`${d.title} · Zicong Yang`} description={d.summary}>
   <article class="container measure work-detail" style="padding-top:40px">
-    <h1>{item.data.title}</h1>
-    <p class="meta">
-      {item.data.role} · {item.data.org} · {item.data.start} – {item.data.end}
-    </p>
+    <h1>{d.title}</h1>
+    <p class="meta">{d.role} · {d.org} · {d.start} – {d.end}</p>
 
-    <Content />
+    {d.problem && <section class="work-block"><h2>Problem</h2><p>{d.problem}</p></section>}
+    {d.approach && <section class="work-block"><h2>Approach</h2><p>{d.approach}</p></section>}
+    {d.results && <section class="work-block"><h2>Results</h2><p>{d.results}</p></section>}
 
-    <h2>Results</h2>
-    <ul>{item.data.highlights.map((highlight) => <li>{highlight}</li>)}</ul>
-
-    {item.data.stack.length > 0 && (
-      <>
-        <h2>Stack</h2>
-        <div class="stack">
-          {item.data.stack.map((tech) => <span>{tech}</span>)}
-        </div>
-      </>
+    {!hasSections && (
+      <section class="work-block">
+        <h2>Highlights</h2>
+        <ul>{d.highlights.map((highlight) => <li>{highlight}</li>)}</ul>
+      </section>
     )}
 
-    {item.data.links.length > 0 && (
-      <>
+    <div class="prose"><Content /></div>
+
+    <section class="work-block">
+      <h2>Role</h2>
+      <p>{d.role} at {d.org}.</p>
+    </section>
+
+    {d.stack.length > 0 && (
+      <section class="work-block">
+        <h2>Stack</h2>
+        <div class="stack">{d.stack.map((tech) => <span>{tech}</span>)}</div>
+      </section>
+    )}
+
+    {d.links.length > 0 && (
+      <section class="work-block">
         <h2>Links</h2>
         <div class="links">
-          {item.data.links.map((link) => (
-            <a href={link.url} target="_blank" rel="noopener">{link.label}</a>
-          ))}
+          {d.links.map((link) => <a href={link.url} target="_blank" rel="noopener">{link.label}</a>)}
         </div>
-      </>
+      </section>
+    )}
+
+    {related && (
+      <section class="work-block">
+        <h2>Related publication</h2>
+        <p>
+          <a href={`https://doi.org/${related.data.doi}`} target="_blank" rel="noopener">
+            {related.data.title}
+          </a>
+          <span class="muted"> · {related.data.venue} · {related.data.year}</span>
+        </p>
+      </section>
     )}
   </article>
 </BaseLayout>

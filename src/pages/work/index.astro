@@ -2,15 +2,13 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import WorkCard from '../../components/WorkCard.astro';
 import { getCollection } from 'astro:content';
+import { topics } from '../../lib/topics';
 import { withBase } from '../../lib/url';
+import { sortExperience, sortProjects } from '../../lib/work';
 
 const all = await getCollection('work');
-const experience = all
-  .filter((item) => item.data.kind === 'experience')
-  .sort((a, b) => b.data.start.localeCompare(a.data.start) || a.id.localeCompare(b.id));
-const projects = all
-  .filter((item) => item.data.kind === 'project')
-  .sort((a, b) => a.data.order - b.data.order || a.id.localeCompare(b.id));
+const experience = sortExperience(all.filter((item) => item.data.kind === 'experience'));
+const projects = sortProjects(all.filter((item) => item.data.kind === 'project'));
 ---
 <BaseLayout title="Work · Zicong Yang" description="Engineering experience and research projects.">
   <div class="container measure" style="padding-top:40px">
@@ -32,7 +30,30 @@ const projects = all
 
     <section class="section">
       <div class="section-head"><h2>Projects</h2></div>
+      <div class="filters" role="group" aria-label="Filter projects by topic">
+        <button type="button" data-value="all" aria-pressed="true">All topics</button>
+        {topics.map((topic) => (
+          <button type="button" data-value={topic.slug} aria-pressed="false">{topic.name}</button>
+        ))}
+      </div>
       <div class="work-grid">{projects.map((item) => <WorkCard item={item} />)}</div>
     </section>
   </div>
+
+  <script is:inline>
+    (() => {
+      const buttons = document.querySelectorAll('.filters button');
+      const cards = document.querySelectorAll('.work-card');
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const value = btn.dataset.value;
+          buttons.forEach((other) => other.setAttribute('aria-pressed', String(other === btn)));
+          cards.forEach((card) => {
+            const cardTopics = (card.dataset.topics ?? '').split(' ').filter(Boolean);
+            card.hidden = value !== 'all' && !cardTopics.includes(value);
+          });
+        });
+      });
+    })();
+  </script>
 </BaseLayout>

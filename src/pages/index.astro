@@ -10,7 +10,7 @@ import { selectHomepage } from '../lib/publications';
 import { visiblePosts } from '../lib/posts';
 import { validateRelations } from '../lib/relations';
 import { withBase } from '../lib/url';
-import { workTitleMap } from '../lib/work';
+import { sortProjects, workTitleMap } from '../lib/work';
 
 const allPublications = await getCollection('publications');
 const allWork = await getCollection('work');
@@ -20,10 +20,7 @@ if (relationErrors.length > 0) {
 }
 
 const pubs = selectHomepage(allPublications);
-const work = allWork
-  .filter((item) => item.data.kind === 'project')
-  .sort((a, b) => a.data.order - b.data.order || a.id.localeCompare(b.id))
-  .slice(0, 3);
+const work = sortProjects(allWork.filter((item) => item.data.kind === 'project')).slice(0, 3);
 const posts = visiblePosts(await getCollection('blog')).slice(0, 2);
 const about = await getEntry('pages', 'about-en');
 const workTitles = workTitleMap(allWork);
