@@ -87,7 +87,8 @@ h3 { font-size: 1.125rem; }
   gap: 24px;
 }
 .brand { font-family: var(--font-serif); font-size: 1.05rem; font-weight: 600; color: var(--fg); }
-.nav-details { margin-left: auto; }
+.desktop-nav { margin-left: auto; }
+.nav-details { display: none; }
 .nav-details > summary { list-style: none; }
 .nav-details > summary::-webkit-details-marker { display: none; }
 .nav { display: flex; gap: 18px; font-size: 0.9rem; }
@@ -98,7 +99,8 @@ h3 { font-size: 1.125rem; }
 .site-footer { border-top: 1px solid var(--border); margin-top: 72px; padding: 28px 0; color: var(--muted); font-size: 0.85rem; }
 
 @media (max-width: 767px) {
-  .nav-details { position: relative; }
+  .desktop-nav { display: none; }
+  .nav-details { display: block; position: relative; margin-left: auto; }
   .nav-toggle { display: block; }
   .nav-details > .nav { display: none; }
   .nav-details[open] > .nav {

@@ -32,3 +32,21 @@
 
 - Astro 5.18.2 已提示 7.4.7 可用。规格明确锁定 Astro 5，本次不升级。
 - 计划未包含 `.gitignore`，已按工程必要补上，属于范围内的必要文件。
+
+## 审查修复（第二轮）
+
+审查发现 `import.meta.env.BASE_URL` 无尾斜杠，`${base}publications` 被拼成 `/cvpublications`。修复内容：
+
+- 新增 `src/lib/url.ts`：`withBase(path)` 负责拼接，`stripBase(pathname)` 负责去掉子路径。
+- `Header.astro`、`Footer.astro`、`BaseLayout.astro` 全部改用 `withBase`；导航当前项改为按路径段比较。
+- canonical 改为 `new URL(pathname.replace(/\/?$/, '/'), site)`，输出带尾斜杠的最终 URL。
+- `ThemeToggle` 增加 `aria-pressed` 同步；初始化与写入 `localStorage` 均包 `try/catch`。
+- `<main>` 增加 `tabindex="-1"`，保证 skip link 焦点落入正文。
+- `plan.md` 增加"全局约定：内部链接"，声明后续示例一律按 `withBase` 理解。
+
+验证：
+
+- `npm run build`：成功。
+- `grep href dist/index.html`：`/cv/`、`/cv/publications`、`/cv/work`、`/cv/blog`、`/cv/about`、`/cv/rss.xml`、`/cv/favicon.svg` 均正确。
+- canonical：`https://yzc0421.github.io/cv/`。
+- `npm run check`：8 files，0 errors，0 warnings，0 hints。

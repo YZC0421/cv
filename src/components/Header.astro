@@ -9,19 +9,22 @@ const links = [
   { path: 'about', label: 'About' },
 ];
 const current = stripBase(Astro.url.pathname);
-const isCurrent = (path: string) => current === `/${path}` || current.startsWith(`/${path}/`);
+const isCurrent = (path: string) => current === `/${path}/` || current.startsWith(`/${path}/`);
 const isHome = current === '/';
 ---
 <header class="site-header">
   <div class="inner">
     <a class="brand" href={withBase()} aria-current={isHome ? 'page' : undefined}>Zicong Yang</a>
+    <nav class="nav desktop-nav" aria-label="Primary">
+      {links.map((link) => (
+        <a href={withBase(link.path)} aria-current={isCurrent(link.path) ? 'page' : undefined}>{link.label}</a>
+      ))}
+    </nav>
     <details class="nav-details">
       <summary class="nav-toggle">Menu</summary>
-      <nav class="nav">
+      <nav class="nav" aria-label="Primary mobile">
         {links.map((link) => (
-          <a href={withBase(link.path)} aria-current={isCurrent(link.path) ? 'page' : undefined}>
-            {link.label}
-          </a>
+          <a href={withBase(link.path)} aria-current={isCurrent(link.path) ? 'page' : undefined}>{link.label}</a>
         ))}
       </nav>
     </details>
