@@ -14,6 +14,7 @@ npm run check    # type + content schema check
 npm test         # unit tests for schema and ordering rules
 npm run build    # build to dist/
 npm run verify   # assert build output
+npm run og       # regenerate public/og.png (committed; manual only)
 ```
 
 ## Add a publication
@@ -46,7 +47,8 @@ PDF manually whenever the About content changes.
 
 ## Deploy
 
-Pushing to `main` triggers `.github/workflows/deploy.yml`. The site is served from
+Pushing to `main` triggers `.github/workflows/deploy.yml`. Pull requests run the same
+test/check/build/verify steps but skip the deploy job. The site is served from
 `https://yzc0421.github.io/cv/`. If a custom domain is added, update `site` and `base` in
 `astro.config.mjs`, add `public/CNAME`, update `public/robots.txt`, and update the RSS/base
 assertion in `scripts/verify-build.mjs`.

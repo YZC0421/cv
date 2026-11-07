@@ -25,3 +25,11 @@
 
 - PR 流水线没有缓存 Playwright 之类重型依赖，当前只有 npm cache，构建约 1 分钟内。
 - `sharp` 在 CI 只作为 devDependency 安装，不调用 `npm run og`，安装脚本被跳过也不影响构建。
+
+## 审查修复
+
+- `countDirs` 在目录缺失时返回 `-1`（断言失败）而非抛错退出。
+- `og:image` 断言改为匹配具体 `property`，并断言 `dist/og.png` 存在。
+- README 补 `npm run og` 与「PR 跑检查但不部署」的说明。
+
+验证：`npm test` 42/42；`npm run check` 0 errors；`npm run build` 20 页；`npm run verify` 全部通过。

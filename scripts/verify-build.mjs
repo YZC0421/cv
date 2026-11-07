@@ -24,10 +24,14 @@ const read = async (path) => {
 const countFiles = async (dir, ext) =>
   (await readdir(dir)).filter((file) => file.endsWith(ext)).length;
 
-const countDirs = async (dir, exclude = []) =>
-  (await readdir(dir, { withFileTypes: true })).filter(
-    (entry) => entry.isDirectory() && !exclude.includes(entry.name)
-  ).length;
+const countDirs = async (dir, exclude = []) => {
+  try {
+    const entries = await readdir(dir, { withFileTypes: true });
+    return entries.filter((entry) => entry.isDirectory() && !exclude.includes(entry.name)).length;
+  } catch {
+    return -1;
+  }
+};
 
 const indexRoutes = [
   'dist/index.html',
@@ -120,8 +124,9 @@ const workIndex = await read('dist/work/index.html');
 checks.push(['work exposes topic filter', workIndex.includes('data-value="medical-signal"')]);
 
 checks.push(['home has research areas', home.includes('Research Areas')]);
-checks.push(['home has og image', home.includes('og:image')]);
-checks.push(['home has twitter card', home.includes('twitter:card')]);
+checks.push(['home has og image', /property="og:image"/.test(home)]);
+checks.push(['home has twitter card', /name="twitter:card"/.test(home)]);
+await must('dist/og.png', 'dist/og.png');
 
 const tagPages = await countDirs('dist/blog/tag');
 const tagSet = new Set();
