@@ -24,6 +24,12 @@ npm run verify   # assert build output
    shows three entries, filling the remainder with first-author papers, then the newest.
 3. Run `npm run check`, `npm run build`, and `npm run verify`.
 
+## CV PDF
+
+Place the exported PDF at `public/cv.pdf`. The About pages and the home page will show a
+direct download link; without the file they fall back to the print action. Regenerate the
+PDF manually whenever the About content changes.
+
 ## Add a post
 
 1. Create `src/content/blog/<slug>.md`; `lang` is `en` or `zh`, `tags` needs at least one

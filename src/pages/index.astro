@@ -9,6 +9,7 @@ import { getCollection, getEntry } from 'astro:content';
 import { selectHomepage } from '../lib/publications';
 import { visiblePosts } from '../lib/posts';
 import { validateRelations } from '../lib/relations';
+import { hasCvPdf } from '../lib/site';
 import { withBase } from '../lib/url';
 import { sortProjects, workTitleMap } from '../lib/work';
 
@@ -69,7 +70,11 @@ const workTitles = workTitleMap(allWork);
     <p class="muted">{about?.data.summary}</p>
     <div class="links">
       <a href={withBase('about')}>More about me →</a>
-      <a href={withBase('about')}>CV (print / PDF)</a>
+      {hasCvPdf() ? (
+        <a href={withBase('cv.pdf')}>Download CV (PDF)</a>
+      ) : (
+        <a href={withBase('about')}>CV (print / PDF)</a>
+      )}
     </div>
   </section>
 </BaseLayout>
