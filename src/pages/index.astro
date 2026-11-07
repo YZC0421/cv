@@ -1,8 +1,67 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import PublicationItem from '../components/PublicationItem.astro';
+import WorkCard from '../components/WorkCard.astro';
+import PostList from '../components/PostList.astro';
+import { getCollection } from 'astro:content';
+import { selectHomepage } from '../lib/publications';
+import { withBase } from '../lib/url';
+
+const today = new Date().toISOString().slice(0, 10);
+
+const pubs = selectHomepage(await getCollection('publications'));
+const work = (await getCollection('work'))
+  .filter((item) => item.data.kind === 'project')
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 3);
+const posts = (await getCollection('blog'))
+  .filter((post) => !post.data.draft && post.data.date <= today)
+  .sort((a, b) => b.data.date.localeCompare(a.data.date))
+  .slice(0, 2);
 ---
-<BaseLayout title="Zicong Yang" description="Medical signal processing and computer vision.">
-  <div class="container" style="padding-top:48px">
-    <h1>Zicong Yang</h1>
-  </div>
+<BaseLayout
+  title="Zicong Yang · Medical Signal Processing & Computer Vision"
+  description="Personal site of Zicong Yang: publications, engineering work, and technical writing."
+>
+  <Hero />
+
+  <section class="section container measure">
+    <div class="section-head">
+      <h2>Selected Publications</h2>
+      <a href={withBase('publications')}>All publications →</a>
+    </div>
+    <ul class="pub-list">{pubs.map((pub) => <PublicationItem pub={pub} />)}</ul>
+  </section>
+
+  <section class="section container measure">
+    <div class="section-head">
+      <h2>Selected Work</h2>
+      <a href={withBase('work')}>All work →</a>
+    </div>
+    <div class="work-grid">{work.map((item) => <WorkCard item={item} />)}</div>
+  </section>
+
+  {posts.length > 0 && (
+    <section class="section container measure">
+      <div class="section-head">
+        <h2>Latest Writing</h2>
+        <a href={withBase('blog')}>All writing →</a>
+      </div>
+      <PostList posts={posts} />
+    </section>
+  )}
+
+  <section class="section container measure">
+    <div class="section-head"><h2>About</h2></div>
+    <p class="muted">
+      B.E. in Software Engineering, Zhuhai College of Science and Technology (2021–2025).
+      First-author publications in Scientific Reports and CVIDL; research on ECG analysis and
+      industrial visual inspection.
+    </p>
+    <div class="links">
+      <a href={withBase('about')}>More about me →</a>
+      <a href={withBase('about')}>Download CV (PDF)</a>
+    </div>
+  </section>
 </BaseLayout>
