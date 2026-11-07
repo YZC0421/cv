@@ -7,7 +7,6 @@ authors:
   - "Wei Lv"
   - "Xiaolin Zhu"
 venue: "Studies in Computational Intelligence"
-venueShort: "CISSE 2024"
 year: 2024
 type: conference
 indexing: Q4

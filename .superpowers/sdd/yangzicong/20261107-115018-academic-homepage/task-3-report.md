@@ -41,3 +41,10 @@
 
 - `cisse-2024` 的 Crossref issued 只有年份，`date` 取 `2024-01-01`；若你知道准确月份可后补。
 - `mst-2025` 的 `date` 为在线发布日，可能与纸刊期号不同。
+
+## 审查后补充说明
+
+- **日期占位**：`cvidl-2024-wheat` 的 `2024-04-01` 与 `cisse-2024` 的 `2024-01-01` 中，日（及 cisse 的月）是 Crossref 缺失时的排序占位。页面只渲染 `year`，不展示 `date`，因此占位不会作为事实出现在站点上；`date` 仅用于排序。若后续需要精确日期，可提供月份后更新。
+- **venue 确认**：用户在核对环节明确选择 `Studies in Computational Intelligence` 作为 `cisse-2024` 的出处，因此覆盖了 CV 中的 `Computer and Information Science and Engineering`。
+- **venueShort 调整**：审查指出 `CISSE 2024` 与丛书名不对应，已删除该字段，列表显示完整出处。
+- **脚本类型映射**：`book-chapter` 会被脚本默认归为 `journal`，本次由人工改为 `conference`；后续如需复用脚本，应补充显式映射。
