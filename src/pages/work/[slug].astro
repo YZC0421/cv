@@ -1,0 +1,39 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const items = await getCollection('work');
+  return items.map((item) => ({ params: { slug: item.id }, props: { item } }));
+}
+
+interface Props {
+  item: CollectionEntry<'work'>;
+}
+const { item } = Astro.props;
+const { Content } = await render(item);
+---
+<BaseLayout title={`${item.data.title} · Zicong Yang`} description={item.data.summary}>
+  <article class="container measure work-detail" style="padding-top:40px">
+    <h1>{item.data.title}</h1>
+    <div class="meta">
+      {item.data.role} · {item.data.org} · {item.data.start} – {item.data.end}
+    </div>
+    <p>{item.data.summary}</p>
+    <ul>{item.data.highlights.map((highlight) => <li>{highlight}</li>)}</ul>
+    <Content />
+    {item.data.stack.length > 0 && (
+      <div class="stack" style="margin-top:24px">
+        {item.data.stack.map((tech) => <span>{tech}</span>)}
+      </div>
+    )}
+    {item.data.links.length > 0 && (
+      <div class="links">
+        {item.data.links.map((link) => (
+          <a href={link.url} target="_blank" rel="noopener">{link.label}</a>
+        ))}
+      </div>
+    )}
+  </article>
+</BaseLayout>

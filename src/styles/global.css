@@ -161,3 +161,14 @@ h3 { font-size: 1.125rem; }
 .post-list time { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .lang-badge { font-size: 0.68rem; border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; color: var(--muted); }
 .links { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 20px; font-size: 0.88rem; }
+
+.timeline { list-style: none; margin: 0; padding: 0; }
+.timeline li { border-left: 2px solid var(--border); padding: 0 0 20px 16px; }
+.timeline h3 { font-size: 1rem; }
+.timeline .org { color: var(--accent); font-weight: 600; font-size: 0.9rem; }
+.timeline .when { font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.timeline ul { margin: 8px 0 0; padding-left: 18px; color: var(--muted); font-size: 0.88rem; }
+.work-detail h1 { margin-bottom: 8px; }
+.work-detail .meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 24px; }
+.work-detail ul { padding-left: 20px; }
+.work-detail li { margin-bottom: 8px; }
