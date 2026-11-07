@@ -2,11 +2,11 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TagFilter from '../../components/TagFilter.astro';
 import { getCollection } from 'astro:content';
-import { visiblePosts } from '../../lib/posts';
+import { postTags, visiblePosts } from '../../lib/posts';
 import { withBase } from '../../lib/url';
 
 const posts = visiblePosts(await getCollection('blog'));
-const tags = [...new Set(posts.flatMap((post) => post.data.tags))].sort();
+const tags = postTags(posts);
 ---
 <BaseLayout
   title="Writing · Zicong Yang"

@@ -1,19 +1,23 @@
 ---
+import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import PostList from '../../../components/PostList.astro';
 import { getCollection } from 'astro:content';
-import { visiblePosts } from '../../../lib/posts';
+import { postTags, visiblePosts } from '../../../lib/posts';
 import { withBase } from '../../../lib/url';
 
 export async function getStaticPaths() {
   const posts = visiblePosts(await getCollection('blog'));
-  const tags = [...new Set(posts.flatMap((post) => post.data.tags))];
-  return tags.map((tag) => ({
+  return postTags(posts).map((tag) => ({
     params: { tag },
     props: { tag, posts: posts.filter((post) => post.data.tags.includes(tag)) },
   }));
 }
 
+interface Props {
+  tag: string;
+  posts: CollectionEntry<'blog'>[];
+}
 const { tag, posts } = Astro.props;
 ---
 <BaseLayout title={`#${tag} · Writing`} description={`Posts tagged ${tag}.`} lang="zh-CN">

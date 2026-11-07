@@ -25,3 +25,12 @@
 
 - OG 图的 SVG 使用系统字体（Georgia/Helvetica），在没有这些字体的机器上重新生成会换字形；当前图片已提交，CI 不重跑。
 - 标签页目前没有分页；当前只有 3 个标签、1 篇文章，不需要。
+
+## 审查修复
+
+- `verify-build.mjs` 的 `countDirs` 支持排除，文章详情统计排除 `tag` 目录，避免标签目录顶替文章页。
+- 标签页补 `Props` 接口（`tag` 与 `posts`），恢复类型检查。
+- 抽出 `postTags()`，博客列表与标签页共用并统一排序。
+- `og:image` 补 `width/height/alt`，并加 `twitter:image`。
+
+验证：`npm test` 42/42；`npm run check` 0 errors；`npm run build` 20 页；`npm run verify` 全部通过；3 个标签页。

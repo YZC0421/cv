@@ -1,0 +1,221 @@
+## Commits
+0cbc49e feat: 增加标签页与社交分享图
+
+## Stat
+ .../progress.md                                    |    1 +
+ .../task-7-brief.md                                |  103 ++
+ .../task-7-report.md                               |   27 +
+ package-lock.json                                  | 1006 ++++++++++++++++----
+ package.json                                       |    4 +-
+ public/og.png                                      |  Bin 0 -> 25660 bytes
+ scripts/make-og.mjs                                |   13 +
+ src/layouts/BaseLayout.astro                       |    3 +
+ src/layouts/PostLayout.astro                       |    5 +-
+ src/pages/blog/index.astro                         |    3 +
+ src/pages/blog/tag/[tag].astro                     |   25 +
+ 11 files changed, 993 insertions(+), 197 deletions(-)
+
+## Diff
+diff --git a/package.json b/package.json
+index 1166d15..9e0556d 100644
+--- a/package.json
++++ b/package.json
+@@ -2,24 +2,26 @@
+   "name": "cv",
+   "type": "module",
+   "version": "1.0.0",
+   "private": true,
+   "scripts": {
+     "dev": "astro dev",
+     "build": "astro build",
+     "preview": "astro preview",
+     "check": "astro check",
+     "test": "tsx --test tests/*.test.ts",
+-    "verify": "node scripts/verify-build.mjs"
++    "verify": "node scripts/verify-build.mjs",
++    "og": "node scripts/make-og.mjs"
+   },
+   "devDependencies": {
+     "@astrojs/check": "^0.9.12",
++    "sharp": "^0.35.5",
+     "tsx": "^4.23.15",
+     "typescript": "^6.0.3"
+   },
+   "dependencies": {
+     "@astrojs/rss": "^4.0.19",
+     "@astrojs/sitemap": "^3.7.4",
+     "astro": "^5.18.2",
+     "zod": "^3.25.76"
+   }
+ }
+diff --git a/scripts/make-og.mjs b/scripts/make-og.mjs
+new file mode 100644
+index 0000000..3c8c5f4
+--- /dev/null
++++ b/scripts/make-og.mjs
+@@ -0,0 +1,13 @@
++import sharp from 'sharp';
++import { mkdir } from 'node:fs/promises';
++
++const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
++  <rect width="1200" height="630" fill="#0b1120"/>
++  <text x="80" y="290" font-family="Georgia, serif" font-size="92" fill="#e5e7eb">Zicong Yang</text>
++  <text x="80" y="360" font-family="Helvetica, Arial, sans-serif" font-size="30" fill="#94a3b8">Medical Signal Processing · Industrial Visual Inspection</text>
++  <rect x="80" y="420" width="120" height="4" fill="#60a5fa"/>
++</svg>`;
++
++await mkdir('public', { recursive: true });
++await sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toFile('public/og.png');
++console.log('wrote public/og.png');
+diff --git a/src/layouts/BaseLayout.astro b/src/layouts/BaseLayout.astro
+index dc975bb..d06c8dc 100644
+--- a/src/layouts/BaseLayout.astro
++++ b/src/layouts/BaseLayout.astro
+@@ -18,20 +18,21 @@ interface Props {
+ const {
+   title,
+   description,
+   lang = 'en',
+   type = 'website',
+   langLink,
+   profilePage = false,
+   noindex = false,
+ } = Astro.props;
+ const canonical = new URL(Astro.url.pathname.replace(/\/?$/, '/'), Astro.site);
++const ogImage = new URL(withBase('og.png'), Astro.site);
+ const personId = `${new URL(withBase(), Astro.site).href}#person`;
+ const profile = {
+   '@context': 'https://schema.org',
+   '@graph': [
+     { '@type': 'ProfilePage', mainEntity: { '@id': personId } },
+     {
+       '@type': 'Person',
+       '@id': personId,
+       name: site.name,
+       jobTitle: 'Software Engineer',
+@@ -46,20 +47,22 @@ const profile = {
+     <meta charset="utf-8" />
+     <meta name="viewport" content="width=device-width, initial-scale=1" />
+     <title>{title}</title>
+     <meta name="description" content={description} />
+     {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+     <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
+     <meta property="og:title" content={title} />
+     <meta property="og:description" content={description} />
+     <meta property="og:type" content={type} />
+     <meta property="og:url" content={canonical} />
++    <meta property="og:image" content={ogImage} />
++    <meta name="twitter:card" content="summary_large_image" />
+     <slot name="head" />
+     {profilePage && <script type="application/ld+json" set:html={JSON.stringify(profile)} />}
+     <script is:inline>
+       (() => {
+         let saved = null;
+         try {
+           saved = localStorage.getItem('theme');
+         } catch {
+           /* storage unavailable */
+         }
+diff --git a/src/layouts/PostLayout.astro b/src/layouts/PostLayout.astro
+index cbeda88..0970c7b 100644
+--- a/src/layouts/PostLayout.astro
++++ b/src/layouts/PostLayout.astro
+@@ -1,13 +1,14 @@
+ ---
+ import BaseLayout from './BaseLayout.astro';
+ import Toc from '../components/Toc.astro';
++import { withBase } from '../lib/url';
+ 
+ interface Props {
+   title: string;
+   description: string;
+   date: string;
+   lang: 'en' | 'zh';
+   tags: string[];
+   headings: { depth: number; slug: string; text: string }[];
+   readingTime: number;
+ }
+@@ -28,21 +29,23 @@ const hasToc = headings.some(
+     {tags.map((tag) => <meta property="article:tag" content={tag} />)}
+   </Fragment>
+   <div class="post-grid container" style="padding-top:24px">
+     <article>
+       <header class="post-header">
+         <h1>{title}</h1>
+         <div class="post-meta">
+           <time datetime={date}>{date}</time>
+           <span class="lang-badge">{lang === 'zh' ? '中文' : 'EN'}</span>
+           <span>{readingLabel}</span>
+-          {tags.map((tag) => <span class="lang-badge">{tag}</span>)}
++          {tags.map((tag) => (
++            <a class="lang-badge" href={withBase(`blog/tag/${tag}`)}>{tag}</a>
++          ))}
+         </div>
+       </header>
+       {hasToc && (
+         <details class="toc-mobile">
+           <summary>Table of contents</summary>
+           <Toc headings={headings} />
+         </details>
+       )}
+       <div class="prose"><slot /></div>
+       <slot name="footer" />
+diff --git a/src/pages/blog/index.astro b/src/pages/blog/index.astro
+index 5a77cc2..dbd11c1 100644
+--- a/src/pages/blog/index.astro
++++ b/src/pages/blog/index.astro
+@@ -19,20 +19,23 @@ const tags = [...new Set(posts.flatMap((post) => post.data.tags))].sort();
+       Technical notes, mostly in Chinese. {posts.length} {posts.length === 1 ? 'post' : 'posts'}.
+       <a href={withBase('rss.xml')}>RSS</a>
+     </p>
+     <TagFilter tags={tags} />
+     <ul class="post-list" id="post-list">
+       {posts.map((post) => (
+         <li data-tags={post.data.tags.join('|')}>
+           <time datetime={post.data.date}>{post.data.date}</time>
+           <a href={withBase(`blog/${post.id}`)}>{post.data.title}</a>
+           <span class="lang-badge">{post.data.lang === 'zh' ? '中文' : 'EN'}</span>
++          {post.data.tags.map((tag) => (
++            <a class="lang-badge" href={withBase(`blog/tag/${tag}`)}>{tag}</a>
++          ))}
+         </li>
+       ))}
+     </ul>
+   </div>
+ 
+   <script is:inline>
+     (() => {
+       const buttons = document.querySelectorAll('.filters button');
+       const rows = document.querySelectorAll('#post-list li');
+       buttons.forEach((btn) => {
+diff --git a/src/pages/blog/tag/[tag].astro b/src/pages/blog/tag/[tag].astro
+new file mode 100644
+index 0000000..ab563f7
+--- /dev/null
++++ b/src/pages/blog/tag/[tag].astro
+@@ -0,0 +1,25 @@
++---
++import BaseLayout from '../../../layouts/BaseLayout.astro';
++import PostList from '../../../components/PostList.astro';
++import { getCollection } from 'astro:content';
++import { visiblePosts } from '../../../lib/posts';
++import { withBase } from '../../../lib/url';
++
++export async function getStaticPaths() {
++  const posts = visiblePosts(await getCollection('blog'));
++  const tags = [...new Set(posts.flatMap((post) => post.data.tags))];
++  return tags.map((tag) => ({
++    params: { tag },
++    props: { tag, posts: posts.filter((post) => post.data.tags.includes(tag)) },
++  }));
++}
++
++const { tag, posts } = Astro.props;
++---
++<BaseLayout title={`#${tag} · Writing`} description={`Posts tagged ${tag}.`} lang="zh-CN">
++  <div class="container measure" style="padding-top:40px">
++    <h1>#{tag}</h1>
++    <p class="muted"><a href={withBase('blog')}>← All writing</a></p>
++    <PostList posts={posts} />
++  </div>
++</BaseLayout>

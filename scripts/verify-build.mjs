@@ -24,8 +24,10 @@ const read = async (path) => {
 const countFiles = async (dir, ext) =>
   (await readdir(dir)).filter((file) => file.endsWith(ext)).length;
 
-const countDirs = async (dir) =>
-  (await readdir(dir, { withFileTypes: true })).filter((entry) => entry.isDirectory()).length;
+const countDirs = async (dir, exclude = []) =>
+  (await readdir(dir, { withFileTypes: true })).filter(
+    (entry) => entry.isDirectory() && !exclude.includes(entry.name)
+  ).length;
 
 const indexRoutes = [
   'dist/index.html',
@@ -48,7 +50,7 @@ for (const route of indexRoutes) await must(route, route);
 const publicationFiles = await countFiles('src/content/publications', '.md');
 const workFiles = await countFiles('src/content/work', '.md');
 const workDetails = await countDirs('dist/work');
-const postDetails = await countDirs('dist/blog');
+const postDetails = await countDirs('dist/blog', ['tag']);
 
 checks.push(['work detail pages match content files', workDetails === workFiles]);
 checks.push(['blog has at least one post page', postDetails >= 1]);
