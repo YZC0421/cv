@@ -34,7 +34,7 @@ npm run build
 
 - 新增一篇论文只需新增一个文件。
 - 构建产物零 CDN 依赖，断网也能正常显示。
-- 中英内容各自拥有稳定 URL，canonical 指向正确（`hreflang` 待补）。
+- 中英内容各自拥有稳定 URL，canonical 与 `hreflang` 均正确。
 - 下一步会给 About 页补打印样式，届时可直接输出 PDF。
 
 ## 没做什么

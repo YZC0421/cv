@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getEntry, render } from 'astro:content';
+import { withBase } from '../../lib/url';
+
+const entry = await getEntry('pages', 'aboutzh');
+if (!entry) throw new Error('about.zh.md is missing');
+const { Content } = await render(entry);
+---
+<BaseLayout
+  title="关于 · 杨梓聪"
+  description="教育经历、研究方向、技能与联系方式。"
+  lang="zh-CN"
+>
+  <Fragment slot="head">
+    <link rel="alternate" hreflang="en" href={new URL(withBase('about'), Astro.site)} />
+  </Fragment>
+  <div class="container measure" style="padding-top:40px">
+    <div class="about-actions">
+      <button type="button" onclick="window.print()">下载 CV (PDF)</button>
+      <a href={withBase('about')} hreflang="en">English</a>
+    </div>
+    <div class="prose"><Content /></div>
+  </div>
+</BaseLayout>

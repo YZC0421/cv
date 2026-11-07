@@ -1,0 +1,166 @@
+## Commits
+c0672a2 fix: 修正目录锚点遮挡与脚注样式
+
+## Stat
+ .../review-task-7-final3.diff                      | 526 +++++++++++++++++++++
+ src/content/blog/from-single-page-to-astro.md      |   2 +-
+ src/pages/blog/index.astro                         |  26 +-
+ src/pages/rss.xml.ts                               |   1 +
+ src/styles/global.css                              |  22 +-
+ 5 files changed, 565 insertions(+), 12 deletions(-)
+
+## Diff
+diff --git a/src/content/blog/from-single-page-to-astro.md b/src/content/blog/from-single-page-to-astro.md
+index 2513a4d..7076248 100644
+--- a/src/content/blog/from-single-page-to-astro.md
++++ b/src/content/blog/from-single-page-to-astro.md
+@@ -27,21 +27,21 @@ draft: false
+ ```bash
+ npm test
+ npm run check
+ npm run build
+ ```
+ 
+ ## 得到什么
+ 
+ - 新增一篇论文只需新增一个文件。
+ - 构建产物零 CDN 依赖，断网也能正常显示。
+-- 中英内容各自拥有稳定 URL，`hreflang` 与 canonical 正确。
++- 中英内容各自拥有稳定 URL，canonical 指向正确（`hreflang` 待补）。
+ - 下一步会给 About 页补打印样式，届时可直接输出 PDF。
+ 
+ ## 没做什么
+ 
+ 没有加评论、站内搜索和访问统计。论文只有六条、文章不足十篇时，这些能力带来的维护
+ 成本高于收益。
+ 
+ ## 一个容易踩的坑
+ 
+ 第一版页面构建出来后，导航链接全部变成了 `/cvpublications` 这样的坏路径。原因是用
+diff --git a/src/pages/blog/index.astro b/src/pages/blog/index.astro
+index 0963445..5a77cc2 100644
+--- a/src/pages/blog/index.astro
++++ b/src/pages/blog/index.astro
+@@ -1,43 +1,49 @@
+ ---
+ import BaseLayout from '../../layouts/BaseLayout.astro';
+ import TagFilter from '../../components/TagFilter.astro';
+ import { getCollection } from 'astro:content';
+ import { visiblePosts } from '../../lib/posts';
+ import { withBase } from '../../lib/url';
+ 
+ const posts = visiblePosts(await getCollection('blog'));
+ const tags = [...new Set(posts.flatMap((post) => post.data.tags))].sort();
+ ---
+-<BaseLayout title="Writing · Zicong Yang" description="Notes on software engineering, computer vision, and research.">
++<BaseLayout
++  title="Writing · Zicong Yang"
++  description="Notes on software engineering, computer vision, and research."
++  lang="zh-CN"
++>
+   <div class="container measure" style="padding-top:40px">
+     <h1>Writing</h1>
+     <p class="muted">
+       Technical notes, mostly in Chinese. {posts.length} {posts.length === 1 ? 'post' : 'posts'}.
+       <a href={withBase('rss.xml')}>RSS</a>
+     </p>
+     <TagFilter tags={tags} />
+     <ul class="post-list" id="post-list">
+       {posts.map((post) => (
+         <li data-tags={post.data.tags.join('|')}>
+           <time datetime={post.data.date}>{post.data.date}</time>
+           <a href={withBase(`blog/${post.id}`)}>{post.data.title}</a>
+           <span class="lang-badge">{post.data.lang === 'zh' ? '中文' : 'EN'}</span>
+         </li>
+       ))}
+     </ul>
+   </div>
+ 
+   <script is:inline>
+-    const buttons = document.querySelectorAll('.filters button');
+-    const rows = document.querySelectorAll('#post-list li');
+-    buttons.forEach((btn) => {
+-      btn.addEventListener('click', () => {
+-        buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+-        const tag = btn.dataset.tag;
+-        rows.forEach((row) => {
+-          row.hidden = tag !== 'all' && !(row.dataset.tags ?? '').split('|').includes(tag);
++    (() => {
++      const buttons = document.querySelectorAll('.filters button');
++      const rows = document.querySelectorAll('#post-list li');
++      buttons.forEach((btn) => {
++        btn.addEventListener('click', () => {
++          buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
++          const tag = btn.dataset.tag;
++          rows.forEach((row) => {
++            row.hidden = tag !== 'all' && !(row.dataset.tags ?? '').split('|').includes(tag);
++          });
+         });
+       });
+-    });
++    })();
+   </script>
+ </BaseLayout>
+diff --git a/src/pages/rss.xml.ts b/src/pages/rss.xml.ts
+index 0052647..26014e8 100644
+--- a/src/pages/rss.xml.ts
++++ b/src/pages/rss.xml.ts
+@@ -10,13 +10,14 @@ export async function GET(context: APIContext) {
+   return rss({
+     title: 'Zicong Yang · Writing',
+     description: 'Notes on software engineering, computer vision, and research.',
+     site: new URL(import.meta.env.BASE_URL, context.site!),
+     customData: '<language>zh-CN</language>',
+     items: posts.map((post) => ({
+       title: post.data.title,
+       pubDate: new Date(post.data.date),
+       description: post.data.summary,
+       link: withBase(`blog/${post.id}`),
++      categories: post.data.tags,
+     })),
+   });
+ }
+diff --git a/src/styles/global.css b/src/styles/global.css
+index 98d3407..4080931 100644
+--- a/src/styles/global.css
++++ b/src/styles/global.css
+@@ -189,18 +189,38 @@ h3 { font-size: 1.125rem; }
+ .toc ul { list-style: none; margin: 0; padding: 0; }
+ .toc li { margin: 6px 0; }
+ .toc a { color: var(--muted); }
+ .post-grid { display: grid; gap: 32px; }
+ @media (min-width: 1024px) { .post-grid { grid-template-columns: 680px 200px; justify-content: center; } }
+ .toc-mobile { margin: 20px 0; }
+ .toc-mobile summary { cursor: pointer; font-size: 0.85rem; color: var(--muted); margin-bottom: 10px; }
+ @media (min-width: 1024px) { .toc-mobile { display: none; } }
+ .toc-aside { display: none; }
+ @media (min-width: 1024px) {
+-  .toc-aside { display: block; position: sticky; top: 80px; align-self: start; }
++  .toc-aside {
++    display: block;
++    position: sticky;
++    top: 80px;
++    align-self: start;
++    max-height: calc(100vh - 100px);
++    overflow-y: auto;
++  }
++}
++.prose :is(h2, h3)[id] { scroll-margin-top: 76px; }
++.sr-only {
++  position: absolute;
++  width: 1px;
++  height: 1px;
++  padding: 0;
++  margin: -1px;
++  overflow: hidden;
++  clip: rect(0, 0, 0, 0);
++  white-space: nowrap;
++  border: 0;
+ }
++[data-footnotes] { margin-top: 40px; font-size: 0.9rem; color: var(--muted); }
+ .post-list li[hidden] { display: none; }
+ .astro-code { background-color: var(--shiki-light-bg); border-radius: 8px; }
+ .astro-code span { color: var(--shiki-light); }
+ [data-theme='dark'] .astro-code { background-color: var(--shiki-dark-bg); }
+ [data-theme='dark'] .astro-code span { color: var(--shiki-dark); }
+ .next-prev { display: flex; justify-content: space-between; gap: 16px; margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 0.88rem; }

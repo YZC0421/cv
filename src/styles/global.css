@@ -218,6 +218,28 @@ h3 { font-size: 1.125rem; }
   border: 0;
 }
 [data-footnotes] { margin-top: 40px; font-size: 0.9rem; color: var(--muted); }
+
+.about-actions { display: flex; flex-wrap: wrap; gap: 16px; margin: 20px 0 32px; font-size: 0.88rem; }
+.about-actions button {
+  font: inherit;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+@page { size: A4; margin: 16mm; }
+
+@media print {
+  .site-header, .site-footer, .skip, .about-actions { display: none !important; }
+  body { background: #fff; color: #000; font-size: 11pt; }
+  .container { max-width: none; padding: 0; }
+  a { color: #000; text-decoration: none; }
+  h2 { break-after: avoid; }
+  li, .print-block { break-inside: avoid; }
+}
 .post-list li[hidden] { display: none; }
 .astro-code { background-color: var(--shiki-light-bg); border-radius: 8px; }
 .astro-code span { color: var(--shiki-light); }
