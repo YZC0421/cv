@@ -50,3 +50,17 @@
 - `grep href dist/index.html`：`/cv/`、`/cv/publications`、`/cv/work`、`/cv/blog`、`/cv/about`、`/cv/rss.xml`、`/cv/favicon.svg` 均正确。
 - canonical：`https://yzc0421.github.io/cv/`。
 - `npm run check`：8 files，0 errors，0 warnings，0 hints。
+
+## 第二轮审查修复
+
+- 桌面导航与移动菜单解耦：桌面使用独立 `<nav class="nav desktop-nav">`，`<details>` 只在 `<768px` 显示，避免关闭态 `<details>` 的 `content-visibility: hidden` 隐藏主导航。
+- `withBase` 对无扩展名的路由补尾斜杠（`/cv/publications/`），对 `rss.xml`、`favicon.svg` 等文件保留扩展名，消除 301 跳转。
+- `stripBase` 增加 `startsWith(BASE)` 守卫，路径不含前缀时原样返回。
+- 主题按钮 `aria-label` 改为 `Dark mode`，状态交给 `aria-pressed`。
+
+验证：
+
+- `npm run build`：成功。
+- 产物链接：`/cv/`、`/cv/publications/`、`/cv/work/`、`/cv/blog/`、`/cv/about/`、`/cv/rss.xml`、`/cv/favicon.svg`。
+- `npm run check`：8 files，0 errors，0 warnings，0 hints。
+- 环境未安装浏览器自动化工具，桌面导航的渲染验证改为结构性保证（不再依赖 `<details>` 打开状态），最终验收任务会再实测。
