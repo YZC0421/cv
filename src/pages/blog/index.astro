@@ -8,7 +8,11 @@ import { withBase } from '../../lib/url';
 const posts = visiblePosts(await getCollection('blog'));
 const tags = [...new Set(posts.flatMap((post) => post.data.tags))].sort();
 ---
-<BaseLayout title="Writing · Zicong Yang" description="Notes on software engineering, computer vision, and research.">
+<BaseLayout
+  title="Writing · Zicong Yang"
+  description="Notes on software engineering, computer vision, and research."
+  lang="zh-CN"
+>
   <div class="container measure" style="padding-top:40px">
     <h1>Writing</h1>
     <p class="muted">
@@ -28,16 +32,18 @@ const tags = [...new Set(posts.flatMap((post) => post.data.tags))].sort();
   </div>
 
   <script is:inline>
-    const buttons = document.querySelectorAll('.filters button');
-    const rows = document.querySelectorAll('#post-list li');
-    buttons.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
-        const tag = btn.dataset.tag;
-        rows.forEach((row) => {
-          row.hidden = tag !== 'all' && !(row.dataset.tags ?? '').split('|').includes(tag);
+    (() => {
+      const buttons = document.querySelectorAll('.filters button');
+      const rows = document.querySelectorAll('#post-list li');
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+          const tag = btn.dataset.tag;
+          rows.forEach((row) => {
+            row.hidden = tag !== 'all' && !(row.dataset.tags ?? '').split('|').includes(tag);
+          });
         });
       });
-    });
+    })();
   </script>
 </BaseLayout>
