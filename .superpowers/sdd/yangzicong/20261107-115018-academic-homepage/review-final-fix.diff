@@ -1,0 +1,559 @@
+## Commits
+d7c1d0f fix: 补齐 Pages 配置并处置最终审查问题
+
+## Stat
+ .github/workflows/deploy.yml                       |    1 +
+ .../review-final-code.diff                         | 2269 ++++++++++++++++++++
+ README.md                                          |    3 +-
+ scripts/verify-build.mjs                           |   28 +-
+ src/content/pages/about-en.md                      |    1 +
+ src/content/pages/about-zh.md                      |    1 +
+ src/layouts/PageLayout.astro                       |   51 +
+ src/lib/date.ts                                    |   12 +-
+ src/lib/format.ts                                  |    8 +-
+ src/lib/schema.ts                                  |    1 +
+ src/lib/url.ts                                     |   18 +-
+ src/pages/about.astro                              |   29 +-
+ src/pages/about/zh.astro                           |   29 +-
+ src/pages/index.astro                              |   11 +-
+ tests/format.test.ts                               |    7 +
+ tests/url.test.ts                                  |   36 +
+ 16 files changed, 2445 insertions(+), 60 deletions(-)
+
+## Diff
+diff --git a/.github/workflows/deploy.yml b/.github/workflows/deploy.yml
+index 834388e..a8c12a4 100644
+--- a/.github/workflows/deploy.yml
++++ b/.github/workflows/deploy.yml
+@@ -16,20 +16,21 @@ concurrency:
+ 
+ jobs:
+   build:
+     runs-on: ubuntu-latest
+     steps:
+       - uses: actions/checkout@v4
+       - uses: actions/setup-node@v4
+         with:
+           node-version: 22
+           cache: npm
++      - uses: actions/configure-pages@v5
+       - run: npm ci
+       - run: npm test
+       - run: npm run check
+       - run: npm run build
+       - run: npm run verify
+       - uses: actions/upload-pages-artifact@v3
+         with:
+           path: dist
+ 
+   deploy:
+diff --git a/README.md b/README.md
+index 7cd6069..661b72d 100644
+--- a/README.md
++++ b/README.md
+@@ -22,21 +22,22 @@ npm run verify   # assert build output
+    `src/lib/schema.ts`.
+ 2. `doi` is required. `selected: true` pins an entry into the home page; the home page always
+    shows three entries, filling the remainder with first-author papers, then the newest.
+ 3. Run `npm run check`, `npm run build`, and `npm run verify`.
+ 
+ ## Add a post
+ 
+ 1. Create `src/content/blog/<slug>.md`; `lang` is `en` or `zh`, `tags` needs at least one
+    entry, `summary` at most 160 characters.
+ 2. `draft: true` keeps it out of the list, RSS, and sitemap.
+-3. Future dates publish automatically: entries dated after the build day are excluded.
++3. Entries dated after the build day are excluded; they appear on the first build after
++   that date (a push or a manual workflow run).
+ 
+ ## Add a project or experience
+ 
+ 1. Create `src/content/work/<slug>.md`; `kind` is `experience` or `project`.
+ 2. `highlights` needs at least one factual bullet; do not add claims without a source.
+ 3. Projects sort by `order`; experiences sort by `start`, newest first.
+ 
+ ## Deploy
+ 
+ Pushing to `main` triggers `.github/workflows/deploy.yml`. The site is served from
+diff --git a/scripts/verify-build.mjs b/scripts/verify-build.mjs
+index 660b2e2..656cbc3 100644
+--- a/scripts/verify-build.mjs
++++ b/scripts/verify-build.mjs
+@@ -75,20 +75,46 @@ const about = await read('dist/about/index.html');
+ checks.push(['about has h1', /<h1[^>]*>About<\/h1>/.test(about)]);
+ checks.push(['about declares alternate zh-CN', /rel="alternate" hreflang="zh-CN"/.test(about)]);
+ checks.push(['about declares alternate en', /rel="alternate" hreflang="en"/.test(about)]);
+ checks.push(['about declares x-default', /hreflang="x-default"/.test(about)]);
+ 
+ const notFound = await read('dist/404.html');
+ checks.push(['404 is noindex', /name="robots"[^>]*noindex/.test(notFound)]);
+ 
+ const sitemap = await read('dist/sitemap-0.xml');
+ checks.push(['sitemap excludes 404', !sitemap.includes('/404')]);
+-checks.push(['sitemap excludes drafts', !sitemap.includes('/blog/draft-check/')]);
++
++const blogList = await read('dist/blog/index.html');
++const blogFiles = (await readdir('src/content/blog')).filter((file) => file.endsWith('.md'));
++const today = new Intl.DateTimeFormat('en-CA', {
++  timeZone: 'Asia/Shanghai',
++  year: 'numeric',
++  month: '2-digit',
++  day: '2-digit',
++}).format(new Date());
++const hiddenPosts = [];
++
++for (const file of blogFiles) {
++  const source = await readFile(`src/content/blog/${file}`, 'utf8');
++  const draft = /^draft:\s*true\s*$/m.test(source);
++  const date = source.match(/^date:\s*"(\d{4}-\d{2}-\d{2})"/m)?.[1];
++  if (draft || (date && date > today)) hiddenPosts.push(file.replace(/\.md$/, ''));
++}
++
++checks.push([
++  'hidden posts stay out of list, rss and sitemap',
++  hiddenPosts.every(
++    (slug) =>
++      !blogList.includes(`/blog/${slug}/`) &&
++      !rss.includes(`/blog/${slug}/`) &&
++      !sitemap.includes(`/blog/${slug}/`)
++  ),
++]);
+ 
+ const failed = checks.filter(([, ok]) => !ok);
+ for (const [label, ok] of checks) console.log(`${ok ? 'ok  ' : 'FAIL'} ${label}`);
+ 
+ if (failed.length) {
+   console.error(`\n${failed.length} check(s) failed`);
+   process.exit(1);
+ }
+ console.log('\nall checks passed');
+diff --git a/src/content/pages/about-en.md b/src/content/pages/about-en.md
+index 8817815..5763c8a 100644
+--- a/src/content/pages/about-en.md
++++ b/src/content/pages/about-en.md
+@@ -1,13 +1,14 @@
+ ---
+ title: "About"
+ updated: "2026-11-07"
++summary: "B.E. in Software Engineering at Zhuhai College of Science and Technology, with first-author publications in Scientific Reports and CVIDL."
+ ---
+ 
+ ## Education
+ 
+ **B.E. in Software Engineering**, Zhuhai College of Science and Technology (formerly Jilin
+ University Zhuhai College), 2021.09 – 2025.07. GPA 3.64/4.0, top 1% of the major.
+ 
+ ## Research
+ 
+ My work focuses on medical signal processing and industrial visual inspection. I designed
+diff --git a/src/content/pages/about-zh.md b/src/content/pages/about-zh.md
+index aa76dab..8f84b57 100644
+--- a/src/content/pages/about-zh.md
++++ b/src/content/pages/about-zh.md
+@@ -1,13 +1,14 @@
+ ---
+ title: "关于"
+ updated: "2026-11-07"
++summary: "珠海科技学院软件工程本科，在 Scientific Reports 与 CVIDL 发表一作论文。"
+ ---
+ 
+ ## 教育经历
+ 
+ **软件工程 本科**，珠海科技学院（原吉林大学珠海学院），2021.09 – 2025.07。
+ GPA 3.64/4.0，专业前 1%。
+ 
+ ## 研究方向
+ 
+ 主要关注医学信号处理与工业视觉检测。设计 STFAC-ECGNet 多尺度时空融合网络，用于多导联
+diff --git a/src/layouts/PageLayout.astro b/src/layouts/PageLayout.astro
+new file mode 100644
+index 0000000..0b0f414
+--- /dev/null
++++ b/src/layouts/PageLayout.astro
+@@ -0,0 +1,51 @@
++---
++import BaseLayout from './BaseLayout.astro';
++
++interface Props {
++  title: string;
++  description: string;
++  lang?: string;
++  langLink?: { href: string; label: string; lang: string };
++  heading: string;
++  updated: string;
++  updatedLabel: string;
++  printLabel: string;
++  enHref: string | URL;
++  zhHref: string | URL;
++}
++const {
++  title,
++  description,
++  lang,
++  langLink,
++  heading,
++  updated,
++  updatedLabel,
++  printLabel,
++  enHref,
++  zhHref,
++} = Astro.props;
++---
++<BaseLayout
++  title={title}
++  description={description}
++  lang={lang}
++  langLink={langLink}
++  profilePage
++>
++  <Fragment slot="head">
++    <link rel="alternate" hreflang="en" href={enHref} />
++    <link rel="alternate" hreflang="zh-CN" href={zhHref} />
++    <link rel="alternate" hreflang="x-default" href={enHref} />
++  </Fragment>
++  <div class="container measure" style="padding-top:40px">
++    <div class="page-head">
++      <h1>{heading}</h1>
++      <span class="muted">{updatedLabel} {updated}</span>
++    </div>
++    <div class="about-actions">
++      <button type="button" onclick="window.print()">{printLabel}</button>
++    </div>
++    <div class="prose"><slot /></div>
++  </div>
++</BaseLayout>
+diff --git a/src/lib/date.ts b/src/lib/date.ts
+index e28a64a..12c8a5f 100644
+--- a/src/lib/date.ts
++++ b/src/lib/date.ts
+@@ -1,6 +1,10 @@
++const formatter = new Intl.DateTimeFormat('en-CA', {
++  timeZone: 'Asia/Shanghai',
++  year: 'numeric',
++  month: '2-digit',
++  day: '2-digit',
++});
++
+ export function localToday(now = new Date()): string {
+-  const year = now.getFullYear();
+-  const month = String(now.getMonth() + 1).padStart(2, '0');
+-  const day = String(now.getDate()).padStart(2, '0');
+-  return `${year}-${month}-${day}`;
++  return formatter.format(now);
+ }
+diff --git a/src/lib/format.ts b/src/lib/format.ts
+index 84c28b9..0e4b04d 100644
+--- a/src/lib/format.ts
++++ b/src/lib/format.ts
+@@ -1,19 +1,25 @@
+ export function readingMinutes(body: string): number {
+   const cjk = body.match(/[\u4e00-\u9fa5]/g)?.length ?? 0;
+   const latin = body.match(/[A-Za-z0-9]+/g)?.length ?? 0;
+   return Math.max(1, Math.ceil(cjk / 400 + latin / 200));
+ }
+ 
++const escapeHtml = (value: string) =>
++  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
++
+ export function boldSelf(authors: string[], self = 'Zicong Yang'): string {
+   return authors
+-    .map((name) => (name.trim() === self ? `<strong>${name}</strong>` : name))
++    .map((name) => {
++      const safe = escapeHtml(name);
++      return name.trim() === self ? `<strong>${safe}</strong>` : safe;
++    })
+     .join(', ');
+ }
+ 
+ export function toBibtex(input: {
+   title: string;
+   authors: string[];
+   venue: string;
+   year: number;
+   doi: string;
+   type: 'journal' | 'conference';
+diff --git a/src/lib/schema.ts b/src/lib/schema.ts
+index 412b060..7864c51 100644
+--- a/src/lib/schema.ts
++++ b/src/lib/schema.ts
+@@ -46,15 +46,16 @@ export const blogSchema = z.object({
+   date: isoDate,
+   lang: z.enum(['en', 'zh']),
+   tags: z.array(z.string().min(1)).min(1),
+   summary: z.string().min(1).max(160),
+   draft: z.boolean().default(false),
+ });
+ 
+ export const pageSchema = z.object({
+   title: z.string().min(1),
+   updated: isoDate,
++  summary: z.string().min(1).max(200).optional(),
+ });
+ 
+ export type Publication = z.infer<typeof publicationSchema>;
+ export type Work = z.infer<typeof workSchema>;
+ export type BlogPost = z.infer<typeof blogSchema>;
+diff --git a/src/lib/url.ts b/src/lib/url.ts
+index 524cf09..59ae76b 100644
+--- a/src/lib/url.ts
++++ b/src/lib/url.ts
+@@ -1,20 +1,22 @@
+-const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
++function defaultBase(): string {
++  return import.meta.env.BASE_URL.replace(/\/$/, '');
++}
+ 
+-export function withBase(path = ''): string {
++export function withBase(path = '', base = defaultBase()): string {
+   const match = path.match(/^([^?#]*)(.*)$/);
+   const pathname = match?.[1] ?? '';
+   const suffix = match?.[2] ?? '';
+   const clean = pathname.replace(/^\/+/, '').replace(/\/+$/, '');
+ 
+-  if (!clean) return `${BASE}/${suffix}`;
++  if (!clean) return `${base}/${suffix}`;
+ 
+   const isFile = /\.[a-z0-9]+$/i.test(clean);
+-  return `${BASE}/${clean}${isFile ? '' : '/'}${suffix}`;
++  return `${base}/${clean}${isFile ? '' : '/'}${suffix}`;
+ }
+ 
+-export function stripBase(pathname: string): string {
+-  if (pathname === BASE) return '/';
+-  if (!pathname.startsWith(`${BASE}/`)) return pathname;
+-  const stripped = pathname.slice(BASE.length);
++export function stripBase(pathname: string, base = defaultBase()): string {
++  if (pathname === base) return '/';
++  if (!pathname.startsWith(`${base}/`)) return pathname;
++  const stripped = pathname.slice(base.length);
+   return stripped === '' ? '/' : stripped;
+ }
+diff --git a/src/pages/about.astro b/src/pages/about.astro
+index 881d0ad..4cae955 100644
+--- a/src/pages/about.astro
++++ b/src/pages/about.astro
+@@ -1,33 +1,24 @@
+ ---
+-import BaseLayout from '../layouts/BaseLayout.astro';
++import PageLayout from '../layouts/PageLayout.astro';
+ import { getEntry, render } from 'astro:content';
+ import { withBase } from '../lib/url';
+ 
+ const entry = await getEntry('pages', 'about-en');
+ if (!entry) throw new Error('about-en.md is missing');
+ const { Content } = await render(entry);
+ const enHref = new URL(withBase('about'), Astro.site);
+ const zhHref = new URL(withBase('about/zh'), Astro.site);
+ ---
+-<BaseLayout
++<PageLayout
+   title="About · Zicong Yang"
+   description="Education, research, skills, and contact."
+   langLink={{ href: withBase('about/zh'), label: '中文', lang: 'zh-CN' }}
+-  profilePage
++  heading={entry.data.title}
++  updated={entry.data.updated}
++  updatedLabel="Updated"
++  printLabel="Download CV (PDF)"
++  enHref={enHref}
++  zhHref={zhHref}
+ >
+-  <Fragment slot="head">
+-    <link rel="alternate" hreflang="en" href={enHref} />
+-    <link rel="alternate" hreflang="zh-CN" href={zhHref} />
+-    <link rel="alternate" hreflang="x-default" href={enHref} />
+-  </Fragment>
+-  <div class="container measure" style="padding-top:40px">
+-    <div class="page-head">
+-      <h1>{entry.data.title}</h1>
+-      <span class="muted">Updated {entry.data.updated}</span>
+-    </div>
+-    <div class="about-actions">
+-      <button type="button" onclick="window.print()">Download CV (PDF)</button>
+-    </div>
+-    <div class="prose"><Content /></div>
+-  </div>
+-</BaseLayout>
++  <Content />
++</PageLayout>
+diff --git a/src/pages/about/zh.astro b/src/pages/about/zh.astro
+index 31a4490..7d63ee4 100644
+--- a/src/pages/about/zh.astro
++++ b/src/pages/about/zh.astro
+@@ -1,34 +1,25 @@
+ ---
+-import BaseLayout from '../../layouts/BaseLayout.astro';
++import PageLayout from '../../layouts/PageLayout.astro';
+ import { getEntry, render } from 'astro:content';
+ import { withBase } from '../../lib/url';
+ 
+ const entry = await getEntry('pages', 'about-zh');
+ if (!entry) throw new Error('about-zh.md is missing');
+ const { Content } = await render(entry);
+ const enHref = new URL(withBase('about'), Astro.site);
+ const zhHref = new URL(withBase('about/zh'), Astro.site);
+ ---
+-<BaseLayout
++<PageLayout
+   title="关于 · 杨梓聪"
+   description="教育经历、研究方向、技能与联系方式。"
+   lang="zh-CN"
+   langLink={{ href: withBase('about'), label: 'English', lang: 'en' }}
+-  profilePage
++  heading={entry.data.title}
++  updated={entry.data.updated}
++  updatedLabel="更新于"
++  printLabel="下载 CV (PDF)"
++  enHref={enHref}
++  zhHref={zhHref}
+ >
+-  <Fragment slot="head">
+-    <link rel="alternate" hreflang="en" href={enHref} />
+-    <link rel="alternate" hreflang="zh-CN" href={zhHref} />
+-    <link rel="alternate" hreflang="x-default" href={enHref} />
+-  </Fragment>
+-  <div class="container measure" style="padding-top:40px">
+-    <div class="page-head">
+-      <h1>{entry.data.title}</h1>
+-      <span class="muted">更新于 {entry.data.updated}</span>
+-    </div>
+-    <div class="about-actions">
+-      <button type="button" onclick="window.print()">下载 CV (PDF)</button>
+-    </div>
+-    <div class="prose"><Content /></div>
+-  </div>
+-</BaseLayout>
++  <Content />
++</PageLayout>
+diff --git a/src/pages/index.astro b/src/pages/index.astro
+index c559ae7..1342a8d 100644
+--- a/src/pages/index.astro
++++ b/src/pages/index.astro
+@@ -1,27 +1,28 @@
+ ---
+ import BaseLayout from '../layouts/BaseLayout.astro';
+ import Hero from '../components/Hero.astro';
+ import PublicationItem from '../components/PublicationItem.astro';
+ import WorkCard from '../components/WorkCard.astro';
+ import PostList from '../components/PostList.astro';
+-import { getCollection } from 'astro:content';
++import { getCollection, getEntry } from 'astro:content';
+ import { selectHomepage } from '../lib/publications';
+ import { visiblePosts } from '../lib/posts';
+ import { withBase } from '../lib/url';
+ 
+ const pubs = selectHomepage(await getCollection('publications'));
+ const work = (await getCollection('work'))
+   .filter((item) => item.data.kind === 'project')
+   .sort((a, b) => a.data.order - b.data.order)
+   .slice(0, 3);
+ const posts = visiblePosts(await getCollection('blog')).slice(0, 2);
++const about = await getEntry('pages', 'about-en');
+ ---
+ <BaseLayout
+   title="Zicong Yang · Medical Signal Processing & Computer Vision"
+   description="Personal site of Zicong Yang: publications, engineering work, and technical writing."
+   profilePage
+ >
+   <Hero />
+ 
+   <section class="section container measure">
+     <div class="section-head">
+@@ -46,21 +47,17 @@ const posts = visiblePosts(await getCollection('blog')).slice(0, 2);
+       <div class="section-head">
+         <h2>Latest Writing</h2>
+         <a href={withBase('blog')}>All writing →</a>
+       </div>
+       <PostList posts={posts} />
+     </section>
+   )}
+ 
+   <section class="section container measure">
+     <div class="section-head"><h2>About</h2></div>
+-    <p class="muted">
+-      B.E. in Software Engineering, Zhuhai College of Science and Technology (2021–2025).
+-      First-author publications in Scientific Reports and CVIDL; research on ECG analysis and
+-      industrial visual inspection.
+-    </p>
++    <p class="muted">{about?.data.summary}</p>
+     <div class="links">
+       <a href={withBase('about')}>More about me →</a>
+-      <a href={withBase('about')}>Download CV (PDF)</a>
++      <a href={withBase('about')}>CV (print / PDF)</a>
+     </div>
+   </section>
+ </BaseLayout>
+diff --git a/tests/format.test.ts b/tests/format.test.ts
+index 93d79b2..c7f0374 100644
+--- a/tests/format.test.ts
++++ b/tests/format.test.ts
+@@ -10,20 +10,27 @@ test('readingMinutes grows with content length', () => {
+   assert.ok(readingMinutes('中'.repeat(1200)) >= 3);
+ });
+ 
+ test('boldSelf wraps the configured name only', () => {
+   assert.equal(
+     boldSelf(['Zicong Yang', 'A. Other'], 'Zicong Yang'),
+     '<strong>Zicong Yang</strong>, A. Other'
+   );
+ });
+ 
++test('boldSelf escapes HTML in author names', () => {
++  assert.equal(
++    boldSelf(['ATLAS <CMS> & Co', 'Zicong Yang'], 'Zicong Yang'),
++    'ATLAS &lt;CMS&gt; &amp; Co, <strong>Zicong Yang</strong>'
++  );
++});
++
+ test('toBibtex produces an article entry with doi and year', () => {
+   const bib = toBibtex({
+     title: 'A paper',
+     authors: ['Zicong Yang', 'A. Other'],
+     venue: 'Scientific Reports',
+     year: 2024,
+     doi: '10.1038/s41598-024-71700-z',
+     type: 'journal',
+   });
+   assert.match(bib, /@article\{/);
+diff --git a/tests/url.test.ts b/tests/url.test.ts
+new file mode 100644
+index 0000000..3f87142
+--- /dev/null
++++ b/tests/url.test.ts
+@@ -0,0 +1,36 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { withBase, stripBase } from '../src/lib/url.ts';
++
++test('withBase returns the site root for an empty path', () => {
++  assert.equal(withBase('', '/cv'), '/cv/');
++  assert.equal(withBase('/', '/cv'), '/cv/');
++});
++
++test('withBase adds a trailing slash to routes', () => {
++  assert.equal(withBase('publications', '/cv'), '/cv/publications/');
++  assert.equal(withBase('/about/zh', '/cv'), '/cv/about/zh/');
++});
++
++test('withBase keeps file extensions unslashed', () => {
++  assert.equal(withBase('rss.xml', '/cv'), '/cv/rss.xml');
++  assert.equal(withBase('favicon.svg', '/cv'), '/cv/favicon.svg');
++});
++
++test('withBase preserves query strings and hashes', () => {
++  assert.equal(withBase('blog?tag=astro', '/cv'), '/cv/blog/?tag=astro');
++  assert.equal(withBase('about#cv', '/cv'), '/cv/about/#cv');
++});
++
++test('withBase handles a root deployment', () => {
++  assert.equal(withBase('work', ''), '/work/');
++});
++
++test('stripBase returns the site root and inner paths', () => {
++  assert.equal(stripBase('/cv', '/cv'), '/');
++  assert.equal(stripBase('/cv/about/zh/', '/cv'), '/about/zh/');
++});
++
++test('stripBase leaves unrelated paths untouched', () => {
++  assert.equal(stripBase('/other/page', '/cv'), '/other/page');
++});
