@@ -1,0 +1,137 @@
+## Commits
+b571a67 feat: 补齐 SEO、404 与站点图标
+
+## Stat
+ .../20261107-115018-academic-homepage/progress.md  |   1 +
+ .../review-task-8-fix.diff                         | 353 +++++++++++++++++++++
+ .../task-9-brief.md                                | 107 +++++++
+ .../task-9-report.md                               |  33 ++
+ astro.config.mjs                                   |   6 +-
+ public/favicon.svg                                 |   4 +
+ public/robots.txt                                  |   4 +
+ src/layouts/BaseLayout.astro                       |  19 ++
+ src/pages/404.astro                                |  11 +
+ 9 files changed, 537 insertions(+), 1 deletion(-)
+
+## Diff
+diff --git a/astro.config.mjs b/astro.config.mjs
+index f44c29d..63c1b0e 100644
+--- a/astro.config.mjs
++++ b/astro.config.mjs
+@@ -1,15 +1,19 @@
+ import { defineConfig } from 'astro/config';
+ import sitemap from '@astrojs/sitemap';
+ 
+ export default defineConfig({
+   site: 'https://yzc0421.github.io',
+   base: '/cv',
+   output: 'static',
+-  integrations: [sitemap()],
++  integrations: [
++    sitemap({
++      filter: (page) => !page.includes('/404'),
++    }),
++  ],
+   markdown: {
+     shikiConfig: {
+       themes: { light: 'github-light', dark: 'github-dark' },
+       defaultColor: false,
+     },
+   },
+ });
+diff --git a/public/favicon.svg b/public/favicon.svg
+new file mode 100644
+index 0000000..f6162b7
+--- /dev/null
++++ b/public/favicon.svg
+@@ -0,0 +1,4 @@
++<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
++  <rect width="32" height="32" rx="6" fill="#111827"/>
++  <text x="16" y="22" font-family="Georgia, serif" font-size="16" fill="#ffffff" text-anchor="middle">Z</text>
++</svg>
+diff --git a/public/robots.txt b/public/robots.txt
+new file mode 100644
+index 0000000..cb38e34
+--- /dev/null
++++ b/public/robots.txt
+@@ -0,0 +1,4 @@
++User-agent: *
++Allow: /
++
++Sitemap: https://yzc0421.github.io/cv/sitemap-index.xml
+diff --git a/src/layouts/BaseLayout.astro b/src/layouts/BaseLayout.astro
+index d594bf1..acb8c8c 100644
+--- a/src/layouts/BaseLayout.astro
++++ b/src/layouts/BaseLayout.astro
+@@ -7,35 +7,54 @@ import { withBase } from '../lib/url';
+ 
+ interface Props {
+   title: string;
+   description: string;
+   lang?: string;
+   type?: 'website' | 'article';
+   langLink?: { href: string; label: string; lang: string };
+ }
+ const { title, description, lang = 'en', type = 'website', langLink } = Astro.props;
+ const canonical = new URL(Astro.url.pathname.replace(/\/?$/, '/'), Astro.site);
++const personId = `${new URL(withBase(), Astro.site).href}#person`;
++const profile = {
++  '@context': 'https://schema.org',
++  '@graph': [
++    { '@type': 'ProfilePage', mainEntity: { '@id': personId } },
++    {
++      '@type': 'Person',
++      '@id': personId,
++      name: 'Zicong Yang',
++      jobTitle: 'Software Engineer',
++      sameAs: [
++        'https://scholar.google.com/citations?user=0Ynn-awAAAAJ',
++        'https://orcid.org/0009-0001-0948-3606',
++        'https://github.com/YZC0421',
++      ],
++    },
++  ],
++};
+ ---
+ <!doctype html>
+ <html lang={lang}>
+   <head>
+     <meta charset="utf-8" />
+     <meta name="viewport" content="width=device-width, initial-scale=1" />
+     <title>{title}</title>
+     <meta name="description" content={description} />
+     <link rel="canonical" href={canonical} />
+     <link rel="icon" href={withBase('favicon.svg')} />
+     <meta property="og:title" content={title} />
+     <meta property="og:description" content={description} />
+     <meta property="og:type" content={type} />
+     <meta property="og:url" content={canonical} />
+     <slot name="head" />
++    <script type="application/ld+json" set:html={JSON.stringify(profile)} />
+     <script is:inline>
+       (() => {
+         let saved = null;
+         try {
+           saved = localStorage.getItem('theme');
+         } catch {
+           /* storage unavailable */
+         }
+         const dark = saved
+           ? saved === 'dark'
+diff --git a/src/pages/404.astro b/src/pages/404.astro
+new file mode 100644
+index 0000000..98010cb
+--- /dev/null
++++ b/src/pages/404.astro
+@@ -0,0 +1,11 @@
++---
++import BaseLayout from '../layouts/BaseLayout.astro';
++import { withBase } from '../lib/url';
++---
++<BaseLayout title="Not found · Zicong Yang" description="Page not found.">
++  <div class="container measure" style="padding:80px 24px">
++    <h1>404</h1>
++    <p class="muted">This page does not exist.</p>
++    <p><a href={withBase()}>Back to home →</a></p>
++  </div>
++</BaseLayout>

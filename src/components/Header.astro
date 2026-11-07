@@ -1,0 +1,39 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+import NavLinks from './NavLinks.astro';
+import { stripBase, withBase } from '../lib/url';
+
+interface Props {
+  langLink?: { href: string; label: string; lang: string };
+}
+const { langLink } = Astro.props;
+
+const links = [
+  { path: 'publications', label: 'Publications' },
+  { path: 'work', label: 'Work' },
+  { path: 'blog', label: 'Writing' },
+  { path: 'about', label: 'About' },
+];
+const current = stripBase(Astro.url.pathname);
+const isHome = current === '/';
+---
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href={withBase()} aria-current={isHome ? 'page' : undefined}>Zicong Yang</a>
+    <nav class="nav desktop-nav" aria-label="Primary">
+      <NavLinks links={links} current={current} />
+    </nav>
+    <details class="nav-details">
+      <summary class="nav-toggle">Menu</summary>
+      <nav class="nav" aria-label="Primary mobile">
+        <NavLinks links={links} current={current} />
+      </nav>
+    </details>
+    {langLink && (
+      <a class="lang-link" href={langLink.href} hreflang={langLink.lang} lang={langLink.lang}>
+        {langLink.label}
+      </a>
+    )}
+    <ThemeToggle />
+  </div>
+</header>

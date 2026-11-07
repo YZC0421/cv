@@ -1,0 +1,305 @@
+## Commits
+981f04f feat: 录入六篇论文的结构化数据
+
+## Stat
+ .gitignore                                         |   1 +
+ .../20261107-115018-academic-homepage/progress.md  |   1 +
+ .../task-3-brief.md                                | 155 +++++++++++++++++++++
+ .../task-3-report.md                               |  43 ++++++
+ scripts/fetch-crossref.mjs                         |  99 +++++++++++++
+ src/content/publications/cisse-2024.md             |  21 +++
+ src/content/publications/cvidl-2024-garbage.md     |  21 +++
+ src/content/publications/cvidl-2024-wheat.md       |  23 +++
+ src/content/publications/ipmlp-2024.md             |  24 ++++
+ src/content/publications/mst-2025.md               |  21 +++
+ .../publications/scientific-reports-2024.md        |  26 ++++
+ 11 files changed, 435 insertions(+)
+
+## Diff (package-lock.json and .superpowers excluded)
+diff --git a/.gitignore b/.gitignore
+index de35ccf..6903e0e 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -1,4 +1,5 @@
+ node_modules/
+ dist/
+ .astro/
++scripts/out/
+ .DS_Store
+diff --git a/scripts/fetch-crossref.mjs b/scripts/fetch-crossref.mjs
+new file mode 100644
+index 0000000..7c8a327
+--- /dev/null
++++ b/scripts/fetch-crossref.mjs
+@@ -0,0 +1,99 @@
++import { mkdir, writeFile } from 'node:fs/promises';
++
++const OUT = 'scripts/out';
++const targets = [
++  { key: 'scientific-reports-2024', doi: '10.1038/s41598-024-71700-z' },
++  { key: 'cisse-2024', doi: '10.1007/978-3-031-57037-7_7' },
++  { key: 'mst-2025', doi: '10.1088/1361-6501/ae10d3' },
++  {
++    key: 'cvidl-2024-wheat',
++    title:
++      'Wheat Disease Recognition Based on a Fusion Model with Improved Spatial and Channel Reconstruction Convolution Combined with Contextual Transformer',
++  },
++  {
++    key: 'cvidl-2024-garbage',
++    title: 'Enhanced and improved garbage identification and classification of YOLOV5 based on data',
++  },
++  { key: 'ipmlp-2024', doi: '10.1145/3700906.3700946' },
++];
++
++const fetchJson = async (url) => {
++  const res = await fetch(url, {
++    headers: { 'User-Agent': 'cv-site-build/1.0 (mailto:402641915@qq.com)' },
++  });
++  if (!res.ok) throw new Error(`${res.status} ${url}`);
++  return res.json();
++};
++
++const lookup = async (target) => {
++  if (target.doi) {
++    const json = await fetchJson(`https://api.crossref.org/works/${encodeURIComponent(target.doi)}`);
++    return json.message;
++  }
++  const q = encodeURIComponent(target.title);
++  const json = await fetchJson(`https://api.crossref.org/works?query.bibliographic=${q}&rows=1`);
++  return json.message.items?.[0];
++};
++
++const toEntry = (item) => {
++  const authors = (item.author ?? []).map((a) => [a.given, a.family].filter(Boolean).join(' '));
++  const issued = item.issued?.['date-parts']?.[0] ?? [];
++  const year = issued[0];
++  const month = String(issued[1] ?? 1).padStart(2, '0');
++  const day = String(issued[2] ?? 1).padStart(2, '0');
++  const type = item.type === 'proceedings-article' ? 'conference' : 'journal';
++  return {
++    title: (item.title ?? [''])[0].replace(/\s+/g, ' ').trim(),
++    authors,
++    venue: (item['container-title'] ?? [''])[0],
++    year,
++    doi: item.DOI,
++    url: item.URL,
++    type,
++    date: `${year}-${month}-${day}`,
++  };
++};
++
++await mkdir(OUT, { recursive: true });
++const review = ['# 论文元数据核对表', ''];
++
++for (const target of targets) {
++  try {
++    const item = await lookup(target);
++    if (!item) throw new Error('no crossref match');
++    const entry = toEntry(item);
++    const fm = [
++      '---',
++      `title: ${JSON.stringify(entry.title)}`,
++      'authors:',
++      ...entry.authors.map((a) => `  - ${JSON.stringify(a)}`),
++      `venue: ${JSON.stringify(entry.venue)}`,
++      `year: ${entry.year}`,
++      `type: ${entry.type}`,
++      'indexing: none',
++      'role: other',
++      `doi: ${JSON.stringify(entry.doi)}`,
++      `url: ${JSON.stringify(entry.url)}`,
++      'selected: false',
++      `date: ${entry.date}`,
++      '---',
++      '',
++    ].join('\n');
++    await writeFile(`${OUT}/${target.key}.md`, fm, 'utf8');
++    review.push(
++      `## ${target.key}`,
++      '',
++      `- 标题：${entry.title}`,
++      `- 作者：${entry.authors.join(', ')}`,
++      `- 出处：${entry.venue} (${entry.year})`,
++      `- DOI：${entry.doi}`,
++      ''
++    );
++  } catch (error) {
++    review.push(`## ${target.key}`, '', `- 失败：${error.message}`, '');
++    console.warn(`[warn] ${target.key}: ${error.message}`);
++  }
++}
++
++await writeFile(`${OUT}/review.md`, review.join('\n'), 'utf8');
++console.log(`written to ${OUT}/`);
+diff --git a/src/content/publications/cisse-2024.md b/src/content/publications/cisse-2024.md
+new file mode 100644
+index 0000000..0d86304
+--- /dev/null
++++ b/src/content/publications/cisse-2024.md
+@@ -0,0 +1,21 @@
++---
++title: "The Fusion Model of ResNet and GRU Based on Simplified Self-Attention for ECG Classification on PTB-XL Dataset"
++authors:
++  - "Zicong Yang"
++  - "Aitong Jin"
++  - "Yan Liu"
++  - "Wei Lv"
++  - "Xiaolin Zhu"
++venue: "Studies in Computational Intelligence"
++venueShort: "CISSE 2024"
++year: 2024
++type: conference
++indexing: Q4
++role: first
++doi: "10.1007/978-3-031-57037-7_7"
++url: "https://doi.org/10.1007/978-3-031-57037-7_7"
++selected: false
++date: "2024-01-01"
++---
++
++A ResNet-GRU fusion model with simplified self-attention for ECG classification on PTB-XL.
+diff --git a/src/content/publications/cvidl-2024-garbage.md b/src/content/publications/cvidl-2024-garbage.md
+new file mode 100644
+index 0000000..b702b40
+--- /dev/null
++++ b/src/content/publications/cvidl-2024-garbage.md
+@@ -0,0 +1,21 @@
++---
++title: "Enhanced and improved garbage identification and classification of YOLOV5 based on data"
++authors:
++  - "Junxi Wang"
++  - "Xin Zhan"
++  - "Zicong Yang"
++  - "Yangwen Li"
++venue: "2024 5th International Conference on Computer Vision, Image and Deep Learning (CVIDL)"
++venueShort: "CVIDL 2024"
++year: 2024
++type: conference
++indexing: EI
++role: second
++doi: "10.1109/cvidl62147.2024.10604280"
++url: "https://ieeexplore.ieee.org/abstract/document/10604280"
++selected: false
++date: "2024-04-19"
++---
++
++Data-centric improvements to YOLOv5 for garbage identification and classification. Second
++author among student contributors.
+diff --git a/src/content/publications/cvidl-2024-wheat.md b/src/content/publications/cvidl-2024-wheat.md
+new file mode 100644
+index 0000000..43f3b2e
+--- /dev/null
++++ b/src/content/publications/cvidl-2024-wheat.md
+@@ -0,0 +1,23 @@
++---
++title: "Wheat Disease Recognition Based on a Fusion Model with Improved Spatial and Channel Reconstruction Convolution Combined with Contextual Transformer"
++authors:
++  - "Zicong Yang"
++  - "Aitong Jin"
++  - "Junxi Wang"
++  - "Haifan Xie"
++  - "Xin Zhan"
++  - "Qiaolin Li"
++venue: "2024 5th International Conference on Computer Vision, Image and Deep Learning (CVIDL)"
++venueShort: "CVIDL 2024"
++year: 2024
++type: conference
++indexing: EI
++role: first
++doi: "10.1109/cvidl62147.2024.10604082"
++url: "https://ieeexplore.ieee.org/abstract/document/10604082"
++selected: true
++date: "2024-04-01"
++---
++
++Wheat disease recognition with improved spatial and channel reconstruction convolution and a
++contextual transformer.
+diff --git a/src/content/publications/ipmlp-2024.md b/src/content/publications/ipmlp-2024.md
+new file mode 100644
+index 0000000..bdf2638
+--- /dev/null
++++ b/src/content/publications/ipmlp-2024.md
+@@ -0,0 +1,24 @@
++---
++title: "Surface waste identification and detection based on improved YOLOV8"
++authors:
++  - "Junxi Wang"
++  - "Xin Zhan"
++  - "Yizhen Jiang"
++  - "Kairong Deng"
++  - "Zicong Yang"
++  - "Huixin Zeng"
++  - "Zhengpeng Wang"
++venue: "Proceedings of the International Conference on Image Processing, Machine Learning and Pattern Recognition"
++venueShort: "IPMLP 2024"
++year: 2024
++type: conference
++indexing: EI
++role: other
++doi: "10.1145/3700906.3700946"
++url: "https://dl.acm.org/doi/abs/10.1145/3700906.3700946"
++selected: false
++date: "2024-09-13"
++---
++
++Surface waste identification with an improved YOLOv8 detector. Fourth author among student
++contributors.
+diff --git a/src/content/publications/mst-2025.md b/src/content/publications/mst-2025.md
+new file mode 100644
+index 0000000..7d1ccb2
+--- /dev/null
++++ b/src/content/publications/mst-2025.md
+@@ -0,0 +1,21 @@
++---
++title: "Enhancing defect detection with diffusion model"
++authors:
++  - "Ziming Song"
++  - "Xuyi Yu"
++  - "Yanchun Liang"
++  - "Zicong Yang"
++venue: "Measurement Science and Technology"
++venueShort: "Meas Sci Technol"
++year: 2025
++type: journal
++indexing: Q1
++role: third
++doi: "10.1088/1361-6501/ae10d3"
++url: "https://iopscience.iop.org/article/10.1088/1361-6501/ae10d3/meta"
++selected: false
++date: "2025-11-07"
++---
++
++Diffusion-model-based data synthesis for industrial defect detection. Third author among
++student contributors.
+diff --git a/src/content/publications/scientific-reports-2024.md b/src/content/publications/scientific-reports-2024.md
+new file mode 100644
+index 0000000..a6b0755
+--- /dev/null
++++ b/src/content/publications/scientific-reports-2024.md
+@@ -0,0 +1,26 @@
++---
++title: "A coordinated adaptive multiscale enhanced spatio-temporal fusion network for multi-lead electrocardiogram arrhythmia detection"
++authors:
++  - "Zicong Yang"
++  - "Aitong Jin"
++  - "Yu Li"
++  - "Xuyi Yu"
++  - "Xi Xu"
++  - "Junxi Wang"
++  - "Qiaolin Li"
++  - "Xiaoyan Guo"
++  - "Yan Liu"
++venue: "Scientific Reports"
++venueShort: "Sci Rep"
++year: 2024
++type: journal
++indexing: Q1
++role: first
++doi: "10.1038/s41598-024-71700-z"
++url: "https://www.nature.com/articles/s41598-024-71700-z"
++selected: true
++date: "2024-09-06"
++---
++
++A multiscale spatio-temporal fusion network with coordinated channel-spatial attention for
++multi-lead ECG arrhythmia detection.

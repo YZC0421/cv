@@ -1,0 +1,21 @@
+---
+interface Props {
+  headings: { depth: number; slug: string; text: string }[];
+}
+const { headings } = Astro.props;
+const items = headings.filter(
+  (heading) =>
+    (heading.depth === 2 || heading.depth === 3) && heading.slug !== 'footnote-label'
+);
+---
+{items.length > 0 && (
+  <nav class="toc" aria-label="Table of contents">
+    <ul>
+      {items.map((heading) => (
+        <li style={heading.depth === 3 ? 'padding-left:12px' : undefined}>
+          <a href={`#${heading.slug}`}>{heading.text}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}

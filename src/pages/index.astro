@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import PublicationItem from '../components/PublicationItem.astro';
+import WorkCard from '../components/WorkCard.astro';
+import PostList from '../components/PostList.astro';
+import { getCollection, getEntry } from 'astro:content';
+import { selectHomepage } from '../lib/publications';
+import { visiblePosts } from '../lib/posts';
+import { withBase } from '../lib/url';
+
+const pubs = selectHomepage(await getCollection('publications'));
+const work = (await getCollection('work'))
+  .filter((item) => item.data.kind === 'project')
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 3);
+const posts = visiblePosts(await getCollection('blog')).slice(0, 2);
+const about = await getEntry('pages', 'about-en');
+---
+<BaseLayout
+  title="Zicong Yang · Medical Signal Processing & Computer Vision"
+  description="Personal site of Zicong Yang: publications, engineering work, and technical writing."
+  profilePage
+>
+  <Hero />
+
+  <section class="section container measure">
+    <div class="section-head">
+      <h2>Selected Publications</h2>
+      <a href={withBase('publications')}>All publications →</a>
+    </div>
+    <ul class="pub-list">{pubs.map((pub) => <PublicationItem pub={pub} />)}</ul>
+  </section>
+
+  {work.length > 0 && (
+    <section class="section container measure">
+      <div class="section-head">
+        <h2>Selected Work</h2>
+        <a href={withBase('work')}>All work →</a>
+      </div>
+      <div class="work-grid">{work.map((item) => <WorkCard item={item} />)}</div>
+    </section>
+  )}
+
+  {posts.length > 0 && (
+    <section class="section container measure">
+      <div class="section-head">
+        <h2>Latest Writing</h2>
+        <a href={withBase('blog')}>All writing →</a>
+      </div>
+      <PostList posts={posts} />
+    </section>
+  )}
+
+  <section class="section container measure">
+    <div class="section-head"><h2>About</h2></div>
+    <p class="muted">{about?.data.summary}</p>
+    <div class="links">
+      <a href={withBase('about')}>More about me →</a>
+      <a href={withBase('about')}>CV (print / PDF)</a>
+    </div>
+  </section>
+</BaseLayout>

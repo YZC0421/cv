@@ -1,0 +1,19 @@
+<button id="theme-toggle" type="button" aria-label="Dark mode" aria-pressed="false" class="theme-toggle">◐</button>
+<script is:inline>
+  (() => {
+    const btn = document.getElementById('theme-toggle');
+    const root = document.documentElement;
+    const sync = () => btn?.setAttribute('aria-pressed', String(root.dataset.theme === 'dark'));
+    sync();
+    btn?.addEventListener('click', () => {
+      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = next;
+      try {
+        localStorage.setItem('theme', next);
+      } catch {
+        /* storage unavailable */
+      }
+      sync();
+    });
+  })();
+</script>

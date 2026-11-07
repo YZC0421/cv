@@ -1,0 +1,214 @@
+## Commits
+38728c8 feat: 实现首页精选论文、项目与文章区块
+
+## Stat
+ .../20261107-115018-academic-homepage/progress.md  |   1 +
+ .../task-5-brief.md                                | 203 +++++++++++++++++++++
+ .../task-5-report.md                               |  38 ++++
+ src/components/Hero.astro                          |  13 ++
+ src/components/PostList.astro                      |  18 ++
+ src/components/WorkCard.astro                      |  14 ++
+ .../work/sudden-cardiac-death-prediction.md        |  18 ++
+ src/pages/index.astro                              |  67 ++++++-
+ src/styles/global.css                              |  20 ++
+ 9 files changed, 388 insertions(+), 4 deletions(-)
+
+## Diff
+diff --git a/src/components/Hero.astro b/src/components/Hero.astro
+new file mode 100644
+index 0000000..a3098ca
+--- /dev/null
++++ b/src/components/Hero.astro
+@@ -0,0 +1,13 @@
++<section class="hero container measure">
++  <h1>Zicong Yang</h1>
++  <p>
++    Software engineer and researcher working on medical signal processing and computer vision —
++    ECG arrhythmia detection, industrial defect inspection, and applied deep learning.
++  </p>
++  <div class="social">
++    <a href="https://scholar.google.com/citations?user=0Ynn-awAAAAJ" target="_blank" rel="noopener">Google Scholar</a>
++    <a href="https://orcid.org/0009-0001-0948-3606" target="_blank" rel="noopener">ORCID</a>
++    <a href="https://github.com/YZC0421" target="_blank" rel="noopener">GitHub</a>
++    <a href="mailto:402641915@qq.com">Email</a>
++  </div>
++</section>
+diff --git a/src/components/PostList.astro b/src/components/PostList.astro
+new file mode 100644
+index 0000000..ceb2ecf
+--- /dev/null
++++ b/src/components/PostList.astro
+@@ -0,0 +1,18 @@
++---
++import type { CollectionEntry } from 'astro:content';
++import { withBase } from '../lib/url';
++
++interface Props {
++  posts: CollectionEntry<'blog'>[];
++}
++const { posts } = Astro.props;
++---
++<ul class="post-list">
++  {posts.map((post) => (
++    <li>
++      <time datetime={post.data.date}>{post.data.date}</time>
++      <a href={withBase(`blog/${post.id}`)}>{post.data.title}</a>
++      <span class="lang-badge">{post.data.lang === 'zh' ? '中文' : 'EN'}</span>
++    </li>
++  ))}
++</ul>
+diff --git a/src/components/WorkCard.astro b/src/components/WorkCard.astro
+new file mode 100644
+index 0000000..20ac52c
+--- /dev/null
++++ b/src/components/WorkCard.astro
+@@ -0,0 +1,14 @@
++---
++import type { CollectionEntry } from 'astro:content';
++import { withBase } from '../lib/url';
++
++interface Props {
++  item: CollectionEntry<'work'>;
++}
++const { item } = Astro.props;
++---
++<article class="work-card">
++  <h3><a href={withBase(`work/${item.id}`)}>{item.data.title}</a></h3>
++  <p>{item.data.summary}</p>
++  <div class="stack">{item.data.stack.map((tech) => <span>{tech}</span>)}</div>
++</article>
+diff --git a/src/content/work/sudden-cardiac-death-prediction.md b/src/content/work/sudden-cardiac-death-prediction.md
+new file mode 100644
+index 0000000..5f0dc94
+--- /dev/null
++++ b/src/content/work/sudden-cardiac-death-prediction.md
+@@ -0,0 +1,18 @@
++---
++title: "Sudden Cardiac Death Prediction Model"
++org: "Guangdong Provincial Student Innovation Program"
++kind: project
++role: "Project Lead"
++start: "2023-03"
++end: "2024-06"
++summary: "End-to-end ECG research project that produced two first-author papers."
++stack: ["PyTorch", "CNN/RNN", "Attention", "PTB-XL"]
++highlights:
++  - "Led proposal, design, implementation, publication, and final acceptance."
++  - "Designed STFAC-ECGNet with coordinated channel-spatial attention and temporal fusion."
++  - "Published two first-author papers (JCR Q1 and Q4)."
++order: 1
++---
++
++Led the project end-to-end and designed a multiscale spatio-temporal fusion network for
++multi-lead ECG classification on PTB-XL and CPSC2018.
+diff --git a/src/pages/index.astro b/src/pages/index.astro
+index 7e3fc9f..ca8871f 100644
+--- a/src/pages/index.astro
++++ b/src/pages/index.astro
+@@ -1,8 +1,67 @@
+ ---
+ import BaseLayout from '../layouts/BaseLayout.astro';
++import Hero from '../components/Hero.astro';
++import PublicationItem from '../components/PublicationItem.astro';
++import WorkCard from '../components/WorkCard.astro';
++import PostList from '../components/PostList.astro';
++import { getCollection } from 'astro:content';
++import { selectHomepage } from '../lib/publications';
++import { withBase } from '../lib/url';
++
++const today = new Date().toISOString().slice(0, 10);
++
++const pubs = selectHomepage(await getCollection('publications'));
++const work = (await getCollection('work'))
++  .filter((item) => item.data.kind === 'project')
++  .sort((a, b) => a.data.order - b.data.order)
++  .slice(0, 3);
++const posts = (await getCollection('blog'))
++  .filter((post) => !post.data.draft && post.data.date <= today)
++  .sort((a, b) => b.data.date.localeCompare(a.data.date))
++  .slice(0, 2);
+ ---
+-<BaseLayout title="Zicong Yang" description="Medical signal processing and computer vision.">
+-  <div class="container" style="padding-top:48px">
+-    <h1>Zicong Yang</h1>
+-  </div>
++<BaseLayout
++  title="Zicong Yang · Medical Signal Processing & Computer Vision"
++  description="Personal site of Zicong Yang: publications, engineering work, and technical writing."
++>
++  <Hero />
++
++  <section class="section container measure">
++    <div class="section-head">
++      <h2>Selected Publications</h2>
++      <a href={withBase('publications')}>All publications →</a>
++    </div>
++    <ul class="pub-list">{pubs.map((pub) => <PublicationItem pub={pub} />)}</ul>
++  </section>
++
++  <section class="section container measure">
++    <div class="section-head">
++      <h2>Selected Work</h2>
++      <a href={withBase('work')}>All work →</a>
++    </div>
++    <div class="work-grid">{work.map((item) => <WorkCard item={item} />)}</div>
++  </section>
++
++  {posts.length > 0 && (
++    <section class="section container measure">
++      <div class="section-head">
++        <h2>Latest Writing</h2>
++        <a href={withBase('blog')}>All writing →</a>
++      </div>
++      <PostList posts={posts} />
++    </section>
++  )}
++
++  <section class="section container measure">
++    <div class="section-head"><h2>About</h2></div>
++    <p class="muted">
++      B.E. in Software Engineering, Zhuhai College of Science and Technology (2021–2025).
++      First-author publications in Scientific Reports and CVIDL; research on ECG analysis and
++      industrial visual inspection.
++    </p>
++    <div class="links">
++      <a href={withBase('about')}>More about me →</a>
++      <a href={withBase('about')}>Download CV (PDF)</a>
++    </div>
++  </section>
+ </BaseLayout>
+diff --git a/src/styles/global.css b/src/styles/global.css
+index 734efda..30df3dc 100644
+--- a/src/styles/global.css
++++ b/src/styles/global.css
+@@ -134,10 +134,30 @@ h3 { font-size: 1.125rem; }
+ .badge-q4 { background: var(--q4-bg); color: var(--q4-fg); }
+ .badge-ei { background: var(--ei-bg); color: var(--ei-fg); }
+ .badge-neutral { background: var(--bg-soft); color: var(--muted); border: 1px solid var(--border); }
+ .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 8px; }
+ .filters button { font: inherit; font-size: 0.8rem; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--muted); cursor: pointer; }
+ .filters button[aria-pressed='true'] { border-color: var(--accent); color: var(--accent); }
+ .bibtex-block { display: inline-flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+ .bibtex { margin-top: 10px; }
+ .bibtex summary { cursor: pointer; font-size: 0.8rem; }
+ .bibtex pre { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 6px; padding: 12px; overflow-x: auto; font-size: 0.78rem; }
++
++.hero { padding: 64px 0 40px; }
++.hero p { max-width: 46ch; margin: 16px 0 0; color: var(--muted); }
++.social { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 20px; font-size: 0.85rem; }
++.section { margin-top: 56px; }
++.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
++.section-head h2 { border-bottom: 1px solid var(--border); padding-bottom: 8px; flex: 1; font-size: 0.95rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-family: var(--font-sans); }
++.section-head a { font-size: 0.85rem; white-space: nowrap; }
++.work-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
++@media (min-width: 768px) { .work-grid { grid-template-columns: 1fr 1fr; } }
++.work-card { border: 1px solid var(--border); border-radius: 8px; padding: 16px; background: var(--bg); }
++.work-card h3 { font-size: 1rem; }
++.work-card p { margin: 8px 0 12px; font-size: 0.88rem; color: var(--muted); }
++.stack { display: flex; flex-wrap: wrap; gap: 6px; }
++.stack span { font-size: 0.72rem; padding: 1px 7px; border-radius: 999px; background: var(--bg-soft); border: 1px solid var(--border); color: var(--muted); }
++.post-list { list-style: none; margin: 0; padding: 0; }
++.post-list li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
++.post-list time { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
++.lang-badge { font-size: 0.68rem; border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; color: var(--muted); }
++.links { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 20px; font-size: 0.88rem; }

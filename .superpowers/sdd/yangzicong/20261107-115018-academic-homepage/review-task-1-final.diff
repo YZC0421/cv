@@ -1,0 +1,401 @@
+## Commits
+791ec84 fix: 桌面导航与移动菜单解耦，路由补尾斜杠
+b2504c1 fix: 修正子路径链接拼接与 canonical
+0c323e0 feat: 搭建 Astro 基座与设计 token
+
+## Stat
+ .gitignore                                         |    4 +
+ .../20261107-115018-academic-homepage/plan.md      |   11 +-
+ .../review-84e5b1d..0c323e0.diff                   | 7615 ++++++++++++++++++++
+ .../review-task-1-fix.diff                         |  391 +
+ .../review-task-1-src.diff                         |  351 +
+ .../task-1-brief.md                                |  340 +
+ .../task-1-report.md                               |   52 +
+ astro.config.mjs                                   |   12 +
+ package-lock.json                                  | 7256 +++++++++++++++++++
+ package.json                                       |   25 +
+ src/components/Footer.astro                        |   12 +
+ src/components/Header.astro                        |   33 +
+ src/components/ThemeToggle.astro                   |   19 +
+ src/layouts/BaseLayout.astro                       |   51 +
+ src/lib/url.ts                                     |   14 +
+ src/pages/index.astro                              |    8 +
+ src/styles/global.css                              |  123 +
+ tsconfig.json                                      |    7 +
+ 18 files changed, 16323 insertions(+), 1 deletion(-)
+
+## Diff (package-lock.json and .superpowers excluded)
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..de35ccf
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,4 @@
++node_modules/
++dist/
++.astro/
++.DS_Store
+diff --git a/astro.config.mjs b/astro.config.mjs
+new file mode 100644
+index 0000000..f454447
+--- /dev/null
++++ b/astro.config.mjs
+@@ -0,0 +1,12 @@
++import { defineConfig } from 'astro/config';
++import sitemap from '@astrojs/sitemap';
++
++export default defineConfig({
++  site: 'https://yzc0421.github.io',
++  base: '/cv',
++  output: 'static',
++  integrations: [sitemap()],
++  markdown: {
++    shikiConfig: { themes: { light: 'github-light', dark: 'github-dark' } },
++  },
++});
+diff --git a/package.json b/package.json
+new file mode 100644
+index 0000000..7694a69
+--- /dev/null
++++ b/package.json
+@@ -0,0 +1,25 @@
++{
++  "name": "cv",
++  "type": "module",
++  "version": "1.0.0",
++  "private": true,
++  "scripts": {
++    "dev": "astro dev",
++    "build": "astro build",
++    "preview": "astro preview",
++    "check": "astro check",
++    "test": "tsx --test tests/*.test.ts",
++    "verify": "node scripts/verify-build.mjs"
++  },
++  "devDependencies": {
++    "@astrojs/check": "^0.9.12",
++    "tsx": "^4.23.15",
++    "typescript": "^6.0.3"
++  },
++  "dependencies": {
++    "@astrojs/rss": "^4.0.19",
++    "@astrojs/sitemap": "^3.7.4",
++    "astro": "^5.18.2",
++    "zod": "^4.6.7"
++  }
++}
+diff --git a/src/components/Footer.astro b/src/components/Footer.astro
+new file mode 100644
+index 0000000..ddc8231
+--- /dev/null
++++ b/src/components/Footer.astro
+@@ -0,0 +1,12 @@
++---
++import { withBase } from '../lib/url';
++
++const year = new Date().getFullYear();
++---
++<footer class="site-footer">
++  <div class="container">
++    © {year} Zicong Yang · <a href={withBase('rss.xml')}>RSS</a> ·
++    <a href="https://scholar.google.com/citations?user=0Ynn-awAAAAJ">Scholar</a> ·
++    <a href="https://orcid.org/0009-0001-0948-3606">ORCID</a>
++  </div>
++</footer>
+diff --git a/src/components/Header.astro b/src/components/Header.astro
+new file mode 100644
+index 0000000..8e39be2
+--- /dev/null
++++ b/src/components/Header.astro
+@@ -0,0 +1,33 @@
++---
++import ThemeToggle from './ThemeToggle.astro';
++import { stripBase, withBase } from '../lib/url';
++
++const links = [
++  { path: 'publications', label: 'Publications' },
++  { path: 'work', label: 'Work' },
++  { path: 'blog', label: 'Writing' },
++  { path: 'about', label: 'About' },
++];
++const current = stripBase(Astro.url.pathname);
++const isCurrent = (path: string) => current === `/${path}/` || current.startsWith(`/${path}/`);
++const isHome = current === '/';
++---
++<header class="site-header">
++  <div class="inner">
++    <a class="brand" href={withBase()} aria-current={isHome ? 'page' : undefined}>Zicong Yang</a>
++    <nav class="nav desktop-nav" aria-label="Primary">
++      {links.map((link) => (
++        <a href={withBase(link.path)} aria-current={isCurrent(link.path) ? 'page' : undefined}>{link.label}</a>
++      ))}
++    </nav>
++    <details class="nav-details">
++      <summary class="nav-toggle">Menu</summary>
++      <nav class="nav" aria-label="Primary mobile">
++        {links.map((link) => (
++          <a href={withBase(link.path)} aria-current={isCurrent(link.path) ? 'page' : undefined}>{link.label}</a>
++        ))}
++      </nav>
++    </details>
++    <ThemeToggle />
++  </div>
++</header>
+diff --git a/src/components/ThemeToggle.astro b/src/components/ThemeToggle.astro
+new file mode 100644
+index 0000000..4a9ffdd
+--- /dev/null
++++ b/src/components/ThemeToggle.astro
+@@ -0,0 +1,19 @@
++<button id="theme-toggle" type="button" aria-label="Dark mode" aria-pressed="false" class="theme-toggle">◐</button>
++<script is:inline>
++  (() => {
++    const btn = document.getElementById('theme-toggle');
++    const root = document.documentElement;
++    const sync = () => btn?.setAttribute('aria-pressed', String(root.dataset.theme === 'dark'));
++    sync();
++    btn?.addEventListener('click', () => {
++      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
++      root.dataset.theme = next;
++      try {
++        localStorage.setItem('theme', next);
++      } catch {
++        /* storage unavailable */
++      }
++      sync();
++    });
++  })();
++</script>
+diff --git a/src/layouts/BaseLayout.astro b/src/layouts/BaseLayout.astro
+new file mode 100644
+index 0000000..777b7fd
+--- /dev/null
++++ b/src/layouts/BaseLayout.astro
+@@ -0,0 +1,51 @@
++---
++import '../styles/global.css';
++import Header from '../components/Header.astro';
++import Footer from '../components/Footer.astro';
++import { withBase } from '../lib/url';
++
++interface Props {
++  title: string;
++  description: string;
++  lang?: string;
++  type?: 'website' | 'article';
++}
++const { title, description, lang = 'en', type = 'website' } = Astro.props;
++const canonical = new URL(Astro.url.pathname.replace(/\/?$/, '/'), Astro.site);
++---
++<!doctype html>
++<html lang={lang}>
++  <head>
++    <meta charset="utf-8" />
++    <meta name="viewport" content="width=device-width, initial-scale=1" />
++    <title>{title}</title>
++    <meta name="description" content={description} />
++    <link rel="canonical" href={canonical} />
++    <link rel="icon" href={withBase('favicon.svg')} />
++    <meta property="og:title" content={title} />
++    <meta property="og:description" content={description} />
++    <meta property="og:type" content={type} />
++    <meta property="og:url" content={canonical} />
++    <slot name="head" />
++    <script is:inline>
++      (() => {
++        let saved = null;
++        try {
++          saved = localStorage.getItem('theme');
++        } catch {
++          /* storage unavailable */
++        }
++        const dark = saved
++          ? saved === 'dark'
++          : window.matchMedia('(prefers-color-scheme: dark)').matches;
++        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
++      })();
++    </script>
++  </head>
++  <body>
++    <a class="skip" href="#main">Skip to content</a>
++    <Header />
++    <main id="main" tabindex="-1"><slot /></main>
++    <Footer />
++  </body>
++</html>
+diff --git a/src/lib/url.ts b/src/lib/url.ts
+new file mode 100644
+index 0000000..013db77
+--- /dev/null
++++ b/src/lib/url.ts
+@@ -0,0 +1,14 @@
++const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
++
++export function withBase(path = ''): string {
++  const clean = path.replace(/^\//, '');
++  if (!clean) return `${BASE}/`;
++  const isFile = /\.[a-z0-9]+$/i.test(clean);
++  return `${BASE}/${clean}${isFile ? '' : '/'}`;
++}
++
++export function stripBase(pathname: string): string {
++  if (!pathname.startsWith(BASE)) return pathname;
++  const stripped = pathname.slice(BASE.length);
++  return stripped === '' ? '/' : stripped;
++}
+diff --git a/src/pages/index.astro b/src/pages/index.astro
+new file mode 100644
+index 0000000..7e3fc9f
+--- /dev/null
++++ b/src/pages/index.astro
+@@ -0,0 +1,8 @@
++---
++import BaseLayout from '../layouts/BaseLayout.astro';
++---
++<BaseLayout title="Zicong Yang" description="Medical signal processing and computer vision.">
++  <div class="container" style="padding-top:48px">
++    <h1>Zicong Yang</h1>
++  </div>
++</BaseLayout>
+diff --git a/src/styles/global.css b/src/styles/global.css
+new file mode 100644
+index 0000000..ef08e58
+--- /dev/null
++++ b/src/styles/global.css
+@@ -0,0 +1,123 @@
++:root {
++  --bg: #ffffff;
++  --bg-soft: #f8fafc;
++  --fg: #111827;
++  --muted: #64748b;
++  --border: #e2e8f0;
++  --accent: #1d4ed8;
++  --q1-bg: #fffbeb;
++  --q1-fg: #b45309;
++  --q4-bg: #f3e8ff;
++  --q4-fg: #7e22ce;
++  --ei-bg: #ecfdf5;
++  --ei-fg: #047857;
++  --font-serif: "Source Serif 4", Georgia, "Songti SC", serif;
++  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
++  --measure: 720px;
++  --wide: 1120px;
++  color-scheme: light;
++}
++
++[data-theme='dark'] {
++  --bg: #0b1120;
++  --bg-soft: #111a2e;
++  --fg: #e5e7eb;
++  --muted: #94a3b8;
++  --border: #1f2a3d;
++  --accent: #60a5fa;
++  --q1-bg: #2a1f06;
++  --q1-fg: #fbbf24;
++  --q4-bg: #241432;
++  --q4-fg: #d8b4fe;
++  --ei-bg: #052e22;
++  --ei-fg: #6ee7b7;
++  color-scheme: dark;
++}
++
++* { box-sizing: border-box; }
++
++body {
++  margin: 0;
++  background: var(--bg);
++  color: var(--fg);
++  font-family: var(--font-sans);
++  font-size: 16px;
++  line-height: 1.7;
++  transition: background-color 150ms ease, color 150ms ease;
++}
++
++a { color: var(--accent); text-decoration: none; }
++a:hover { text-decoration: underline; }
++:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
++
++h1, h2, h3 { font-family: var(--font-serif); line-height: 1.25; margin: 0; }
++h1 { font-size: 2.25rem; letter-spacing: -0.02em; }
++h2 { font-size: 1.5rem; }
++h3 { font-size: 1.125rem; }
++
++.container { width: 100%; max-width: var(--wide); margin: 0 auto; padding: 0 24px; }
++.measure { max-width: var(--measure); }
++.muted { color: var(--muted); }
++.rule { border: 0; border-top: 1px solid var(--border); margin: 0; }
++
++.skip {
++  position: absolute;
++  left: -9999px;
++  top: 0;
++  background: var(--bg);
++  padding: 8px 12px;
++  z-index: 100;
++}
++.skip:focus { left: 8px; }
++
++.site-header {
++  border-bottom: 1px solid var(--border);
++  position: sticky;
++  top: 0;
++  background: color-mix(in srgb, var(--bg) 92%, transparent);
++  backdrop-filter: blur(8px);
++  z-index: 50;
++}
++.site-header .inner {
++  max-width: var(--wide);
++  margin: 0 auto;
++  padding: 14px 24px;
++  display: flex;
++  align-items: center;
++  gap: 24px;
++}
++.brand { font-family: var(--font-serif); font-size: 1.05rem; font-weight: 600; color: var(--fg); }
++.desktop-nav { margin-left: auto; }
++.nav-details { display: none; }
++.nav-details > summary { list-style: none; }
++.nav-details > summary::-webkit-details-marker { display: none; }
++.nav { display: flex; gap: 18px; font-size: 0.9rem; }
++.nav a { color: var(--muted); }
++.nav a[aria-current='page'] { color: var(--fg); font-weight: 600; }
++.nav-toggle { display: none; cursor: pointer; background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; color: var(--fg); font: inherit; }
++.theme-toggle { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; color: var(--muted); cursor: pointer; font: inherit; }
++.site-footer { border-top: 1px solid var(--border); margin-top: 72px; padding: 28px 0; color: var(--muted); font-size: 0.85rem; }
++
++@media (max-width: 767px) {
++  .desktop-nav { display: none; }
++  .nav-details { display: block; position: relative; margin-left: auto; }
++  .nav-toggle { display: block; }
++  .nav-details > .nav { display: none; }
++  .nav-details[open] > .nav {
++    display: flex;
++    flex-direction: column;
++    position: absolute;
++    right: 0;
++    top: calc(100% + 8px);
++    min-width: 180px;
++    padding: 16px;
++    background: var(--bg);
++    border: 1px solid var(--border);
++    border-radius: 8px;
++    z-index: 60;
++  }
++}
++
++@media (prefers-reduced-motion: reduce) {
++  *, *::before, *::after { transition: none !important; animation: none !important; }
++}
+diff --git a/tsconfig.json b/tsconfig.json
+new file mode 100644
+index 0000000..f9c6efa
+--- /dev/null
++++ b/tsconfig.json
+@@ -0,0 +1,7 @@
++{
++  "extends": "astro/tsconfigs/strict",
++  "compilerOptions": {
++    "strictNullChecks": true,
++    "allowJs": true
++  }
++}

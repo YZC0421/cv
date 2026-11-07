@@ -1,0 +1,1778 @@
+## Commits
+f07dc76 chore: 增加构建校验、部署流水线与项目文档
+
+## Stat
+ .github/workflows/deploy.yml                       |  43 ++
+ .../20261107-115018-academic-homepage/progress.md  |   1 +
+ .../task-10-brief.md                               | 281 ++++++++
+ .../task-10-report.md                              |  32 +
+ CV.html                                            | 785 ---------------------
+ README.md                                          |  57 ++
+ index.html                                         | 785 ---------------------
+ scripts/verify-build.mjs                           |  63 ++
+ 8 files changed, 477 insertions(+), 1570 deletions(-)
+
+## Diff
+diff --git a/.github/workflows/deploy.yml b/.github/workflows/deploy.yml
+new file mode 100644
+index 0000000..834388e
+--- /dev/null
++++ b/.github/workflows/deploy.yml
+@@ -0,0 +1,43 @@
++name: Deploy to GitHub Pages
++
++on:
++  push:
++    branches: [main]
++  workflow_dispatch:
++
++permissions:
++  contents: read
++  pages: write
++  id-token: write
++
++concurrency:
++  group: pages
++  cancel-in-progress: false
++
++jobs:
++  build:
++    runs-on: ubuntu-latest
++    steps:
++      - uses: actions/checkout@v4
++      - uses: actions/setup-node@v4
++        with:
++          node-version: 22
++          cache: npm
++      - run: npm ci
++      - run: npm test
++      - run: npm run check
++      - run: npm run build
++      - run: npm run verify
++      - uses: actions/upload-pages-artifact@v3
++        with:
++          path: dist
++
++  deploy:
++    needs: build
++    runs-on: ubuntu-latest
++    environment:
++      name: github-pages
++      url: ${{ steps.deployment.outputs.page_url }}
++    steps:
++      - id: deployment
++        uses: actions/deploy-pages@v4
+diff --git a/CV.html b/CV.html
+deleted file mode 100644
+index c5aad2d..0000000
+--- a/CV.html
++++ /dev/null
+@@ -1,785 +0,0 @@
+-<!DOCTYPE html>
+-<html lang="zh-CN">
+-<head>
+-    <meta charset="UTF-8">
+-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-    <title>Zicong Yang - Resume / 杨梓聪简历</title>
+-    <script src="https://cdn.tailwindcss.com"></script>
+-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+-    <!-- Font: Set to Times New Roman as requested -->
+-    
+-    <style>
+-        :root {
+-            --primary-en: #0f172a; 
+-            --secondary-en: #334155; 
+-            --accent: #2563eb; 
+-            --bg-sidebar: #f8fafc;
+-        }
+-
+-        body {
+-            background-color: #f1f5f9;
+-            transition: all 0.3s ease;
+-        }
+-
+-        /* Typography Switcher - Set to Times New Roman and fallback serif */
+-        .lang-en { font-family: 'Times New Roman', Times, serif; line-height: 1.6; color: var(--secondary-en); }
+-        .lang-en h1, .lang-en h2, .lang-en h3 { font-family: 'Times New Roman', Times, serif; color: var(--primary-en); }
+-        
+-        /* For Chinese, using Times New Roman first, then 'SimSun' (Song Ti) for better serif support */
+-        .lang-cn { font-family: 'Times New Roman', 'SimSun', serif; line-height: 1.6; color: #1f2937; }
+-        .lang-cn h1, .lang-cn h2, .lang-cn h3 { font-family: 'Times New Roman', 'SimSun', serif; font-weight: 700; color: #111827; }
+-
+-        /* Section Styles */
+-        .section-title-en {
+-            font-family: 'Times New Roman', Times, serif !important; /* Override explicit font if any */
+-            text-transform: uppercase;
+-            letter-spacing: 0.05em;
+-            font-size: 0.85rem;
+-            font-weight: 700;
+-            color: #64748b;
+-            border-bottom: 1px solid #e2e8f0;
+-            padding-bottom: 0.5rem;
+-            margin: 2rem 0 1.25rem 0;
+-        }
+-
+-        .section-title-cn {
+-            font-size: 1.15rem;
+-            font-weight: 700;
+-            color: #111827;
+-            border-left: 4px solid var(--accent);
+-            padding-left: 0.75rem;
+-            margin: 2rem 0 1.25rem 0;
+-        }
+-
+-        /* Components */
+-        .paper-tag {
+-            font-size: 0.65rem;
+-            font-weight: 700;
+-            padding: 2px 6px;
+-            border-radius: 4px;
+-            text-transform: uppercase;
+-            display: inline-block;
+-            margin-right: 6px;
+-        }
+-        .tag-q1 { background: #fffbeb; color: #b45309; border: 1px solid #fcd34d; }
+-        .tag-q4 { background: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; }
+-        .tag-ei { background: #ecfdf5; color: #047857; border: 1px solid #6ee7b7; }
+-
+-        .skill-pill {
+-            background: #e2e8f0;
+-            color: #334155;
+-            padding: 2px 8px;
+-            border-radius: 12px;
+-            font-size: 0.75rem;
+-            font-weight: 600;
+-            margin: 0 4px 6px 0;
+-            display: inline-block;
+-        }
+-        
+-        /* Link styling for papers */
+-        .paper-link {
+-            color: #1d4ed8; /* blue-700 */
+-            text-decoration: none;
+-            transition: color 0.2s, text-decoration 0.2s;
+-        }
+-        .paper-link:hover {
+-            color: #2563eb; /* blue-600 */
+-            text-decoration: underline;
+-        }
+-
+-        /* Floating Toggle */
+-        .lang-switch {
+-            position: fixed;
+-            top: 20px;
+-            right: 20px;
+-            z-index: 1000;
+-            background: white;
+-            padding: 4px;
+-            border-radius: 30px;
+-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+-            display: flex;
+-            border: 1px solid #e2e8f0;
+-            cursor: pointer;
+-        }
+-        .lang-btn {
+-            padding: 6px 16px;
+-            border-radius: 24px;
+-            font-size: 0.85rem;
+-            font-weight: 600;
+-            transition: all 0.2s;
+-        }
+-        .lang-btn.active { background: #0f172a; color: white; }
+-        .lang-btn.inactive { color: #64748b; }
+-        .lang-btn.inactive:hover { color: #0f172a; }
+-
+-        /* Main content order: research first */
+-        .main-content {
+-            display: flex;
+-            flex-direction: column;
+-        }
+-        .section-research { order: 1; }
+-        .section-work { order: 2; }
+-        .section-projects { order: 3; }
+-
+-        /* Responsive */
+-        @media (max-width: 768px) {
+-            .sidebar { border-right: none; border-bottom: 1px solid #e2e8f0; }
+-        }
+-        @media print {
+-            .lang-switch { display: none; }
+-            body { background: white; }
+-            .shadow-2xl { box-shadow: none; }
+-        }
+-    </style>
+-</head>
+-<body class="lang-cn">
+-
+-    <!-- Language Switcher -->
+-    <div class="lang-switch" onclick="toggleLanguage()">
+-        <div id="btn-en" class="lang-btn inactive">English</div>
+-        <div id="btn-cn" class="lang-btn active">中文</div>
+-    </div>
+-
+-    <!-- Main Resume Container -->
+-    <div class="max-w-6xl mx-auto bg-white min-h-screen shadow-2xl flex flex-col md:flex-row my-0 md:my-8">
+-        
+-        <!-- LEFT SIDEBAR (Basic Info, Education, Skills, Honors, IP) -->
+-        <aside class="sidebar w-full md:w-1/3 bg-slate-50 p-8 border-r border-slate-100 flex-shrink-0">
+-            
+-            <!-- Header -->
+-            <div class="mb-8">
+-                <h1 class="text-3xl font-bold mb-2 text-slate-900">
+-                    <span class="en-text">Zicong Yang</span>
+-                    <span class="cn-text hidden">杨梓聪</span>
+-                </h1>
+-                <div class="flex flex-wrap gap-2 mb-4">
+-                    <span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded font-bold">
+-                        <span class="en-text">CPC Member</span>
+-                        <span class="cn-text hidden">中共党员</span>
+-                    </span>
+-                    <span class="bg-slate-200 text-slate-700 text-xs px-2 py-1 rounded font-bold">
+-                        <span class="en-text">Han Ethnicity</span>
+-                        <span class="cn-text hidden">汉族</span>
+-                    </span>
+-                </div>
+-                
+-                <div class="text-sm text-slate-600 space-y-2">
+-                    <div class="flex items-center"><i class="fa-solid fa-phone w-6 text-center text-slate-400 mr-2"></i> (+86) 130-6895-9696</div>
+-                    <div class="flex items-center"><i class="fa-regular fa-envelope w-6 text-center text-slate-400 mr-2"></i> 402641915@qq.com</div>
+-                    <a href="https://scholar.google.com/citations?user=0Ynn-awAAAAJ" target="_blank" class="flex items-center hover:text-blue-600">
+-                        <i class="fa-solid fa-graduation-cap w-6 text-center text-slate-400 mr-2"></i> Google Scholar
+-                    </a>
+-                    <a href="https://orcid.org/0009-0001-0948-3606" target="_blank" class="flex items-center hover:text-blue-600">
+-                        <i class="fa-brands fa-orcid w-6 text-center text-slate-400 mr-2"></i> ORCID
+-                    </a>
+-                </div>
+-            </div>
+-
+-            <!-- Education -->
+-            <div class="mb-8">
+-                <h2 class="en-text section-title-en">Education</h2>
+-                <h2 class="cn-text hidden section-title-cn">教育经历</h2>
+-                
+-                <div class="mb-2">
+-                    <div class="font-bold text-slate-900 text-lg en-text">Zhuhai College of Science and Technology</div>
+-                    <div class="font-bold text-slate-900 text-lg cn-text hidden">珠海科技学院</div>
+-                    <div class="text-xs text-slate-500 italic mb-1 en-text">(Formerly Jilin University Zhuhai College)</div>
+-                    <div class="text-xs text-slate-500 italic mb-1 cn-text hidden">(原吉林大学珠海学院)</div>
+-                </div>
+-                <div class="text-sm font-semibold text-blue-700 mb-1">
+-                    <span class="en-text">B.E. Software Engineering</span>
+-                    <span class="cn-text hidden">软件工程 (本科)</span>
+-                </div>
+-                <div class="text-xs text-slate-500 mb-3 font-mono">2021.09 – 2025.07</div>
+-                
+-                <ul class="text-xs space-y-2 list-disc list-inside text-slate-700 leading-relaxed">
+-                    <li>
+-                        <span class="en-text"><strong>GPA:</strong> 3.64/4.0 (Top 1%)</span>
+-                        <span class="cn-text hidden"><strong>GPA:</strong> 3.64/4.0 (专业前1%)</span>
+-                    </li>
+-                    <li>
+-                        <span class="en-text"><strong>Honors:</strong> National Scholarship, Top 10 Student, 1st Class Scholarship (3 years), Excellent Monitor, Excellent Student, Academic Technology Award, Social Practice Award.</span>
+-                        <span class="cn-text hidden"><strong>荣誉:</strong> 国家奖学金、十佳大学生、连续三年一等奖学金、优秀班长、优秀学生、学术科技奖、社会实践奖。</span>
+-                    </li>
+-                    <li>
+-                        <span class="en-text"><strong>Roles:</strong> Aliyun Lab Member (Research), Class Monitor (Class ranked 1st in school), Computer Assoc. Officer.</span>
+-                        <span class="cn-text hidden"><strong>任职:</strong> 阿里云实验室成员(参与科研)、班长(带领班级获全校第一/省级优秀)、计算机协会优秀干事。</span>
+-                    </li>
+-                </ul>
+-            </div>
+-
+-            <!-- Skills -->
+-            <div class="mb-8">
+-                <h2 class="en-text section-title-en">Skills</h2>
+-                <h2 class="cn-text hidden section-title-cn">技能清单</h2>
+-                <div>
+-                    <span class="skill-pill">Python</span>
+-                    <span class="skill-pill">C++</span>
+-                    <span class="skill-pill">Java</span>
+-                    <span class="skill-pill">VS Code</span>
+-                    <span class="skill-pill">PyCharm</span>
+-                    <span class="skill-pill">Claude Code</span>
+-                    <span class="skill-pill">Codex</span>
+-                    <span class="skill-pill">MCP</span>
+-                    <span class="skill-pill">PyQt5</span>
+-                    <span class="skill-pill">QThread/Signal-Slot/QMutex</span>
+-                    <span class="skill-pill">PyTorch</span>
+-                    <span class="skill-pill">OpenCV</span>
+-                    <span class="skill-pill">Ultralytics YOLO</span>
+-                    <span class="skill-pill">ONNX/TensorRT</span>
+-                    <span class="skill-pill">queue/threading</span>
+-                    <span class="skill-pill">SQLite</span>
+-                    <span class="skill-pill">SQLAlchemy</span>
+-                    <span class="skill-pill">RAG</span>
+-                </div>
+-                <div class="mt-2 text-xs text-slate-600">
+-                    <span class="en-text"><strong>English:</strong> IELTS 5.5 / CET-4 Passed</span>
+-                    <span class="cn-text hidden"><strong>英语:</strong> 雅思 5.5 / 已过四级</span>
+-                </div>
+-            </div>
+-
+-            <!-- Honors (Full List) -->
+-            <div class="mb-8">
+-                <h2 class="en-text section-title-en">Honors & Awards</h2>
+-                <h2 class="cn-text hidden section-title-cn">荣誉奖项</h2>
+-                <ul class="text-xs space-y-3 text-slate-600">
+-                    <!-- CP Group Cup -->
+-                    <li class="border-l-2 border-yellow-400 pl-2">
+-                        <div class="font-bold text-slate-900">
+-                            <span class="en-text">National 3rd Prize, CP Group Cup Market Analysis Competition</span>
+-                            <span class="cn-text hidden">第十三届正大杯市场调研大赛 全国三等奖</span>
+-                        </div>
+-                        <div class="italic text-slate-500">2022-2023 | National Level</div>
+-                    </li>
+-                    <!-- Innovation Comp -->
+-                    <li class="border-l-2 border-red-500 pl-2">
+-                        <div class="font-bold text-slate-900">
+-                            <span class="en-text">Gold Medal (Provincial) / Bronze (National), China Int'l College Student Innovation Competition</span>
+-                            <span class="cn-text hidden">中国国际大学生创新大赛(2024) 省级金奖/国赛铜奖</span>
+-                        </div>
+-                        <div class="italic text-slate-500">2023-2024 | "Youth Red Dream" Track</div>
+-                    </li>
+-                    <!-- MCM -->
+-                    <li class="border-l-2 border-purple-500 pl-2">
+-                        <div class="font-bold text-slate-900">
+-                            <span class="en-text">Meritorious Winner (Top 7%), MCM/ICM</span>
+-                            <span class="cn-text hidden">美国大学生数学建模竞赛(MCM/ICM) M奖</span>
+-                        </div>
+-                        <div class="italic text-slate-500">2023-2024 | International</div>
+-                    </li>
+-                    <!-- Challenge Cup Academic -->
+-                    <li class="border-l-2 border-blue-500 pl-2">
+-                        <div class="font-bold text-slate-900">
+-                            <span class="en-text">Provincial 1st Prize, "Challenge Cup" Academic Works Competition</span>
+-                            <span class="cn-text hidden">广东省"挑战杯"课外学术科技作品竞赛 一等奖</span>
+-                        </div>
+-                        <div class="italic text-slate-500">2022-2023</div>
+-                    </li>
+-                    <!-- Challenge Cup Entrepreneurship -->
+-                    <li class="border-l-2 border-blue-500 pl-2">
+-                        <div class="font-bold text-slate-900">
+-                            <span class="en-text">Gold Medal, "Challenge Cup" Entrepreneurship Plan (Fujian)</span>
+-                            <span class="cn-text hidden">第十三届"挑战杯"福建省大学生创业计划竞赛 金奖</span>
+-                        </div>
+-                        <div class="italic text-slate-500">2021-2022</div>
+-                    </li>
+-                    <!-- CUMCM -->
+-                    <li class="border-l-2 border-blue-500 pl-2">
+-                        <div class="font-bold text-slate-900">
+-                            <span class="en-text">Provincial 2nd Prize, CUMCM</span>
+-                            <span class="cn-text hidden">全国大学生数学建模竞赛 广东省分赛二等奖</span>
+-                        </div>
+-                        <div class="italic text-slate-500">2021-2022</div>
+-                    </li>
+-                     <!-- Research Report -->
+-                     <li class="border-l-2 border-green-500 pl-2">
+-                        <div class="font-bold text-slate-900">
+-                            <span class="en-text">National Top 100 Research Report ("Three Rural")</span>
+-                            <span class="cn-text hidden">创青春"三下乡""返家乡"全国百强调研报告</span>
+-                        </div>
+-                    </li>
+-                    <!-- Innovation Projects -->
+-                    <li class="pt-2 mt-2 border-t border-slate-200">
+-                        <div class="font-bold mb-1 text-slate-900">
+-                            <span class="en-text">Innovation Training Programs:</span>
+-                            <span class="cn-text hidden">大创项目:</span>
+-                        </div>
+-                        <ul class="list-disc list-inside space-y-1">
+-                            <li>
+-                                <span class="en-text"><strong>Host (National):</strong> Cardiac Death Prediction (202213684015)</span>
+-                                <span class="cn-text hidden"><strong>主持 (国家级):</strong> 心源性猝死预测 (202213684015)</span>
+-                            </li>
+-                            <li>
+-                                <span class="en-text"><strong>Part. (National):</strong> YOLOv7 TCM Class. (S202313684041)</span>
+-                                <span class="cn-text hidden"><strong>参与 (国家级):</strong> YOLOv7中医药分类 (S202313684041)</span>
+-                            </li>
+-                            <li>
+-                                <span class="en-text"><strong>Part. (School):</strong> Silk Embroidery Seg. (DC2024034)</span>
+-                                <span class="cn-text hidden"><strong>参与 (校级):</strong> 丝绣图像分割 (DC2024034)</span>
+-                            </li>
+-                        </ul>
+-                    </li>
+-                </ul>
+-            </div>
+-
+-            <!-- IP -->
+-            <div>
+-                <h2 class="en-text section-title-en">Intellectual Property</h2>
+-                <h2 class="cn-text hidden section-title-cn">知识产权</h2>
+-                <div class="text-xs space-y-3 text-slate-600">
+-                    <div>
+-                        <div class="font-bold text-slate-900 mb-1">
+-                            <span class="en-text">Patents</span>
+-                            <span class="cn-text hidden">专利</span>
+-                        </div>
+-                        <ul class="list-disc list-inside">
+-                            <li>
+-                                <span class="en-text">Agricultural product component detection device</span>
+-                                <span class="cn-text hidden">一种农业产品成分检测装置</span>
+-                            </li>
+-                            <li>
+-                                <span class="en-text">Transport oxygenated crab box structure</span>
+-                                <span class="cn-text hidden">一种运输充氧蟹盒结构</span>
+-                            </li>
+-                        </ul>
+-                    </div>
+-                    <div>
+-                        <div class="font-bold text-slate-900 mb-1">
+-                            <span class="en-text">Software Copyrights</span>
+-                            <span class="cn-text hidden">软件著作权</span>
+-                        </div>
+-                        <ul class="list-disc list-inside">
+-                            <li>
+-                                <span class="en-text">Cross-border e-commerce backend analysis V1.0</span>
+-                                <span class="cn-text hidden">跨境电商后台运营分析管理系统V1.0</span>
+-                            </li>
+-                            <li>
+-                                <span class="en-text">Agri-product cross-border settlement V1.0</span>
+-                                <span class="cn-text hidden">农产品跨国交易与结算系统V1.0</span>
+-                            </li>
+-                            <li>
+-                                <span class="en-text">Agri-product intl market analysis V1.0</span>
+-                                <span class="cn-text hidden">农产品国际市场分析与营销策略系统V1.0</span>
+-                            </li>
+-                            <li>
+-                                <span class="en-text">Intl trade logistics & clearance platform V1.0</span>
+-                                <span class="cn-text hidden">国际贸易物流与通关服务平台V1.0</span>
+-                            </li>
+-                            <li>
+-                                <span class="en-text">Agri intl trade policy analysis tool V1</span>
+-                                <span class="cn-text hidden">农业国际贸易政策研究与分析工具软件V1</span>
+-                            </li>
+-                        </ul>
+-                    </div>
+-                </div>
+-            </div>
+-
+-        </aside>
+-
+-
+-        <!-- RIGHT CONTENT (Experience, Papers, Projects) -->
+-        <main class="main-content w-full md:w-2/3 p-8 md:p-12 text-sm leading-relaxed">
+-            
+-            <!-- === WORK EXPERIENCE === -->
+-            <section class="mb-10 section-work">
+-                <h2 class="en-text section-title-en">Professional Experience</h2>
+-                <h2 class="cn-text hidden section-title-cn">工作经历</h2>
+-
+-                <!-- Job 1: Cable Defect Detection -->
+-                <div class="mb-8 border-l-2 border-slate-200 pl-4 relative">
+-                    <div class="flex justify-between items-baseline mb-1">
+-                        <h3 class="text-lg font-bold text-slate-900">
+-                            <span class="en-text">Software Engineer</span>
+-                            <span class="cn-text hidden">软件工程师</span>
+-                        </h3>
+-                        <span class="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded">2025.01 – 2025.09</span>
+-                    </div>
+-                    <div class="text-blue-700 font-bold mb-3">
+-                        <span class="en-text">Guangzhou Xiyang Information Technology Co., Ltd.</span>
+-                        <span class="cn-text hidden">广州西洋信息科技有限公司</span>
+-                    </div>
+-                    <div class="mb-3 text-slate-600 space-y-1 text-justify">
+-                        <div>
+-                            <span class="en-text"><strong>Project Name:</strong> CablePyQT Cable Surface Defect Detection and Intelligent Reporting System</span>
+-                            <span class="cn-text hidden"><strong>项目名称：</strong>CablePyQT 线缆表面缺陷检测与智能报告系统</span>
+-                        </div>
+-                        <div>
+-                            <span class="en-text"><strong>Tech Stack:</strong> Python, PyQt5, Ultralytics YOLO, OpenCV, SQLAlchemy (SQLite), ReportLab, OpenAI/Spark API, RAG, PyTest, Git, Bash, Vibe Coding, Skills</span>
+-                            <span class="cn-text hidden"><strong>技术栈：</strong>Python、PyQt5、Ultralytics YOLO、OpenCV、SQLAlchemy(SQLite)、ReportLab、OpenAI/Spark API、RAG、PyTest、Git、Bash、Vibe Coding、Skills</span>
+-                        </div>
+-                        <div>
+-                            <span class="en-text"><strong>Project Description:</strong> A desktop multi-channel real-time inspection platform for industrial quality-control scenarios, delivering a full closed loop from high-concurrency data acquisition, AI visual recognition, and persistent storage to RAG-powered intelligent analysis.</span>
+-                            <span class="cn-text hidden"><strong>项目描述：</strong>面向工业产线质检场景的桌面端多通道实时检测平台，提供涵盖“高并发数据采集-AI视觉识别-持久化落库-RAG智能分析”的全链路闭环。</span>
+-                        </div>
+-                    </div>
+-                    <ul class="list-disc list-outside ml-4 text-slate-600 space-y-2 text-justify">
+-                        <li>
+-                            <span class="en-text">Collaborated with Zhuhai Key Laboratory of Intelligent Visual Inspection Technology, led dataset construction and algorithm R&amp;D, organized and guided student innovation teams for annotation, completed <strong>3,500</strong> cable-defect labels, and co-built the <strong>CSDDdb</strong> dataset through industry-academia collaboration.</span>
+-                            <span class="cn-text hidden">与珠海市智能视觉检测技术重点实验室展开合作，主导线缆缺陷检测项目的数据构建与算法研发，组织并指导大学生创新创业团队开展数据标注工作，累计完成 <strong>3500 张</strong> 线缆缺陷图像标注，实现与重点实验室的产学研合作，标注项目顺利完成，共同创建 <strong>CSDDdb</strong> 数据集。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">Addressed long-tail data scarcity under uneven lighting and varying viewpoints by building an offline augmentation pipeline with YOLO normalized coordinate (XYWH) linkage. Decoupled the system bottom layer and implemented a rich operator library covering bbox-synchronized geometric transforms (translation, flip, orthogonal rotation) and pixel-level photometric transforms (Gaussian noise, blur, color enhancement).</span>
+-                            <span class="cn-text hidden">针对光照不均、视角多变等长尾场景下的数据稀缺问题，研发了支持 YOLO 归一化坐标（XYWH）联动计算的离线数据增强流水线。系统底层解耦并实现了丰富的增强算子库，全面涵盖边界框同步跟随的空间几何变换（平移、翻转、正交旋转），以及像素级的光度学变换（高斯噪声、模糊、色彩增强）。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">Developed the image preprocessing module based on <strong>OpenCV</strong>. For irregular cable edges and weak dark-area details, designed a full pipeline using Wiener frequency-domain deblurring and Gaussian background suppression to reconstruct quality, then built multi-stage enhancement from pixel-distribution features (illumination compensation + multi-scale feature fusion), and used adaptive hybrid-threshold segmentation with morphological projection differencing to isolate background noise and visualize uneven edges plus internal black spots.</span>
+-                            <span class="cn-text hidden">负责图像预处理模块的开发，基于 OpenCV 实现了一系列图像增强与缺陷提取算法。针对线缆成像边缘不规则与暗区细节弱的痛点，设计了完整的图像处理管线。采用 Wiener 频域去模糊与高斯背景抑制重构图像质量。构建了基于像素分布特征的多阶段图像增强算法（光照补偿+多尺度特征融合），并利用自适应混合阈值分割与形态学投影差分技术，精准剥离背景干扰，实现线缆不平整边缘与内部黑点的高亮可视化追踪。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">For small-target defects, implemented adaptive ROI extraction with Otsu and morphology in <strong>OpenCV</strong>; smoothed background using guided filtering and enhanced weak high-frequency defects under complex backgrounds via multi-scale Sobel gradient fusion. Replaced empirical thresholds with a dynamic adaptive segmentation model based on global gradient statistics and multi-dimensional contour geometry, significantly reducing false positives while achieving high-precision real-time localization at low compute cost.</span>
+-                            <span class="cn-text hidden">针对小目标缺陷检测难的问题，基于 OpenCV 实现了基于 Otsu 与形态学自适应提取目标 ROI，利用导向滤波平滑背景并结合多尺度 Sobel 融合梯度特征，显著增强复杂背景下的微弱高频缺陷；摒弃传统经验阈值，创新性构建基于全局梯度统计与多维轮廓几何特征的动态自适应分割模型，在极低算力消耗下大幅抑制误检率，实现高精度的实时缺陷定位。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">Proposed and implemented the improved lightweight defect-vision model <strong>CSDDNet</strong>, migrated LWGANet to cable-defect detection, introduced PWCSA to optimize the GPA branch for better small-target capability, added a lightweight detection head, and trained multiple mainstream YOLO models.</span>
+-                            <span class="cn-text hidden">提出并实现了改进型轻量化缺陷检测视觉检测模型 <strong>CSDDNet</strong>，将 LWGANet 迁移至电缆缺陷检测任务，并通过引入 PWCSA 网络优化 GPA 分支提升小目标缺陷检测能力，同时新增轻量化检测头，并训练多个主流检测 YOLO 模型。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">Developed a PyQt5 + YOLO + OpenCV desktop inspection system from AI model to application-layer delivery. Supported 4-channel parallel processing, 3 video-source types, and multi-model formats (.pt/.onnx/.engine). Implemented thread-safe access with QThread + QMutex, continuous-error circuit breaking, and stream reconnection to prevent dead loops and leaks. Introduced frame skipping, async I/O, and 5-second throttled DB writes; fully decoupled UI rendering from inference and capped UI at 12 FPS (~60% fewer calls) while preserving 30 FPS lossless detection. Built a RAG reporting module with paraphrase-multilingual-MiniLM-L12-v2, Top-K retrieval, and Spark API requests/OpenAI dual fallback for better stability and report quality. Delivered accurate segmentation and visualization for cable-surface attachments, bulges, black spots, breakage, and concave-convex defects.</span>
+-                            <span class="cn-text hidden">研发基于 PyQt5+YOLO+OpenCV 算子的线缆缺陷检测桌面端，实现从 AI 模型到应用层的完整落地，支持 4 通道并行、3 类视频源及多模型格式（.pt/.onnx/.engine），覆盖复杂工业场景。基于 QThread+QMutex 落地线程安全访问，构建连续错误熔断与断流重连机制，避免底层检测死循环与资源泄漏。引入帧跳过、异步 I/O 及 5s 周期节流写库策略；将 UI 渲染与底层推理彻底解耦，限制界面至 12FPS（减少约 60% 调用量），在保障 30FPS 视频流无损检测的同时实现界面极速响应。实现基于 RAG 的智能报告系统，构建 paraphrase-multilingual-MiniLM-L12-v2、Top-K 检索、Spark API requests/OpenAI 双通道回退机制，提升报告生成质量与稳定性。实现线缆表面附着物、鼓包、黑点、破损及凹凸缺陷的精准分割与可视化展示。</span>
+-                        </li>
+-                    </ul>
+-                </div>
+-
+-                <!-- Job 2: Soft-shell Crab -->
+-                <div class="mb-8 border-l-2 border-slate-200 pl-4 relative">
+-                    <div class="flex justify-between items-baseline mb-1">
+-                        <h3 class="text-lg font-bold text-slate-900">
+-                            <span class="en-text">Algorithm Intern</span>
+-                            <span class="cn-text hidden">算法实习生</span>
+-                        </h3>
+-                        <span class="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded">2024.09 – 2024.12</span>
+-                    </div>
+-                    <div class="text-blue-700 font-bold mb-3">
+-                        <span class="en-text">Ningbo Haizhimingshi Technology Co., Ltd.</span>
+-                        <span class="cn-text hidden">宁波海智明视科技有限公司 | 研发部</span>
+-                    </div>
+-                    <ul class="list-disc list-outside ml-4 text-slate-600 space-y-2 text-justify">
+-                        <li>
+-                            <span class="en-text">Built multi-scenario soft-shell crab dataset. Trained <strong>YOLOv5s</strong> with optimized LR and loss functions.</span>
+-                            <span class="cn-text hidden">构建多场景软壳蟹图像数据集，使用 <strong>YOLOv5s</strong> 进行训练并优化学习率与损失函数。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">Achieved: <strong>Precision 92.3%, Recall 89.7%, mAP 90.5%, F1-score 90.9%</strong>.</span>
+-                            <span class="cn-text hidden">模型指标：<strong>Precision 92.3%, Recall 89.7%, mAP 90.5%, F1-score 90.9%</strong>。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">Optimized inference speed to <strong>45 FPS</strong> for automatic sorting systems.</span>
+-                            <span class="cn-text hidden">优化推理速度至 <strong>45 FPS</strong>，满足自动分拣系统实时需求。</span>
+-                        </li>
+-                    </ul>
+-                </div>
+-
+-                <!-- Job 3: Water Quality -->
+-                <div class="mb-8 border-l-2 border-slate-200 pl-4 relative">
+-                    <div class="flex justify-between items-baseline mb-1">
+-                        <h3 class="text-lg font-bold text-slate-900">
+-                            <span class="en-text">Algorithm Intern</span>
+-                            <span class="cn-text hidden">算法实习生</span>
+-                        </h3>
+-                        <span class="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded">2024.03 – 2024.09</span>
+-                    </div>
+-                    <div class="text-blue-700 font-bold mb-3">
+-                        <span class="en-text">Ningbo Jiasi Technology Co., Ltd.</span>
+-                        <span class="cn-text hidden">宁波嘉偲科技有限公司 | 研发部</span>
+-                    </div>
+-                    <ul class="list-disc list-outside ml-4 text-slate-600 space-y-2 text-justify">
+-                        <li>
+-                            <span class="en-text">Developed water quality algo (Acc 95.2%, Recall 93.8%, F1 94.5%) with IoT sensor network.</span>
+-                            <span class="cn-text hidden">开发智能水质检测算法（准确率95.2%，召回率93.8%，F1 94.5%），结合物联网传感器监测。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">Designed <strong>GRU/LSTM/Transformer</strong> for 24h forecast and anomaly warning (temp/oxygen pump).</span>
+-                            <span class="cn-text hidden">设计 <strong>GRU/LSTM/Transformer</strong> 模型预测未来24小时环境变化与异常预警（水温/增氧泵）。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">Led multi-sensor fusion data collection. Used Random Forest/XGBoost for evaluation. Calculated WOI using DO% and NTU to decide water changes.</span>
+-                            <span class="cn-text hidden">主导多传感器融合数据采集。运用随机森林/XGBoost评估，综合溶解氧(DO%)和浊度(NTU)计算水质指数(WOI)判断换水。</span>
+-                        </li>
+-                    </ul>
+-                </div>
+-
+-                <!-- Job 4: Publishing System -->
+-                <div class="mb-8 border-l-2 border-slate-200 pl-4 relative">
+-                    <div class="flex justify-between items-baseline mb-1">
+-                        <h3 class="text-lg font-bold text-slate-900">
+-                            <span class="en-text">Software Development Intern</span>
+-                            <span class="cn-text hidden">软件开发实习生</span>
+-                        </h3>
+-                        <span class="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded">2023.07 – 2023.11</span>
+-                    </div>
+-                    <div class="text-blue-700 font-bold mb-3">
+-                        <span class="en-text">Guangzhou Chuzhong Technology Co.</span>
+-                        <span class="cn-text hidden">广州市触众科技公司 | 软件部</span>
+-                    </div>
+-                    <ul class="list-disc list-outside ml-4 text-slate-600 space-y-2 text-justify">
+-                        <li>
+-                            <span class="en-text">Enhanced publishing system. Built RESTful APIs with <strong>SpringBoot</strong> & <strong>JWT</strong> RBAC (Editor/Admin).</span>
+-                            <span class="cn-text hidden">优化发布系统。基于 <strong>SpringBoot</strong> 和 <strong>JWT</strong> 构建API与多角色权限管理（编辑/管理员）。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">Designed MySQL schema, used MyBatis-Plus for dynamic SQL & version rollback.</span>
+-                            <span class="cn-text hidden">设计MySQL表结构，使用MyBatis-Plus实现动态SQL与版本回滚。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">Integrated NLP API for rewriting. Developed interfaces for Publish (Rich text/Img), Query (Filter), and Audit workflow.</span>
+-                            <span class="cn-text hidden">集成NLP模型实现智能改写。开发稿件发布（富文本/图片）、查询（筛选）及审核流转接口。</span>
+-                        </li>
+-                    </ul>
+-                </div>
+-
+-                <!-- Job 5: Independent Operator (Startup) -->
+-                <div class="mb-8 border-l-2 border-red-200 pl-4 relative">
+-                    <div class="flex justify-between items-baseline mb-1">
+-                        <h3 class="text-lg font-bold text-slate-900">
+-                            <span class="en-text">Independent Operator (Startup)</span>
+-                            <span class="cn-text hidden">独立运营+销售 (创业项目)</span>
+-                        </h3>
+-                        <span class="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded">2024.07 – 2025.09</span>
+-                    </div>
+-                    <div class="text-blue-700 font-bold mb-3">
+-                        <span class="en-text">Campus Startup Project</span>
+-                        <span class="cn-text hidden">学校创业项目 | 运营规划与独立销售</span>
+-                    </div>
+-                    <ul class="list-disc list-outside ml-4 text-slate-600 space-y-2 text-justify">
+-                        <li>
+-                            <span class="en-text">Managed content on Xiaohongshu (Little Red Book). 2,374 leads, 4,509+ engagements, Max view 25k+.</span>
+-                            <span class="cn-text hidden">负责小红书内容运营。引流 2374 人，获赞藏 4509+，单条最高浏览 25,000+。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">Converted 1,800+ to WeChat (63% rate). Summer monthly revenue > <strong>100,000 RMB</strong>.</span>
+-                            <span class="cn-text hidden">私域引流 1800+ 人，转化率 63%。暑期月流水突破 <strong>10万元人民币</strong>。</span>
+-                        </li>
+-                    </ul>
+-                </div>
+-            </section>
+-
+-            <!-- === RESEARCH PAPERS === -->
+-            <section class="mb-10 section-research">
+-                <h2 class="en-text section-title-en" style="margin-top: 0;">Research Publications</h2>
+-                <h2 class="cn-text hidden section-title-cn" style="margin-top: 0;">学术研究</h2>
+-                <div class="space-y-4">
+-                    <!-- Paper 1 -->
+-                    <div class="p-4 bg-slate-50 rounded border border-slate-200">
+-                        <div class="flex items-center mb-1">
+-                            <span class="paper-tag tag-q1">JCR Q1</span>
+-                            <span class="text-xs text-slate-500 font-mono ml-auto">2024.03-2024.09</span>
+-                        </div>
+-                        <h4 class="font-bold text-slate-900 text-sm mb-1 leading-tight">
+-                            <a href="https://www.nature.com/articles/s41598-024-71700-z" target="_blank" class="paper-link">
+-                                A coordinated adaptive multiscale enhanced spatio-temporal fusion network for multi-lead electrocardiogram arrhythmia detection
+-                            </a>
+-                        </h4>
+-                        <div class="text-xs text-slate-600">
+-                            <span class="font-bold text-blue-700">1st Author</span> | 
+-                            <span class="italic">Scientific Reports</span>
+-                        </div>
+-                    </div>
+-                    <!-- Paper 2 -->
+-                    <div class="p-4 bg-slate-50 rounded border border-slate-200">
+-                        <div class="flex items-center mb-1">
+-                            <span class="paper-tag tag-q4">JCR Q4</span>
+-                            <span class="text-xs text-slate-500 font-mono ml-auto">2023.07-2024.06</span>
+-                        </div>
+-                        <h4 class="font-bold text-slate-900 text-sm mb-1 leading-tight">
+-                            <a href="https://doi.org/10.1007/978-3-031-57037-7_7" target="_blank" class="paper-link">
+-                                The fusion model of ResNet and GRU based on simplified self-attention for ECG classification on PTB-XL dataset
+-                            </a>
+-                        </h4>
+-                        <div class="text-xs text-slate-600">
+-                            <span class="font-bold text-blue-700">1st Author</span> | 
+-                            <span class="italic">Computer and Information Science and Engineering</span>
+-                        </div>
+-                    </div>
+-                    <!-- Paper 3 -->
+-                    <div class="p-4 bg-slate-50 rounded border border-slate-200">
+-                        <div class="flex items-center mb-1">
+-                            <span class="paper-tag tag-q1">JCR Q1</span>
+-                            <span class="text-xs text-slate-500 font-mono ml-auto">2025.06-2025.10</span>
+-                        </div>
+-                        <h4 class="font-bold text-slate-900 text-sm mb-1 leading-tight">
+-                            <a href="https://iopscience.iop.org/article/10.1088/1361-6501/ae10d3/meta" target="_blank" class="paper-link">
+-                                Enhancing Defect Detection with Diffusion Model
+-                            </a>
+-                        </h4>
+-                        <div class="text-xs text-slate-600">
+-                            <span class="en-text">3rd Author (Student 3rd)</span>
+-                            <span class="cn-text hidden">第三作者(学生三作)</span> | 
+-                            <span class="italic">Measurement Science and Technology</span>
+-                        </div>
+-                    </div>
+-                    <!-- Paper 4 -->
+-                    <div class="p-4 bg-slate-50 rounded border border-slate-200">
+-                        <div class="flex items-center mb-1">
+-                            <span class="paper-tag tag-ei">EI Indexed</span>
+-                            <span class="text-xs text-slate-500 font-mono ml-auto">2024.01-2025.05</span>
+-                        </div>
+-                        <h4 class="font-bold text-slate-900 text-sm mb-1 leading-tight">
+-                            <a href="https://ieeexplore.ieee.org/abstract/document/10604082" target="_blank" class="paper-link">
+-                                Wheat Disease Recognition Based on a Fusion Model with Improved Spatial and Channel Reconstruction Convolution Combined with Contextual Transformer
+-                            </a>
+-                        </h4>
+-                        <div class="text-xs text-slate-600">
+-                            <span class="font-bold text-blue-700">1st Author</span> | 
+-                            <span class="italic">CVIDL 2024</span>
+-                        </div>
+-                    </div>
+-                    <!-- Paper 5 -->
+-                    <div class="p-4 bg-slate-50 rounded border border-slate-200">
+-                        <div class="flex items-center mb-1">
+-                            <span class="paper-tag tag-ei">EI Indexed</span>
+-                            <span class="text-xs text-slate-500 font-mono ml-auto">2024.01-2025.05</span>
+-                        </div>
+-                        <h4 class="font-bold text-slate-900 text-sm mb-1 leading-tight">
+-                            <a href="https://ieeexplore.ieee.org/abstract/document/10604280" target="_blank" class="paper-link">
+-                                Enhanced and improved garbage identification and classification of YOLOV5 based on data
+-                            </a>
+-                        </h4>
+-                        <div class="text-xs text-slate-600">
+-                            <span class="en-text">2nd Author (Student 2nd)</span>
+-                            <span class="cn-text hidden">第二作者(学生二作)</span> | 
+-                            <span class="italic">CVIDL 2024</span>
+-                        </div>
+-                    </div>
+-                     <!-- Paper 6 -->
+-                     <div class="p-4 bg-slate-50 rounded border border-slate-200">
+-                        <div class="flex items-center mb-1">
+-                            <span class="paper-tag tag-ei">EI Indexed</span>
+-                            <span class="text-xs text-slate-500 font-mono ml-auto">2024.06-2024.10</span>
+-                        </div>
+-                        <h4 class="font-bold text-slate-900 text-sm mb-1 leading-tight">
+-                            <a href="https://dl.acm.org/doi/abs/10.1145/3700906.3700946" target="_blank" class="paper-link">
+-                                Surface waste identification and detection based on improved YOLOV8
+-                            </a>
+-                        </h4>
+-                        <div class="text-xs text-slate-600">
+-                            <span class="en-text">4th Author (Student 4th)</span>
+-                            <span class="cn-text hidden">第四作者(学生四作)</span> | 
+-                            <span class="italic">IPMLP 2024</span>
+-                        </div>
+-                    </div>
+-                </div>
+-            </section>
+-
+-            <!-- === PROJECTS === -->
+-            <section class="section-projects">
+-                <h2 class="en-text section-title-en">Key Projects</h2>
+-                <h2 class="cn-text hidden section-title-cn">项目经历</h2>
+-
+-                <!-- Project 1: Sudden Cardiac Death Prediction -->
+-                <div class="mb-6">
+-                    <h3 class="font-bold text-slate-900 text-sm">
+-                        <span class="en-text">Sudden Cardiac Death Prediction Model (Machine Learning)</span>
+-                        <span class="cn-text hidden">基于机器学习的心源性猝死预测模型的研究</span>
+-                    </h3>
+-                    <div class="text-xs text-slate-500 mb-1">
+-                        <span class="en-text">Project Lead | Provincial Research Fund | 2023.03-2024.06</span>
+-                        <span class="cn-text hidden">第一负责人 | 广东省大创省级科研基金立项 | 2023.03-2024.06</span>
+-                    </div>
+-                    <p class="text-slate-600 text-justify">
+-                        <span class="en-text">Led the project <strong>end-to-end</strong> (proposal, design, implementation, publication, final approval). Converted multi-lead ECG signals to 2D grayscale images; implemented grayscale feature fusion. Designed <strong>STFAC-ECGNet</strong> (Adaptive Multiscale Spatio-Temporal Fusion Network) integrating <strong>CNN/RNN</strong> with <strong>Coordinated Channel-Spatial Attention</strong> and temporal fusion modules, significantly improving classification accuracy on PTB-XL and CPSC2018 datasets. Published <strong>2 papers as 1st Author</strong> (<strong>JCR Q1, Q4</strong>).</span>
+-                        <span class="cn-text hidden">独立负责项目全流程（申报、设计、实现、发表、结项）。将多导联心电信号转为二维灰度图，实现灰度特征融合。设计 <strong>STFAC-ECGNet</strong>（自适应多尺度时空融合网络），整合 <strong>CNN/RNN</strong> 特征提取器，结合<strong>协同通道-空间注意力机制</strong>与时间融合模块，提升 PTB-XL/CPSC2018 数据集上的分类准确率。以第一作者身份发表 <strong>JCR Q1、Q4 论文 2 篇</strong>。</span>
+-                    </p>
+-                </div>
+-
+-                <!-- Project 2: NYT Wordle Game Analysis -->
+-                <div class="mb-6">
+-                    <h3 class="font-bold text-slate-900 text-sm">
+-                        <span class="en-text">NYT Wordle Game Analysis</span>
+-                        <span class="cn-text hidden">纽约时报Wordle游戏产品分析</span>
+-                    </h3>
+-                    <div class="text-xs text-slate-500 mb-1">
+-                        <span class="en-text">Lead | MCM Meritorious Winner (Top 7%) | 2023.02-2023.05</span>
+-                        <span class="cn-text hidden">第一负责人 | 美国大学生数学建模竞赛 M 奖（国际前 7%）| 2023.02-2023.05</span>
+-                    </div>
+-                    <p class="text-slate-600 text-justify">
+-                        <span class="en-text">Led analysis of Wordle game trends and difficulty factors. Used <strong>Machine Learning</strong> and <strong>Python Corpus</strong> statistics to analyze word frequency, syllables, and letter repetition for difficulty metrics. Implemented a <strong>BiGRU model</strong> to predict player behavior trends. Secured the <strong>MCM Meritorious Winner (Top 7%)</strong> award.</span>
+-                        <span class="cn-text hidden">负责分析 Wordle 游戏未来趋势、难度因素与更改方案。运用机器学习及<strong>丰富的 Python 语料库</strong>统计分析单词频率、音节、重复字母等难度指标。采用深度学习 <strong>BiGRU 模型</strong>预测玩家走势。荣获<strong>美国大学生数学建模竞赛 M奖 (国际前 7%)</strong>。</span>
+-                    </p>
+-                </div>
+-
+-                <!-- Project 3: Consumer Demand Analysis (Coca-Cola) -->
+-                <div class="mb-6">
+-                    <h3 class="font-bold text-slate-900 text-sm">
+-                        <span class="en-text">Consumer Demand Analysis (Coca-Cola)</span>
+-                        <span class="cn-text hidden">数字化营销背景下消费者需求分析 —— 基于可口可乐品牌调研</span>
+-                    </h3>
+-                    <div class="text-xs text-slate-500 mb-1">
+-                        <span class="en-text">Lead | National 3rd Prize | 2023.01-2025.05</span>
+-                        <span class="cn-text hidden">第一负责人 | 正大杯市场调研数据分析大赛全国三等奖 | 2023.01-2025.05</span>
+-                    </div>
+-                    <p class="text-slate-600 text-justify">
+-                        <span class="en-text">Responsible for data mining. Used automated crawlers to collect <strong>120,756</strong> JD.com reviews for Coca-Cola products. Applied the <strong>BERT Natural Language Model</strong> for sentiment analysis to generate word clouds and user profiles. Secured the <strong>National 3rd Prize</strong> in the CP Group Market Research Competition.</span>
+-                        <span class="cn-text hidden">负责数据挖掘工作。利用自动化爬虫技术采集京东 <strong>120,756条</strong> 可口可乐产品评论。采用 <strong>BERT 自然语言模型</strong>进行情感分析，并绘制词云图及用户画像，荣获<strong>正大杯市场调研数据分析大赛全国三等奖</strong>。</span>
+-                    </p>
+-                </div>
+-
+-                <!-- Project 4: "Agriculture + Tourism" Rural Revitalization -->
+-                <div class="mb-6">
+-                    <h3 class="font-bold text-slate-900 text-sm">
+-                        <span class="en-text">"Agriculture + Tourism" Rural Revitalization</span>
+-                        <span class="cn-text hidden">"农业 + 旅游" 模式助推乡村振兴路径研究</span>
+-                    </h3>
+-                    <div class="text-xs text-slate-500 mb-1">
+-                        <span class="en-text">2nd Lead | National Excellent Report | 2023.07-2025.11</span>
+-                        <span class="cn-text hidden">第二负责人 | 中国共青团国家级优秀调研报告（知网检索）| 2023.07-2025.11</span>
+-                    </div>
+-                    <p class="text-slate-600 text-justify">
+-                        <span class="en-text">Handled data collection and mining. Distributed <strong>379</strong> questionnaires (97% valid) and integrated government data. Performed descriptive statistics and used <strong>Machine Learning</strong> to predict tea yield, fertilization volume, and total machinery power. Research report won <strong>National Excellent Report</strong> status, with the corresponding paper published as <strong>2nd Author</strong> (CNKI indexed).</span>
+-                        <span class="cn-text hidden">负责数据采集和挖掘工作。发放问卷 <strong>379份</strong>（有效回收率97%），并整合政府单位数据。进行描述性统计与<strong>机器学习预测</strong>（茶叶产量、施肥量、机械总动力）。调研报告荣获<strong>国家级优秀调研报告</strong>，论文以第二作者身份发表（知网检索）。</span>
+-                    </p>
+-                </div>
+-
+-            </section>
+-
+-        </main>
+-    </div>
+-
+-    <script>
+-        const btnEn = document.getElementById('btn-en');
+-        const btnCn = document.getElementById('btn-cn');
+-        const body = document.body;
+-        
+-        function setLanguage(lang) {
+-            const enElements = document.querySelectorAll('.en-text');
+-            const cnElements = document.querySelectorAll('.cn-text');
+-            const isCn = lang === 'cn';
+-
+-            if (isCn) {
+-                btnEn.classList.remove('active');
+-                btnEn.classList.add('inactive');
+-                btnCn.classList.add('active');
+-                btnCn.classList.remove('inactive');
+-
+-                enElements.forEach(el => el.classList.add('hidden'));
+-                cnElements.forEach(el => el.classList.remove('hidden'));
+-
+-                body.classList.remove('lang-en');
+-                body.classList.add('lang-cn');
+-                document.documentElement.lang = 'zh-CN';
+-                document.title = "杨梓聪 - 详细个人简历";
+-            } else {
+-                btnCn.classList.remove('active');
+-                btnCn.classList.add('inactive');
+-                btnEn.classList.add('active');
+-                btnEn.classList.remove('inactive');
+-
+-                cnElements.forEach(el => el.classList.add('hidden'));
+-                enElements.forEach(el => el.classList.remove('hidden'));
+-
+-                body.classList.remove('lang-cn');
+-                body.classList.add('lang-en');
+-                document.documentElement.lang = 'en';
+-                document.title = "Zicong Yang - Resume";
+-            }
+-        }
+-
+-        function toggleLanguage() {
+-            const isCurrentlyEn = body.classList.contains('lang-en');
+-            setLanguage(isCurrentlyEn ? 'cn' : 'en');
+-        }
+-
+-        // Initialize default language to Chinese
+-        setLanguage('cn');
+-    </script>
+-</body>
+-</html>
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000..25f7c7b
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,57 @@
++# cv
++
++Personal academic site of Zicong Yang: publications, work, and writing.
++
++Built with Astro 5, statically generated, deployed to GitHub Pages.
++
++## Local
++
++```bash
++npm install
++npm run dev      # http://localhost:4321/cv/
++npm run check    # type + content schema check
++npm test         # unit tests for schema and ordering rules
++npm run build    # build to dist/
++npm run verify   # assert build output
++```
++
++## Add a publication
++
++1. Create `src/content/publications/<slug>.md` with the frontmatter defined in
++   `src/lib/schema.ts`.
++2. `doi` is required. Set `selected: true` only for entries that should appear on the home
++   page.
++3. Run `npm run check` and `npm run build`.
++
++## Add a post
++
++1. Create `src/content/blog/<slug>.md`; `lang` is `en` or `zh`, `tags` needs at least one
++   entry, `summary` at most 160 characters.
++2. `draft: true` keeps it out of the list, RSS, and sitemap.
++3. Future dates publish automatically: entries dated after the build day are excluded.
++
++## Add a project or experience
++
++1. Create `src/content/work/<slug>.md`; `kind` is `experience` or `project`.
++2. `highlights` needs at least one factual bullet; do not add claims without a source.
++3. Projects sort by `order`; experiences sort by `start`, newest first.
++
++## Deploy
++
++Pushing to `main` triggers `.github/workflows/deploy.yml`. The site is served from
++`https://yzc0421.github.io/cv/`. If a custom domain is added, update `site` and `base` in
++`astro.config.mjs`, add `public/CNAME`, and update `public/robots.txt`.
++
++## Rollback
++
++Re-run the last successful `Deploy to GitHub Pages` workflow, or `git revert` the offending
++content commit. Build configuration changes revert the same way; no manual cleanup on Pages
++is required.
++
++## Notes
++
++- No runtime CDN dependencies and no external fonts.
++- Content is validated by Zod at build time; invalid frontmatter fails the build.
++- Paper metadata was cross-checked against Crossref and confirmed manually.
++- All internal links go through `withBase` in `src/lib/url.ts`; do not concatenate
++  `import.meta.env.BASE_URL` directly.
+diff --git a/index.html b/index.html
+deleted file mode 100644
+index c5aad2d..0000000
+--- a/index.html
++++ /dev/null
+@@ -1,785 +0,0 @@
+-<!DOCTYPE html>
+-<html lang="zh-CN">
+-<head>
+-    <meta charset="UTF-8">
+-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-    <title>Zicong Yang - Resume / 杨梓聪简历</title>
+-    <script src="https://cdn.tailwindcss.com"></script>
+-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+-    <!-- Font: Set to Times New Roman as requested -->
+-    
+-    <style>
+-        :root {
+-            --primary-en: #0f172a; 
+-            --secondary-en: #334155; 
+-            --accent: #2563eb; 
+-            --bg-sidebar: #f8fafc;
+-        }
+-
+-        body {
+-            background-color: #f1f5f9;
+-            transition: all 0.3s ease;
+-        }
+-
+-        /* Typography Switcher - Set to Times New Roman and fallback serif */
+-        .lang-en { font-family: 'Times New Roman', Times, serif; line-height: 1.6; color: var(--secondary-en); }
+-        .lang-en h1, .lang-en h2, .lang-en h3 { font-family: 'Times New Roman', Times, serif; color: var(--primary-en); }
+-        
+-        /* For Chinese, using Times New Roman first, then 'SimSun' (Song Ti) for better serif support */
+-        .lang-cn { font-family: 'Times New Roman', 'SimSun', serif; line-height: 1.6; color: #1f2937; }
+-        .lang-cn h1, .lang-cn h2, .lang-cn h3 { font-family: 'Times New Roman', 'SimSun', serif; font-weight: 700; color: #111827; }
+-
+-        /* Section Styles */
+-        .section-title-en {
+-            font-family: 'Times New Roman', Times, serif !important; /* Override explicit font if any */
+-            text-transform: uppercase;
+-            letter-spacing: 0.05em;
+-            font-size: 0.85rem;
+-            font-weight: 700;
+-            color: #64748b;
+-            border-bottom: 1px solid #e2e8f0;
+-            padding-bottom: 0.5rem;
+-            margin: 2rem 0 1.25rem 0;
+-        }
+-
+-        .section-title-cn {
+-            font-size: 1.15rem;
+-            font-weight: 700;
+-            color: #111827;
+-            border-left: 4px solid var(--accent);
+-            padding-left: 0.75rem;
+-            margin: 2rem 0 1.25rem 0;
+-        }
+-
+-        /* Components */
+-        .paper-tag {
+-            font-size: 0.65rem;
+-            font-weight: 700;
+-            padding: 2px 6px;
+-            border-radius: 4px;
+-            text-transform: uppercase;
+-            display: inline-block;
+-            margin-right: 6px;
+-        }
+-        .tag-q1 { background: #fffbeb; color: #b45309; border: 1px solid #fcd34d; }
+-        .tag-q4 { background: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; }
+-        .tag-ei { background: #ecfdf5; color: #047857; border: 1px solid #6ee7b7; }
+-
+-        .skill-pill {
+-            background: #e2e8f0;
+-            color: #334155;
+-            padding: 2px 8px;
+-            border-radius: 12px;
+-            font-size: 0.75rem;
+-            font-weight: 600;
+-            margin: 0 4px 6px 0;
+-            display: inline-block;
+-        }
+-        
+-        /* Link styling for papers */
+-        .paper-link {
+-            color: #1d4ed8; /* blue-700 */
+-            text-decoration: none;
+-            transition: color 0.2s, text-decoration 0.2s;
+-        }
+-        .paper-link:hover {
+-            color: #2563eb; /* blue-600 */
+-            text-decoration: underline;
+-        }
+-
+-        /* Floating Toggle */
+-        .lang-switch {
+-            position: fixed;
+-            top: 20px;
+-            right: 20px;
+-            z-index: 1000;
+-            background: white;
+-            padding: 4px;
+-            border-radius: 30px;
+-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+-            display: flex;
+-            border: 1px solid #e2e8f0;
+-            cursor: pointer;
+-        }
+-        .lang-btn {
+-            padding: 6px 16px;
+-            border-radius: 24px;
+-            font-size: 0.85rem;
+-            font-weight: 600;
+-            transition: all 0.2s;
+-        }
+-        .lang-btn.active { background: #0f172a; color: white; }
+-        .lang-btn.inactive { color: #64748b; }
+-        .lang-btn.inactive:hover { color: #0f172a; }
+-
+-        /* Main content order: research first */
+-        .main-content {
+-            display: flex;
+-            flex-direction: column;
+-        }
+-        .section-research { order: 1; }
+-        .section-work { order: 2; }
+-        .section-projects { order: 3; }
+-
+-        /* Responsive */
+-        @media (max-width: 768px) {
+-            .sidebar { border-right: none; border-bottom: 1px solid #e2e8f0; }
+-        }
+-        @media print {
+-            .lang-switch { display: none; }
+-            body { background: white; }
+-            .shadow-2xl { box-shadow: none; }
+-        }
+-    </style>
+-</head>
+-<body class="lang-cn">
+-
+-    <!-- Language Switcher -->
+-    <div class="lang-switch" onclick="toggleLanguage()">
+-        <div id="btn-en" class="lang-btn inactive">English</div>
+-        <div id="btn-cn" class="lang-btn active">中文</div>
+-    </div>
+-
+-    <!-- Main Resume Container -->
+-    <div class="max-w-6xl mx-auto bg-white min-h-screen shadow-2xl flex flex-col md:flex-row my-0 md:my-8">
+-        
+-        <!-- LEFT SIDEBAR (Basic Info, Education, Skills, Honors, IP) -->
+-        <aside class="sidebar w-full md:w-1/3 bg-slate-50 p-8 border-r border-slate-100 flex-shrink-0">
+-            
+-            <!-- Header -->
+-            <div class="mb-8">
+-                <h1 class="text-3xl font-bold mb-2 text-slate-900">
+-                    <span class="en-text">Zicong Yang</span>
+-                    <span class="cn-text hidden">杨梓聪</span>
+-                </h1>
+-                <div class="flex flex-wrap gap-2 mb-4">
+-                    <span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded font-bold">
+-                        <span class="en-text">CPC Member</span>
+-                        <span class="cn-text hidden">中共党员</span>
+-                    </span>
+-                    <span class="bg-slate-200 text-slate-700 text-xs px-2 py-1 rounded font-bold">
+-                        <span class="en-text">Han Ethnicity</span>
+-                        <span class="cn-text hidden">汉族</span>
+-                    </span>
+-                </div>
+-                
+-                <div class="text-sm text-slate-600 space-y-2">
+-                    <div class="flex items-center"><i class="fa-solid fa-phone w-6 text-center text-slate-400 mr-2"></i> (+86) 130-6895-9696</div>
+-                    <div class="flex items-center"><i class="fa-regular fa-envelope w-6 text-center text-slate-400 mr-2"></i> 402641915@qq.com</div>
+-                    <a href="https://scholar.google.com/citations?user=0Ynn-awAAAAJ" target="_blank" class="flex items-center hover:text-blue-600">
+-                        <i class="fa-solid fa-graduation-cap w-6 text-center text-slate-400 mr-2"></i> Google Scholar
+-                    </a>
+-                    <a href="https://orcid.org/0009-0001-0948-3606" target="_blank" class="flex items-center hover:text-blue-600">
+-                        <i class="fa-brands fa-orcid w-6 text-center text-slate-400 mr-2"></i> ORCID
+-                    </a>
+-                </div>
+-            </div>
+-
+-            <!-- Education -->
+-            <div class="mb-8">
+-                <h2 class="en-text section-title-en">Education</h2>
+-                <h2 class="cn-text hidden section-title-cn">教育经历</h2>
+-                
+-                <div class="mb-2">
+-                    <div class="font-bold text-slate-900 text-lg en-text">Zhuhai College of Science and Technology</div>
+-                    <div class="font-bold text-slate-900 text-lg cn-text hidden">珠海科技学院</div>
+-                    <div class="text-xs text-slate-500 italic mb-1 en-text">(Formerly Jilin University Zhuhai College)</div>
+-                    <div class="text-xs text-slate-500 italic mb-1 cn-text hidden">(原吉林大学珠海学院)</div>
+-                </div>
+-                <div class="text-sm font-semibold text-blue-700 mb-1">
+-                    <span class="en-text">B.E. Software Engineering</span>
+-                    <span class="cn-text hidden">软件工程 (本科)</span>
+-                </div>
+-                <div class="text-xs text-slate-500 mb-3 font-mono">2021.09 – 2025.07</div>
+-                
+-                <ul class="text-xs space-y-2 list-disc list-inside text-slate-700 leading-relaxed">
+-                    <li>
+-                        <span class="en-text"><strong>GPA:</strong> 3.64/4.0 (Top 1%)</span>
+-                        <span class="cn-text hidden"><strong>GPA:</strong> 3.64/4.0 (专业前1%)</span>
+-                    </li>
+-                    <li>
+-                        <span class="en-text"><strong>Honors:</strong> National Scholarship, Top 10 Student, 1st Class Scholarship (3 years), Excellent Monitor, Excellent Student, Academic Technology Award, Social Practice Award.</span>
+-                        <span class="cn-text hidden"><strong>荣誉:</strong> 国家奖学金、十佳大学生、连续三年一等奖学金、优秀班长、优秀学生、学术科技奖、社会实践奖。</span>
+-                    </li>
+-                    <li>
+-                        <span class="en-text"><strong>Roles:</strong> Aliyun Lab Member (Research), Class Monitor (Class ranked 1st in school), Computer Assoc. Officer.</span>
+-                        <span class="cn-text hidden"><strong>任职:</strong> 阿里云实验室成员(参与科研)、班长(带领班级获全校第一/省级优秀)、计算机协会优秀干事。</span>
+-                    </li>
+-                </ul>
+-            </div>
+-
+-            <!-- Skills -->
+-            <div class="mb-8">
+-                <h2 class="en-text section-title-en">Skills</h2>
+-                <h2 class="cn-text hidden section-title-cn">技能清单</h2>
+-                <div>
+-                    <span class="skill-pill">Python</span>
+-                    <span class="skill-pill">C++</span>
+-                    <span class="skill-pill">Java</span>
+-                    <span class="skill-pill">VS Code</span>
+-                    <span class="skill-pill">PyCharm</span>
+-                    <span class="skill-pill">Claude Code</span>
+-                    <span class="skill-pill">Codex</span>
+-                    <span class="skill-pill">MCP</span>
+-                    <span class="skill-pill">PyQt5</span>
+-                    <span class="skill-pill">QThread/Signal-Slot/QMutex</span>
+-                    <span class="skill-pill">PyTorch</span>
+-                    <span class="skill-pill">OpenCV</span>
+-                    <span class="skill-pill">Ultralytics YOLO</span>
+-                    <span class="skill-pill">ONNX/TensorRT</span>
+-                    <span class="skill-pill">queue/threading</span>
+-                    <span class="skill-pill">SQLite</span>
+-                    <span class="skill-pill">SQLAlchemy</span>
+-                    <span class="skill-pill">RAG</span>
+-                </div>
+-                <div class="mt-2 text-xs text-slate-600">
+-                    <span class="en-text"><strong>English:</strong> IELTS 5.5 / CET-4 Passed</span>
+-                    <span class="cn-text hidden"><strong>英语:</strong> 雅思 5.5 / 已过四级</span>
+-                </div>
+-            </div>
+-
+-            <!-- Honors (Full List) -->
+-            <div class="mb-8">
+-                <h2 class="en-text section-title-en">Honors & Awards</h2>
+-                <h2 class="cn-text hidden section-title-cn">荣誉奖项</h2>
+-                <ul class="text-xs space-y-3 text-slate-600">
+-                    <!-- CP Group Cup -->
+-                    <li class="border-l-2 border-yellow-400 pl-2">
+-                        <div class="font-bold text-slate-900">
+-                            <span class="en-text">National 3rd Prize, CP Group Cup Market Analysis Competition</span>
+-                            <span class="cn-text hidden">第十三届正大杯市场调研大赛 全国三等奖</span>
+-                        </div>
+-                        <div class="italic text-slate-500">2022-2023 | National Level</div>
+-                    </li>
+-                    <!-- Innovation Comp -->
+-                    <li class="border-l-2 border-red-500 pl-2">
+-                        <div class="font-bold text-slate-900">
+-                            <span class="en-text">Gold Medal (Provincial) / Bronze (National), China Int'l College Student Innovation Competition</span>
+-                            <span class="cn-text hidden">中国国际大学生创新大赛(2024) 省级金奖/国赛铜奖</span>
+-                        </div>
+-                        <div class="italic text-slate-500">2023-2024 | "Youth Red Dream" Track</div>
+-                    </li>
+-                    <!-- MCM -->
+-                    <li class="border-l-2 border-purple-500 pl-2">
+-                        <div class="font-bold text-slate-900">
+-                            <span class="en-text">Meritorious Winner (Top 7%), MCM/ICM</span>
+-                            <span class="cn-text hidden">美国大学生数学建模竞赛(MCM/ICM) M奖</span>
+-                        </div>
+-                        <div class="italic text-slate-500">2023-2024 | International</div>
+-                    </li>
+-                    <!-- Challenge Cup Academic -->
+-                    <li class="border-l-2 border-blue-500 pl-2">
+-                        <div class="font-bold text-slate-900">
+-                            <span class="en-text">Provincial 1st Prize, "Challenge Cup" Academic Works Competition</span>
+-                            <span class="cn-text hidden">广东省"挑战杯"课外学术科技作品竞赛 一等奖</span>
+-                        </div>
+-                        <div class="italic text-slate-500">2022-2023</div>
+-                    </li>
+-                    <!-- Challenge Cup Entrepreneurship -->
+-                    <li class="border-l-2 border-blue-500 pl-2">
+-                        <div class="font-bold text-slate-900">
+-                            <span class="en-text">Gold Medal, "Challenge Cup" Entrepreneurship Plan (Fujian)</span>
+-                            <span class="cn-text hidden">第十三届"挑战杯"福建省大学生创业计划竞赛 金奖</span>
+-                        </div>
+-                        <div class="italic text-slate-500">2021-2022</div>
+-                    </li>
+-                    <!-- CUMCM -->
+-                    <li class="border-l-2 border-blue-500 pl-2">
+-                        <div class="font-bold text-slate-900">
+-                            <span class="en-text">Provincial 2nd Prize, CUMCM</span>
+-                            <span class="cn-text hidden">全国大学生数学建模竞赛 广东省分赛二等奖</span>
+-                        </div>
+-                        <div class="italic text-slate-500">2021-2022</div>
+-                    </li>
+-                     <!-- Research Report -->
+-                     <li class="border-l-2 border-green-500 pl-2">
+-                        <div class="font-bold text-slate-900">
+-                            <span class="en-text">National Top 100 Research Report ("Three Rural")</span>
+-                            <span class="cn-text hidden">创青春"三下乡""返家乡"全国百强调研报告</span>
+-                        </div>
+-                    </li>
+-                    <!-- Innovation Projects -->
+-                    <li class="pt-2 mt-2 border-t border-slate-200">
+-                        <div class="font-bold mb-1 text-slate-900">
+-                            <span class="en-text">Innovation Training Programs:</span>
+-                            <span class="cn-text hidden">大创项目:</span>
+-                        </div>
+-                        <ul class="list-disc list-inside space-y-1">
+-                            <li>
+-                                <span class="en-text"><strong>Host (National):</strong> Cardiac Death Prediction (202213684015)</span>
+-                                <span class="cn-text hidden"><strong>主持 (国家级):</strong> 心源性猝死预测 (202213684015)</span>
+-                            </li>
+-                            <li>
+-                                <span class="en-text"><strong>Part. (National):</strong> YOLOv7 TCM Class. (S202313684041)</span>
+-                                <span class="cn-text hidden"><strong>参与 (国家级):</strong> YOLOv7中医药分类 (S202313684041)</span>
+-                            </li>
+-                            <li>
+-                                <span class="en-text"><strong>Part. (School):</strong> Silk Embroidery Seg. (DC2024034)</span>
+-                                <span class="cn-text hidden"><strong>参与 (校级):</strong> 丝绣图像分割 (DC2024034)</span>
+-                            </li>
+-                        </ul>
+-                    </li>
+-                </ul>
+-            </div>
+-
+-            <!-- IP -->
+-            <div>
+-                <h2 class="en-text section-title-en">Intellectual Property</h2>
+-                <h2 class="cn-text hidden section-title-cn">知识产权</h2>
+-                <div class="text-xs space-y-3 text-slate-600">
+-                    <div>
+-                        <div class="font-bold text-slate-900 mb-1">
+-                            <span class="en-text">Patents</span>
+-                            <span class="cn-text hidden">专利</span>
+-                        </div>
+-                        <ul class="list-disc list-inside">
+-                            <li>
+-                                <span class="en-text">Agricultural product component detection device</span>
+-                                <span class="cn-text hidden">一种农业产品成分检测装置</span>
+-                            </li>
+-                            <li>
+-                                <span class="en-text">Transport oxygenated crab box structure</span>
+-                                <span class="cn-text hidden">一种运输充氧蟹盒结构</span>
+-                            </li>
+-                        </ul>
+-                    </div>
+-                    <div>
+-                        <div class="font-bold text-slate-900 mb-1">
+-                            <span class="en-text">Software Copyrights</span>
+-                            <span class="cn-text hidden">软件著作权</span>
+-                        </div>
+-                        <ul class="list-disc list-inside">
+-                            <li>
+-                                <span class="en-text">Cross-border e-commerce backend analysis V1.0</span>
+-                                <span class="cn-text hidden">跨境电商后台运营分析管理系统V1.0</span>
+-                            </li>
+-                            <li>
+-                                <span class="en-text">Agri-product cross-border settlement V1.0</span>
+-                                <span class="cn-text hidden">农产品跨国交易与结算系统V1.0</span>
+-                            </li>
+-                            <li>
+-                                <span class="en-text">Agri-product intl market analysis V1.0</span>
+-                                <span class="cn-text hidden">农产品国际市场分析与营销策略系统V1.0</span>
+-                            </li>
+-                            <li>
+-                                <span class="en-text">Intl trade logistics & clearance platform V1.0</span>
+-                                <span class="cn-text hidden">国际贸易物流与通关服务平台V1.0</span>
+-                            </li>
+-                            <li>
+-                                <span class="en-text">Agri intl trade policy analysis tool V1</span>
+-                                <span class="cn-text hidden">农业国际贸易政策研究与分析工具软件V1</span>
+-                            </li>
+-                        </ul>
+-                    </div>
+-                </div>
+-            </div>
+-
+-        </aside>
+-
+-
+-        <!-- RIGHT CONTENT (Experience, Papers, Projects) -->
+-        <main class="main-content w-full md:w-2/3 p-8 md:p-12 text-sm leading-relaxed">
+-            
+-            <!-- === WORK EXPERIENCE === -->
+-            <section class="mb-10 section-work">
+-                <h2 class="en-text section-title-en">Professional Experience</h2>
+-                <h2 class="cn-text hidden section-title-cn">工作经历</h2>
+-
+-                <!-- Job 1: Cable Defect Detection -->
+-                <div class="mb-8 border-l-2 border-slate-200 pl-4 relative">
+-                    <div class="flex justify-between items-baseline mb-1">
+-                        <h3 class="text-lg font-bold text-slate-900">
+-                            <span class="en-text">Software Engineer</span>
+-                            <span class="cn-text hidden">软件工程师</span>
+-                        </h3>
+-                        <span class="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded">2025.01 – 2025.09</span>
+-                    </div>
+-                    <div class="text-blue-700 font-bold mb-3">
+-                        <span class="en-text">Guangzhou Xiyang Information Technology Co., Ltd.</span>
+-                        <span class="cn-text hidden">广州西洋信息科技有限公司</span>
+-                    </div>
+-                    <div class="mb-3 text-slate-600 space-y-1 text-justify">
+-                        <div>
+-                            <span class="en-text"><strong>Project Name:</strong> CablePyQT Cable Surface Defect Detection and Intelligent Reporting System</span>
+-                            <span class="cn-text hidden"><strong>项目名称：</strong>CablePyQT 线缆表面缺陷检测与智能报告系统</span>
+-                        </div>
+-                        <div>
+-                            <span class="en-text"><strong>Tech Stack:</strong> Python, PyQt5, Ultralytics YOLO, OpenCV, SQLAlchemy (SQLite), ReportLab, OpenAI/Spark API, RAG, PyTest, Git, Bash, Vibe Coding, Skills</span>
+-                            <span class="cn-text hidden"><strong>技术栈：</strong>Python、PyQt5、Ultralytics YOLO、OpenCV、SQLAlchemy(SQLite)、ReportLab、OpenAI/Spark API、RAG、PyTest、Git、Bash、Vibe Coding、Skills</span>
+-                        </div>
+-                        <div>
+-                            <span class="en-text"><strong>Project Description:</strong> A desktop multi-channel real-time inspection platform for industrial quality-control scenarios, delivering a full closed loop from high-concurrency data acquisition, AI visual recognition, and persistent storage to RAG-powered intelligent analysis.</span>
+-                            <span class="cn-text hidden"><strong>项目描述：</strong>面向工业产线质检场景的桌面端多通道实时检测平台，提供涵盖“高并发数据采集-AI视觉识别-持久化落库-RAG智能分析”的全链路闭环。</span>
+-                        </div>
+-                    </div>
+-                    <ul class="list-disc list-outside ml-4 text-slate-600 space-y-2 text-justify">
+-                        <li>
+-                            <span class="en-text">Collaborated with Zhuhai Key Laboratory of Intelligent Visual Inspection Technology, led dataset construction and algorithm R&amp;D, organized and guided student innovation teams for annotation, completed <strong>3,500</strong> cable-defect labels, and co-built the <strong>CSDDdb</strong> dataset through industry-academia collaboration.</span>
+-                            <span class="cn-text hidden">与珠海市智能视觉检测技术重点实验室展开合作，主导线缆缺陷检测项目的数据构建与算法研发，组织并指导大学生创新创业团队开展数据标注工作，累计完成 <strong>3500 张</strong> 线缆缺陷图像标注，实现与重点实验室的产学研合作，标注项目顺利完成，共同创建 <strong>CSDDdb</strong> 数据集。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">Addressed long-tail data scarcity under uneven lighting and varying viewpoints by building an offline augmentation pipeline with YOLO normalized coordinate (XYWH) linkage. Decoupled the system bottom layer and implemented a rich operator library covering bbox-synchronized geometric transforms (translation, flip, orthogonal rotation) and pixel-level photometric transforms (Gaussian noise, blur, color enhancement).</span>
+-                            <span class="cn-text hidden">针对光照不均、视角多变等长尾场景下的数据稀缺问题，研发了支持 YOLO 归一化坐标（XYWH）联动计算的离线数据增强流水线。系统底层解耦并实现了丰富的增强算子库，全面涵盖边界框同步跟随的空间几何变换（平移、翻转、正交旋转），以及像素级的光度学变换（高斯噪声、模糊、色彩增强）。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">Developed the image preprocessing module based on <strong>OpenCV</strong>. For irregular cable edges and weak dark-area details, designed a full pipeline using Wiener frequency-domain deblurring and Gaussian background suppression to reconstruct quality, then built multi-stage enhancement from pixel-distribution features (illumination compensation + multi-scale feature fusion), and used adaptive hybrid-threshold segmentation with morphological projection differencing to isolate background noise and visualize uneven edges plus internal black spots.</span>
+-                            <span class="cn-text hidden">负责图像预处理模块的开发，基于 OpenCV 实现了一系列图像增强与缺陷提取算法。针对线缆成像边缘不规则与暗区细节弱的痛点，设计了完整的图像处理管线。采用 Wiener 频域去模糊与高斯背景抑制重构图像质量。构建了基于像素分布特征的多阶段图像增强算法（光照补偿+多尺度特征融合），并利用自适应混合阈值分割与形态学投影差分技术，精准剥离背景干扰，实现线缆不平整边缘与内部黑点的高亮可视化追踪。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">For small-target defects, implemented adaptive ROI extraction with Otsu and morphology in <strong>OpenCV</strong>; smoothed background using guided filtering and enhanced weak high-frequency defects under complex backgrounds via multi-scale Sobel gradient fusion. Replaced empirical thresholds with a dynamic adaptive segmentation model based on global gradient statistics and multi-dimensional contour geometry, significantly reducing false positives while achieving high-precision real-time localization at low compute cost.</span>
+-                            <span class="cn-text hidden">针对小目标缺陷检测难的问题，基于 OpenCV 实现了基于 Otsu 与形态学自适应提取目标 ROI，利用导向滤波平滑背景并结合多尺度 Sobel 融合梯度特征，显著增强复杂背景下的微弱高频缺陷；摒弃传统经验阈值，创新性构建基于全局梯度统计与多维轮廓几何特征的动态自适应分割模型，在极低算力消耗下大幅抑制误检率，实现高精度的实时缺陷定位。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">Proposed and implemented the improved lightweight defect-vision model <strong>CSDDNet</strong>, migrated LWGANet to cable-defect detection, introduced PWCSA to optimize the GPA branch for better small-target capability, added a lightweight detection head, and trained multiple mainstream YOLO models.</span>
+-                            <span class="cn-text hidden">提出并实现了改进型轻量化缺陷检测视觉检测模型 <strong>CSDDNet</strong>，将 LWGANet 迁移至电缆缺陷检测任务，并通过引入 PWCSA 网络优化 GPA 分支提升小目标缺陷检测能力，同时新增轻量化检测头，并训练多个主流检测 YOLO 模型。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">Developed a PyQt5 + YOLO + OpenCV desktop inspection system from AI model to application-layer delivery. Supported 4-channel parallel processing, 3 video-source types, and multi-model formats (.pt/.onnx/.engine). Implemented thread-safe access with QThread + QMutex, continuous-error circuit breaking, and stream reconnection to prevent dead loops and leaks. Introduced frame skipping, async I/O, and 5-second throttled DB writes; fully decoupled UI rendering from inference and capped UI at 12 FPS (~60% fewer calls) while preserving 30 FPS lossless detection. Built a RAG reporting module with paraphrase-multilingual-MiniLM-L12-v2, Top-K retrieval, and Spark API requests/OpenAI dual fallback for better stability and report quality. Delivered accurate segmentation and visualization for cable-surface attachments, bulges, black spots, breakage, and concave-convex defects.</span>
+-                            <span class="cn-text hidden">研发基于 PyQt5+YOLO+OpenCV 算子的线缆缺陷检测桌面端，实现从 AI 模型到应用层的完整落地，支持 4 通道并行、3 类视频源及多模型格式（.pt/.onnx/.engine），覆盖复杂工业场景。基于 QThread+QMutex 落地线程安全访问，构建连续错误熔断与断流重连机制，避免底层检测死循环与资源泄漏。引入帧跳过、异步 I/O 及 5s 周期节流写库策略；将 UI 渲染与底层推理彻底解耦，限制界面至 12FPS（减少约 60% 调用量），在保障 30FPS 视频流无损检测的同时实现界面极速响应。实现基于 RAG 的智能报告系统，构建 paraphrase-multilingual-MiniLM-L12-v2、Top-K 检索、Spark API requests/OpenAI 双通道回退机制，提升报告生成质量与稳定性。实现线缆表面附着物、鼓包、黑点、破损及凹凸缺陷的精准分割与可视化展示。</span>
+-                        </li>
+-                    </ul>
+-                </div>
+-
+-                <!-- Job 2: Soft-shell Crab -->
+-                <div class="mb-8 border-l-2 border-slate-200 pl-4 relative">
+-                    <div class="flex justify-between items-baseline mb-1">
+-                        <h3 class="text-lg font-bold text-slate-900">
+-                            <span class="en-text">Algorithm Intern</span>
+-                            <span class="cn-text hidden">算法实习生</span>
+-                        </h3>
+-                        <span class="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded">2024.09 – 2024.12</span>
+-                    </div>
+-                    <div class="text-blue-700 font-bold mb-3">
+-                        <span class="en-text">Ningbo Haizhimingshi Technology Co., Ltd.</span>
+-                        <span class="cn-text hidden">宁波海智明视科技有限公司 | 研发部</span>
+-                    </div>
+-                    <ul class="list-disc list-outside ml-4 text-slate-600 space-y-2 text-justify">
+-                        <li>
+-                            <span class="en-text">Built multi-scenario soft-shell crab dataset. Trained <strong>YOLOv5s</strong> with optimized LR and loss functions.</span>
+-                            <span class="cn-text hidden">构建多场景软壳蟹图像数据集，使用 <strong>YOLOv5s</strong> 进行训练并优化学习率与损失函数。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">Achieved: <strong>Precision 92.3%, Recall 89.7%, mAP 90.5%, F1-score 90.9%</strong>.</span>
+-                            <span class="cn-text hidden">模型指标：<strong>Precision 92.3%, Recall 89.7%, mAP 90.5%, F1-score 90.9%</strong>。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">Optimized inference speed to <strong>45 FPS</strong> for automatic sorting systems.</span>
+-                            <span class="cn-text hidden">优化推理速度至 <strong>45 FPS</strong>，满足自动分拣系统实时需求。</span>
+-                        </li>
+-                    </ul>
+-                </div>
+-
+-                <!-- Job 3: Water Quality -->
+-                <div class="mb-8 border-l-2 border-slate-200 pl-4 relative">
+-                    <div class="flex justify-between items-baseline mb-1">
+-                        <h3 class="text-lg font-bold text-slate-900">
+-                            <span class="en-text">Algorithm Intern</span>
+-                            <span class="cn-text hidden">算法实习生</span>
+-                        </h3>
+-                        <span class="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded">2024.03 – 2024.09</span>
+-                    </div>
+-                    <div class="text-blue-700 font-bold mb-3">
+-                        <span class="en-text">Ningbo Jiasi Technology Co., Ltd.</span>
+-                        <span class="cn-text hidden">宁波嘉偲科技有限公司 | 研发部</span>
+-                    </div>
+-                    <ul class="list-disc list-outside ml-4 text-slate-600 space-y-2 text-justify">
+-                        <li>
+-                            <span class="en-text">Developed water quality algo (Acc 95.2%, Recall 93.8%, F1 94.5%) with IoT sensor network.</span>
+-                            <span class="cn-text hidden">开发智能水质检测算法（准确率95.2%，召回率93.8%，F1 94.5%），结合物联网传感器监测。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">Designed <strong>GRU/LSTM/Transformer</strong> for 24h forecast and anomaly warning (temp/oxygen pump).</span>
+-                            <span class="cn-text hidden">设计 <strong>GRU/LSTM/Transformer</strong> 模型预测未来24小时环境变化与异常预警（水温/增氧泵）。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">Led multi-sensor fusion data collection. Used Random Forest/XGBoost for evaluation. Calculated WOI using DO% and NTU to decide water changes.</span>
+-                            <span class="cn-text hidden">主导多传感器融合数据采集。运用随机森林/XGBoost评估，综合溶解氧(DO%)和浊度(NTU)计算水质指数(WOI)判断换水。</span>
+-                        </li>
+-                    </ul>
+-                </div>
+-
+-                <!-- Job 4: Publishing System -->
+-                <div class="mb-8 border-l-2 border-slate-200 pl-4 relative">
+-                    <div class="flex justify-between items-baseline mb-1">
+-                        <h3 class="text-lg font-bold text-slate-900">
+-                            <span class="en-text">Software Development Intern</span>
+-                            <span class="cn-text hidden">软件开发实习生</span>
+-                        </h3>
+-                        <span class="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded">2023.07 – 2023.11</span>
+-                    </div>
+-                    <div class="text-blue-700 font-bold mb-3">
+-                        <span class="en-text">Guangzhou Chuzhong Technology Co.</span>
+-                        <span class="cn-text hidden">广州市触众科技公司 | 软件部</span>
+-                    </div>
+-                    <ul class="list-disc list-outside ml-4 text-slate-600 space-y-2 text-justify">
+-                        <li>
+-                            <span class="en-text">Enhanced publishing system. Built RESTful APIs with <strong>SpringBoot</strong> & <strong>JWT</strong> RBAC (Editor/Admin).</span>
+-                            <span class="cn-text hidden">优化发布系统。基于 <strong>SpringBoot</strong> 和 <strong>JWT</strong> 构建API与多角色权限管理（编辑/管理员）。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">Designed MySQL schema, used MyBatis-Plus for dynamic SQL & version rollback.</span>
+-                            <span class="cn-text hidden">设计MySQL表结构，使用MyBatis-Plus实现动态SQL与版本回滚。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">Integrated NLP API for rewriting. Developed interfaces for Publish (Rich text/Img), Query (Filter), and Audit workflow.</span>
+-                            <span class="cn-text hidden">集成NLP模型实现智能改写。开发稿件发布（富文本/图片）、查询（筛选）及审核流转接口。</span>
+-                        </li>
+-                    </ul>
+-                </div>
+-
+-                <!-- Job 5: Independent Operator (Startup) -->
+-                <div class="mb-8 border-l-2 border-red-200 pl-4 relative">
+-                    <div class="flex justify-between items-baseline mb-1">
+-                        <h3 class="text-lg font-bold text-slate-900">
+-                            <span class="en-text">Independent Operator (Startup)</span>
+-                            <span class="cn-text hidden">独立运营+销售 (创业项目)</span>
+-                        </h3>
+-                        <span class="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded">2024.07 – 2025.09</span>
+-                    </div>
+-                    <div class="text-blue-700 font-bold mb-3">
+-                        <span class="en-text">Campus Startup Project</span>
+-                        <span class="cn-text hidden">学校创业项目 | 运营规划与独立销售</span>
+-                    </div>
+-                    <ul class="list-disc list-outside ml-4 text-slate-600 space-y-2 text-justify">
+-                        <li>
+-                            <span class="en-text">Managed content on Xiaohongshu (Little Red Book). 2,374 leads, 4,509+ engagements, Max view 25k+.</span>
+-                            <span class="cn-text hidden">负责小红书内容运营。引流 2374 人，获赞藏 4509+，单条最高浏览 25,000+。</span>
+-                        </li>
+-                        <li>
+-                            <span class="en-text">Converted 1,800+ to WeChat (63% rate). Summer monthly revenue > <strong>100,000 RMB</strong>.</span>
+-                            <span class="cn-text hidden">私域引流 1800+ 人，转化率 63%。暑期月流水突破 <strong>10万元人民币</strong>。</span>
+-                        </li>
+-                    </ul>
+-                </div>
+-            </section>
+-
+-            <!-- === RESEARCH PAPERS === -->
+-            <section class="mb-10 section-research">
+-                <h2 class="en-text section-title-en" style="margin-top: 0;">Research Publications</h2>
+-                <h2 class="cn-text hidden section-title-cn" style="margin-top: 0;">学术研究</h2>
+-                <div class="space-y-4">
+-                    <!-- Paper 1 -->
+-                    <div class="p-4 bg-slate-50 rounded border border-slate-200">
+-                        <div class="flex items-center mb-1">
+-                            <span class="paper-tag tag-q1">JCR Q1</span>
+-                            <span class="text-xs text-slate-500 font-mono ml-auto">2024.03-2024.09</span>
+-                        </div>
+-                        <h4 class="font-bold text-slate-900 text-sm mb-1 leading-tight">
+-                            <a href="https://www.nature.com/articles/s41598-024-71700-z" target="_blank" class="paper-link">
+-                                A coordinated adaptive multiscale enhanced spatio-temporal fusion network for multi-lead electrocardiogram arrhythmia detection
+-                            </a>
+-                        </h4>
+-                        <div class="text-xs text-slate-600">
+-                            <span class="font-bold text-blue-700">1st Author</span> | 
+-                            <span class="italic">Scientific Reports</span>
+-                        </div>
+-                    </div>
+-                    <!-- Paper 2 -->
+-                    <div class="p-4 bg-slate-50 rounded border border-slate-200">
+-                        <div class="flex items-center mb-1">
+-                            <span class="paper-tag tag-q4">JCR Q4</span>
+-                            <span class="text-xs text-slate-500 font-mono ml-auto">2023.07-2024.06</span>
+-                        </div>
+-                        <h4 class="font-bold text-slate-900 text-sm mb-1 leading-tight">
+-                            <a href="https://doi.org/10.1007/978-3-031-57037-7_7" target="_blank" class="paper-link">
+-                                The fusion model of ResNet and GRU based on simplified self-attention for ECG classification on PTB-XL dataset
+-                            </a>
+-                        </h4>
+-                        <div class="text-xs text-slate-600">
+-                            <span class="font-bold text-blue-700">1st Author</span> | 
+-                            <span class="italic">Computer and Information Science and Engineering</span>
+-                        </div>
+-                    </div>
+-                    <!-- Paper 3 -->
+-                    <div class="p-4 bg-slate-50 rounded border border-slate-200">
+-                        <div class="flex items-center mb-1">
+-                            <span class="paper-tag tag-q1">JCR Q1</span>
+-                            <span class="text-xs text-slate-500 font-mono ml-auto">2025.06-2025.10</span>
+-                        </div>
+-                        <h4 class="font-bold text-slate-900 text-sm mb-1 leading-tight">
+-                            <a href="https://iopscience.iop.org/article/10.1088/1361-6501/ae10d3/meta" target="_blank" class="paper-link">
+-                                Enhancing Defect Detection with Diffusion Model
+-                            </a>
+-                        </h4>
+-                        <div class="text-xs text-slate-600">
+-                            <span class="en-text">3rd Author (Student 3rd)</span>
+-                            <span class="cn-text hidden">第三作者(学生三作)</span> | 
+-                            <span class="italic">Measurement Science and Technology</span>
+-                        </div>
+-                    </div>
+-                    <!-- Paper 4 -->
+-                    <div class="p-4 bg-slate-50 rounded border border-slate-200">
+-                        <div class="flex items-center mb-1">
+-                            <span class="paper-tag tag-ei">EI Indexed</span>
+-                            <span class="text-xs text-slate-500 font-mono ml-auto">2024.01-2025.05</span>
+-                        </div>
+-                        <h4 class="font-bold text-slate-900 text-sm mb-1 leading-tight">
+-                            <a href="https://ieeexplore.ieee.org/abstract/document/10604082" target="_blank" class="paper-link">
+-                                Wheat Disease Recognition Based on a Fusion Model with Improved Spatial and Channel Reconstruction Convolution Combined with Contextual Transformer
+-                            </a>
+-                        </h4>
+-                        <div class="text-xs text-slate-600">
+-                            <span class="font-bold text-blue-700">1st Author</span> | 
+-                            <span class="italic">CVIDL 2024</span>
+-                        </div>
+-                    </div>
+-                    <!-- Paper 5 -->
+-                    <div class="p-4 bg-slate-50 rounded border border-slate-200">
+-                        <div class="flex items-center mb-1">
+-                            <span class="paper-tag tag-ei">EI Indexed</span>
+-                            <span class="text-xs text-slate-500 font-mono ml-auto">2024.01-2025.05</span>
+-                        </div>
+-                        <h4 class="font-bold text-slate-900 text-sm mb-1 leading-tight">
+-                            <a href="https://ieeexplore.ieee.org/abstract/document/10604280" target="_blank" class="paper-link">
+-                                Enhanced and improved garbage identification and classification of YOLOV5 based on data
+-                            </a>
+-                        </h4>
+-                        <div class="text-xs text-slate-600">
+-                            <span class="en-text">2nd Author (Student 2nd)</span>
+-                            <span class="cn-text hidden">第二作者(学生二作)</span> | 
+-                            <span class="italic">CVIDL 2024</span>
+-                        </div>
+-                    </div>
+-                     <!-- Paper 6 -->
+-                     <div class="p-4 bg-slate-50 rounded border border-slate-200">
+-                        <div class="flex items-center mb-1">
+-                            <span class="paper-tag tag-ei">EI Indexed</span>
+-                            <span class="text-xs text-slate-500 font-mono ml-auto">2024.06-2024.10</span>
+-                        </div>
+-                        <h4 class="font-bold text-slate-900 text-sm mb-1 leading-tight">
+-                            <a href="https://dl.acm.org/doi/abs/10.1145/3700906.3700946" target="_blank" class="paper-link">
+-                                Surface waste identification and detection based on improved YOLOV8
+-                            </a>
+-                        </h4>
+-                        <div class="text-xs text-slate-600">
+-                            <span class="en-text">4th Author (Student 4th)</span>
+-                            <span class="cn-text hidden">第四作者(学生四作)</span> | 
+-                            <span class="italic">IPMLP 2024</span>
+-                        </div>
+-                    </div>
+-                </div>
+-            </section>
+-
+-            <!-- === PROJECTS === -->
+-            <section class="section-projects">
+-                <h2 class="en-text section-title-en">Key Projects</h2>
+-                <h2 class="cn-text hidden section-title-cn">项目经历</h2>
+-
+-                <!-- Project 1: Sudden Cardiac Death Prediction -->
+-                <div class="mb-6">
+-                    <h3 class="font-bold text-slate-900 text-sm">
+-                        <span class="en-text">Sudden Cardiac Death Prediction Model (Machine Learning)</span>
+-                        <span class="cn-text hidden">基于机器学习的心源性猝死预测模型的研究</span>
+-                    </h3>
+-                    <div class="text-xs text-slate-500 mb-1">
+-                        <span class="en-text">Project Lead | Provincial Research Fund | 2023.03-2024.06</span>
+-                        <span class="cn-text hidden">第一负责人 | 广东省大创省级科研基金立项 | 2023.03-2024.06</span>
+-                    </div>
+-                    <p class="text-slate-600 text-justify">
+-                        <span class="en-text">Led the project <strong>end-to-end</strong> (proposal, design, implementation, publication, final approval). Converted multi-lead ECG signals to 2D grayscale images; implemented grayscale feature fusion. Designed <strong>STFAC-ECGNet</strong> (Adaptive Multiscale Spatio-Temporal Fusion Network) integrating <strong>CNN/RNN</strong> with <strong>Coordinated Channel-Spatial Attention</strong> and temporal fusion modules, significantly improving classification accuracy on PTB-XL and CPSC2018 datasets. Published <strong>2 papers as 1st Author</strong> (<strong>JCR Q1, Q4</strong>).</span>
+-                        <span class="cn-text hidden">独立负责项目全流程（申报、设计、实现、发表、结项）。将多导联心电信号转为二维灰度图，实现灰度特征融合。设计 <strong>STFAC-ECGNet</strong>（自适应多尺度时空融合网络），整合 <strong>CNN/RNN</strong> 特征提取器，结合<strong>协同通道-空间注意力机制</strong>与时间融合模块，提升 PTB-XL/CPSC2018 数据集上的分类准确率。以第一作者身份发表 <strong>JCR Q1、Q4 论文 2 篇</strong>。</span>
+-                    </p>
+-                </div>
+-
+-                <!-- Project 2: NYT Wordle Game Analysis -->
+-                <div class="mb-6">
+-                    <h3 class="font-bold text-slate-900 text-sm">
+-                        <span class="en-text">NYT Wordle Game Analysis</span>
+-                        <span class="cn-text hidden">纽约时报Wordle游戏产品分析</span>
+-                    </h3>
+-                    <div class="text-xs text-slate-500 mb-1">
+-                        <span class="en-text">Lead | MCM Meritorious Winner (Top 7%) | 2023.02-2023.05</span>
+-                        <span class="cn-text hidden">第一负责人 | 美国大学生数学建模竞赛 M 奖（国际前 7%）| 2023.02-2023.05</span>
+-                    </div>
+-                    <p class="text-slate-600 text-justify">
+-                        <span class="en-text">Led analysis of Wordle game trends and difficulty factors. Used <strong>Machine Learning</strong> and <strong>Python Corpus</strong> statistics to analyze word frequency, syllables, and letter repetition for difficulty metrics. Implemented a <strong>BiGRU model</strong> to predict player behavior trends. Secured the <strong>MCM Meritorious Winner (Top 7%)</strong> award.</span>
+-                        <span class="cn-text hidden">负责分析 Wordle 游戏未来趋势、难度因素与更改方案。运用机器学习及<strong>丰富的 Python 语料库</strong>统计分析单词频率、音节、重复字母等难度指标。采用深度学习 <strong>BiGRU 模型</strong>预测玩家走势。荣获<strong>美国大学生数学建模竞赛 M奖 (国际前 7%)</strong>。</span>
+-                    </p>
+-                </div>
+-
+-                <!-- Project 3: Consumer Demand Analysis (Coca-Cola) -->
+-                <div class="mb-6">
+-                    <h3 class="font-bold text-slate-900 text-sm">
+-                        <span class="en-text">Consumer Demand Analysis (Coca-Cola)</span>
+-                        <span class="cn-text hidden">数字化营销背景下消费者需求分析 —— 基于可口可乐品牌调研</span>
+-                    </h3>
+-                    <div class="text-xs text-slate-500 mb-1">
+-                        <span class="en-text">Lead | National 3rd Prize | 2023.01-2025.05</span>
+-                        <span class="cn-text hidden">第一负责人 | 正大杯市场调研数据分析大赛全国三等奖 | 2023.01-2025.05</span>
+-                    </div>
+-                    <p class="text-slate-600 text-justify">
+-                        <span class="en-text">Responsible for data mining. Used automated crawlers to collect <strong>120,756</strong> JD.com reviews for Coca-Cola products. Applied the <strong>BERT Natural Language Model</strong> for sentiment analysis to generate word clouds and user profiles. Secured the <strong>National 3rd Prize</strong> in the CP Group Market Research Competition.</span>
+-                        <span class="cn-text hidden">负责数据挖掘工作。利用自动化爬虫技术采集京东 <strong>120,756条</strong> 可口可乐产品评论。采用 <strong>BERT 自然语言模型</strong>进行情感分析，并绘制词云图及用户画像，荣获<strong>正大杯市场调研数据分析大赛全国三等奖</strong>。</span>
+-                    </p>
+-                </div>
+-
+-                <!-- Project 4: "Agriculture + Tourism" Rural Revitalization -->
+-                <div class="mb-6">
+-                    <h3 class="font-bold text-slate-900 text-sm">
+-                        <span class="en-text">"Agriculture + Tourism" Rural Revitalization</span>
+-                        <span class="cn-text hidden">"农业 + 旅游" 模式助推乡村振兴路径研究</span>
+-                    </h3>
+-                    <div class="text-xs text-slate-500 mb-1">
+-                        <span class="en-text">2nd Lead | National Excellent Report | 2023.07-2025.11</span>
+-                        <span class="cn-text hidden">第二负责人 | 中国共青团国家级优秀调研报告（知网检索）| 2023.07-2025.11</span>
+-                    </div>
+-                    <p class="text-slate-600 text-justify">
+-                        <span class="en-text">Handled data collection and mining. Distributed <strong>379</strong> questionnaires (97% valid) and integrated government data. Performed descriptive statistics and used <strong>Machine Learning</strong> to predict tea yield, fertilization volume, and total machinery power. Research report won <strong>National Excellent Report</strong> status, with the corresponding paper published as <strong>2nd Author</strong> (CNKI indexed).</span>
+-                        <span class="cn-text hidden">负责数据采集和挖掘工作。发放问卷 <strong>379份</strong>（有效回收率97%），并整合政府单位数据。进行描述性统计与<strong>机器学习预测</strong>（茶叶产量、施肥量、机械总动力）。调研报告荣获<strong>国家级优秀调研报告</strong>，论文以第二作者身份发表（知网检索）。</span>
+-                    </p>
+-                </div>
+-
+-            </section>
+-
+-        </main>
+-    </div>
+-
+-    <script>
+-        const btnEn = document.getElementById('btn-en');
+-        const btnCn = document.getElementById('btn-cn');
+-        const body = document.body;
+-        
+-        function setLanguage(lang) {
+-            const enElements = document.querySelectorAll('.en-text');
+-            const cnElements = document.querySelectorAll('.cn-text');
+-            const isCn = lang === 'cn';
+-
+-            if (isCn) {
+-                btnEn.classList.remove('active');
+-                btnEn.classList.add('inactive');
+-                btnCn.classList.add('active');
+-                btnCn.classList.remove('inactive');
+-
+-                enElements.forEach(el => el.classList.add('hidden'));
+-                cnElements.forEach(el => el.classList.remove('hidden'));
+-
+-                body.classList.remove('lang-en');
+-                body.classList.add('lang-cn');
+-                document.documentElement.lang = 'zh-CN';
+-                document.title = "杨梓聪 - 详细个人简历";
+-            } else {
+-                btnCn.classList.remove('active');
+-                btnCn.classList.add('inactive');
+-                btnEn.classList.add('active');
+-                btnEn.classList.remove('inactive');
+-
+-                cnElements.forEach(el => el.classList.add('hidden'));
+-                enElements.forEach(el => el.classList.remove('hidden'));
+-
+-                body.classList.remove('lang-cn');
+-                body.classList.add('lang-en');
+-                document.documentElement.lang = 'en';
+-                document.title = "Zicong Yang - Resume";
+-            }
+-        }
+-
+-        function toggleLanguage() {
+-            const isCurrentlyEn = body.classList.contains('lang-en');
+-            setLanguage(isCurrentlyEn ? 'cn' : 'en');
+-        }
+-
+-        // Initialize default language to Chinese
+-        setLanguage('cn');
+-    </script>
+-</body>
+-</html>
+diff --git a/scripts/verify-build.mjs b/scripts/verify-build.mjs
+new file mode 100644
+index 0000000..e7ab9e3
+--- /dev/null
++++ b/scripts/verify-build.mjs
+@@ -0,0 +1,63 @@
++import { readFile, access } from 'node:fs/promises';
++import { constants } from 'node:fs';
++
++const checks = [];
++
++const must = async (path, label) => {
++  try {
++    await access(path, constants.R_OK);
++    checks.push([label, true]);
++    return true;
++  } catch {
++    checks.push([label, false]);
++    return false;
++  }
++};
++
++const routes = [
++  'dist/index.html',
++  'dist/publications/index.html',
++  'dist/work/index.html',
++  'dist/work/guangzhou-xiyang/index.html',
++  'dist/work/sudden-cardiac-death-prediction/index.html',
++  'dist/blog/index.html',
++  'dist/blog/from-single-page-to-astro/index.html',
++  'dist/about/index.html',
++  'dist/about/zh/index.html',
++  'dist/404.html',
++  'dist/rss.xml',
++  'dist/sitemap-index.xml',
++  'dist/robots.txt',
++  'dist/favicon.svg',
++  'dist/CV.html',
++];
++
++for (const route of routes) await must(route, route);
++
++const home = await readFile('dist/index.html', 'utf8');
++checks.push(['home shows 3 publications', (home.match(/class="pub-item"/g) ?? []).length === 3]);
++checks.push(['home shows 3 work cards', (home.match(/class="work-card"/g) ?? []).length === 3]);
++
++const pubs = await readFile('dist/publications/index.html', 'utf8');
++checks.push(['publications has 6 entries', (pubs.match(/class="pub-item"/g) ?? []).length === 6]);
++checks.push(['publications include doi links', pubs.includes('doi.org')]);
++
++const rss = await readFile('dist/rss.xml', 'utf8');
++checks.push(['rss has items', rss.includes('<item>')]);
++checks.push(['rss channel link includes base', rss.includes('<link>https://yzc0421.github.io/cv/</link>')]);
++
++const about = await readFile('dist/about/index.html', 'utf8');
++checks.push(['about has h1', about.includes('<h1>About</h1>')]);
++checks.push(['about includes hreflang', about.includes('hreflang="zh-CN"')]);
++
++const notFound = await readFile('dist/404.html', 'utf8');
++checks.push(['404 is noindex', notFound.includes('name="robots" content="noindex"')]);
++
++const failed = checks.filter(([, ok]) => !ok);
++for (const [label, ok] of checks) console.log(`${ok ? 'ok  ' : 'FAIL'} ${label}`);
++
++if (failed.length) {
++  console.error(`\n${failed.length} check(s) failed`);
++  process.exit(1);
++}
++console.log('\nall checks passed');

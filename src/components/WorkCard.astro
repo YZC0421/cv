@@ -1,0 +1,14 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { withBase } from '../lib/url';
+
+interface Props {
+  item: CollectionEntry<'work'>;
+}
+const { item } = Astro.props;
+---
+<article class="work-card">
+  <h3><a href={withBase(`work/${item.id}`)}>{item.data.title}</a></h3>
+  <p>{item.data.summary}</p>
+  <div class="stack">{item.data.stack.map((tech) => <span>{tech}</span>)}</div>
+</article>

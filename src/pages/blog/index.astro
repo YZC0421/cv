@@ -1,0 +1,49 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TagFilter from '../../components/TagFilter.astro';
+import { getCollection } from 'astro:content';
+import { visiblePosts } from '../../lib/posts';
+import { withBase } from '../../lib/url';
+
+const posts = visiblePosts(await getCollection('blog'));
+const tags = [...new Set(posts.flatMap((post) => post.data.tags))].sort();
+---
+<BaseLayout
+  title="Writing · Zicong Yang"
+  description="Notes on software engineering, computer vision, and research."
+  lang="zh-CN"
+>
+  <div class="container measure" style="padding-top:40px">
+    <h1>Writing</h1>
+    <p class="muted">
+      Technical notes, mostly in Chinese. {posts.length} {posts.length === 1 ? 'post' : 'posts'}.
+      <a href={withBase('rss.xml')}>RSS</a>
+    </p>
+    <TagFilter tags={tags} />
+    <ul class="post-list" id="post-list">
+      {posts.map((post) => (
+        <li data-tags={post.data.tags.join('|')}>
+          <time datetime={post.data.date}>{post.data.date}</time>
+          <a href={withBase(`blog/${post.id}`)}>{post.data.title}</a>
+          <span class="lang-badge">{post.data.lang === 'zh' ? '中文' : 'EN'}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const buttons = document.querySelectorAll('.filters button');
+      const rows = document.querySelectorAll('#post-list li');
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+          const tag = btn.dataset.tag;
+          rows.forEach((row) => {
+            row.hidden = tag !== 'all' && !(row.dataset.tags ?? '').split('|').includes(tag);
+          });
+        });
+      });
+    })();
+  </script>
+</BaseLayout>

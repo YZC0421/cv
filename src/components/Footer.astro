@@ -1,0 +1,12 @@
+---
+import { withBase } from '../lib/url';
+
+const year = new Date().getFullYear();
+---
+<footer class="site-footer">
+  <div class="container">
+    © {year} Zicong Yang · <a href={withBase('rss.xml')}>RSS</a> ·
+    <a href="https://scholar.google.com/citations?user=0Ynn-awAAAAJ">Scholar</a> ·
+    <a href="https://orcid.org/0009-0001-0948-3606">ORCID</a>
+  </div>
+</footer>

@@ -1,0 +1,322 @@
+## Commits
+7b6f8ea feat: 实现工作经历与项目页面
+
+## Stat
+ .../task-6-report.md                               | 37 ++++++++++++++++++++
+ src/content/work/campus-startup.md                 | 17 ++++++++++
+ src/content/work/coca-cola-consumer-analysis.md    | 17 ++++++++++
+ src/content/work/guangzhou-chuzhong.md             | 17 ++++++++++
+ src/content/work/guangzhou-xiyang.md               | 21 ++++++++++++
+ src/content/work/ningbo-haizhimingshi.md           | 17 ++++++++++
+ src/content/work/ningbo-jiasi.md                   | 17 ++++++++++
+ src/content/work/rural-revitalization.md           | 17 ++++++++++
+ src/content/work/wordle-analysis.md                | 17 ++++++++++
+ src/pages/work/[slug].astro                        | 39 ++++++++++++++++++++++
+ src/pages/work/index.astro                         | 38 +++++++++++++++++++++
+ src/styles/global.css                              | 11 ++++++
+ 12 files changed, 265 insertions(+)
+
+## Diff
+diff --git a/src/content/work/campus-startup.md b/src/content/work/campus-startup.md
+new file mode 100644
+index 0000000..76ccd12
+--- /dev/null
++++ b/src/content/work/campus-startup.md
+@@ -0,0 +1,17 @@
++---
++title: "Independent Operator"
++org: "Campus Startup Project"
++kind: experience
++role: "Operator"
++start: "2024-07"
++end: "2025-09"
++summary: "Xiaohongshu content operations and direct sales for a campus startup."
++stack: ["Content Operations", "Sales"]
++highlights:
++  - "Ran Xiaohongshu content: 2,374 leads, 4,509+ engagements, and 25k+ views on the top post."
++  - "Converted 1,800+ users to WeChat, a 63% conversion rate."
++  - "Reached over 100,000 RMB in monthly revenue during the summer."
++order: 0
++---
++
++Handled content planning, lead generation, and direct sales for a campus startup.
+diff --git a/src/content/work/coca-cola-consumer-analysis.md b/src/content/work/coca-cola-consumer-analysis.md
+new file mode 100644
+index 0000000..811d12c
+--- /dev/null
++++ b/src/content/work/coca-cola-consumer-analysis.md
+@@ -0,0 +1,17 @@
++---
++title: "Consumer Demand Analysis (Coca-Cola)"
++org: "CP Group Cup Market Research Competition"
++kind: project
++role: "Lead"
++start: "2023-01"
++end: "2025-05"
++summary: "Consumer demand analysis over 120,756 JD.com reviews with BERT sentiment analysis."
++stack: ["BERT", "Python", "Crawlers"]
++highlights:
++  - "Collected 120,756 Coca-Cola product reviews from JD.com with automated crawlers."
++  - "Applied BERT sentiment analysis to generate word clouds and user profiles."
++  - "Won a National Third Prize in the CP Group Cup market research competition."
++order: 3
++---
++
++Led the data-mining work for a brand research project on Coca-Cola consumer demand.
+diff --git a/src/content/work/guangzhou-chuzhong.md b/src/content/work/guangzhou-chuzhong.md
+new file mode 100644
+index 0000000..5a6e949
+--- /dev/null
++++ b/src/content/work/guangzhou-chuzhong.md
+@@ -0,0 +1,17 @@
++---
++title: "Software Development Intern"
++org: "Guangzhou Chuzhong Technology Co."
++kind: experience
++role: "Software Development Intern"
++start: "2023-07"
++end: "2023-11"
++summary: "SpringBoot publishing system with JWT-based RBAC and an editorial review workflow."
++stack: ["SpringBoot", "JWT", "MySQL", "MyBatis-Plus"]
++highlights:
++  - "Built RESTful APIs with SpringBoot and JWT role-based access for editors and administrators."
++  - "Designed the MySQL schema and used MyBatis-Plus for dynamic SQL and version rollback."
++  - "Integrated an NLP rewriting API and built publish, query, and audit interfaces."
++order: 0
++---
++
++Improved the company publishing system with role-based APIs and a review workflow.
+diff --git a/src/content/work/guangzhou-xiyang.md b/src/content/work/guangzhou-xiyang.md
+new file mode 100644
+index 0000000..93c5d16
+--- /dev/null
++++ b/src/content/work/guangzhou-xiyang.md
+@@ -0,0 +1,21 @@
++---
++title: "Software Engineer"
++org: "Guangzhou Xiyang Information Technology Co., Ltd."
++kind: experience
++role: "Software Engineer"
++start: "2025-01"
++end: "2025-09"
++summary: "Cable surface defect detection and intelligent reporting, from model research to desktop delivery."
++stack: ["Python", "PyQt5", "YOLO", "OpenCV", "SQLAlchemy", "RAG"]
++highlights:
++  - "Annotated 3,500 cable-defect images and co-built the CSDDdb dataset with a municipal key laboratory."
++  - "Built an offline augmentation pipeline with YOLO XYWH-linked geometric and photometric transforms for long-tail cases."
++  - "Developed OpenCV preprocessing with Wiener deblurring, background suppression, and adaptive threshold segmentation."
++  - "Proposed CSDDNet, migrating LWGANet with PWCSA and a lightweight detection head for small defects."
++  - "Delivered a PyQt5 + YOLO desktop system with 4-channel parallel processing, 30 FPS detection, and 12 FPS UI rendering."
++  - "Built a RAG reporting module with multilingual MiniLM retrieval and OpenAI/Spark dual fallback."
++order: 0
++---
++
++Worked on the CablePyQT cable surface defect detection and intelligent reporting system, covering
++dataset construction, image preprocessing, model research, and the desktop application layer.
+diff --git a/src/content/work/ningbo-haizhimingshi.md b/src/content/work/ningbo-haizhimingshi.md
+new file mode 100644
+index 0000000..24418e1
+--- /dev/null
++++ b/src/content/work/ningbo-haizhimingshi.md
+@@ -0,0 +1,17 @@
++---
++title: "Algorithm Intern"
++org: "Ningbo Haizhimingshi Technology Co., Ltd."
++kind: experience
++role: "Algorithm Intern"
++start: "2024-09"
++end: "2024-12"
++summary: "Soft-shell crab detection with YOLOv5s for an automatic sorting system."
++stack: ["YOLOv5", "Python", "OpenCV"]
++highlights:
++  - "Built a multi-scene soft-shell crab dataset."
++  - "Trained YOLOv5s with tuned learning rate and loss: Precision 92.3%, Recall 89.7%, mAP 90.5%, F1 90.9%."
++  - "Optimized inference to 45 FPS to meet the real-time requirement of automatic sorting."
++order: 0
++---
++
++Built the detection dataset and trained a YOLOv5s model for soft-shell crab sorting.
+diff --git a/src/content/work/ningbo-jiasi.md b/src/content/work/ningbo-jiasi.md
+new file mode 100644
+index 0000000..474de4f
+--- /dev/null
++++ b/src/content/work/ningbo-jiasi.md
+@@ -0,0 +1,17 @@
++---
++title: "Algorithm Intern"
++org: "Ningbo Jiasi Technology Co., Ltd."
++kind: experience
++role: "Algorithm Intern"
++start: "2024-03"
++end: "2024-09"
++summary: "Water-quality forecasting and anomaly warning with IoT sensor fusion."
++stack: ["GRU", "LSTM", "Transformer", "Random Forest", "XGBoost"]
++highlights:
++  - "Developed a water-quality model with 95.2% accuracy, 93.8% recall, and 94.5% F1."
++  - "Designed GRU/LSTM/Transformer models for 24-hour forecasts and anomaly warnings."
++  - "Led multi-sensor data collection; used Random Forest and XGBoost with a WOI index for water-change decisions."
++order: 0
++---
++
++Developed water-quality prediction and warning models on top of an IoT sensor network.
+diff --git a/src/content/work/rural-revitalization.md b/src/content/work/rural-revitalization.md
+new file mode 100644
+index 0000000..5af625d
+--- /dev/null
++++ b/src/content/work/rural-revitalization.md
+@@ -0,0 +1,17 @@
++---
++title: "“Agriculture + Tourism” Rural Revitalization"
++org: "National Youth League Research Program"
++kind: project
++role: "Second Lead"
++start: "2023-07"
++end: "2025-11"
++summary: "Survey-based research on agriculture-plus-tourism rural revitalization pathways."
++stack: ["Machine Learning", "Statistics"]
++highlights:
++  - "Distributed 379 questionnaires with a 97% valid response rate and integrated government data."
++  - "Predicted tea yield, fertilization volume, and total machinery power with machine learning."
++  - "Report recognized as a National Excellent Research Report; the paper was published as second author."
++order: 4
++---
++
++Handled data collection and mining for a rural revitalization research project.
+diff --git a/src/content/work/wordle-analysis.md b/src/content/work/wordle-analysis.md
+new file mode 100644
+index 0000000..b1b8780
+--- /dev/null
++++ b/src/content/work/wordle-analysis.md
+@@ -0,0 +1,17 @@
++---
++title: "NYT Wordle Game Analysis"
++org: "MCM/ICM"
++kind: project
++role: "Lead"
++start: "2023-02"
++end: "2023-05"
++summary: "Difficulty modeling and player-trend prediction for the NYT Wordle game."
++stack: ["Python", "BiGRU", "Machine Learning"]
++highlights:
++  - "Analyzed word frequency, syllables, and letter repetition to build difficulty metrics."
++  - "Implemented a BiGRU model to predict player behavior trends."
++  - "Won the MCM Meritorious Winner award (top 7%)."
++order: 2
++---
++
++Led the analysis of Wordle difficulty factors and future player trends for the MCM competition.
+diff --git a/src/pages/work/[slug].astro b/src/pages/work/[slug].astro
+new file mode 100644
+index 0000000..39766a2
+--- /dev/null
++++ b/src/pages/work/[slug].astro
+@@ -0,0 +1,39 @@
++---
++import type { CollectionEntry } from 'astro:content';
++import BaseLayout from '../../layouts/BaseLayout.astro';
++import { getCollection, render } from 'astro:content';
++
++export async function getStaticPaths() {
++  const items = await getCollection('work');
++  return items.map((item) => ({ params: { slug: item.id }, props: { item } }));
++}
++
++interface Props {
++  item: CollectionEntry<'work'>;
++}
++const { item } = Astro.props;
++const { Content } = await render(item);
++---
++<BaseLayout title={`${item.data.title} · Zicong Yang`} description={item.data.summary}>
++  <article class="container measure work-detail" style="padding-top:40px">
++    <h1>{item.data.title}</h1>
++    <div class="meta">
++      {item.data.role} · {item.data.org} · {item.data.start} – {item.data.end}
++    </div>
++    <p>{item.data.summary}</p>
++    <ul>{item.data.highlights.map((highlight) => <li>{highlight}</li>)}</ul>
++    <Content />
++    {item.data.stack.length > 0 && (
++      <div class="stack" style="margin-top:24px">
++        {item.data.stack.map((tech) => <span>{tech}</span>)}
++      </div>
++    )}
++    {item.data.links.length > 0 && (
++      <div class="links">
++        {item.data.links.map((link) => (
++          <a href={link.url} target="_blank" rel="noopener">{link.label}</a>
++        ))}
++      </div>
++    )}
++  </article>
++</BaseLayout>
+diff --git a/src/pages/work/index.astro b/src/pages/work/index.astro
+new file mode 100644
+index 0000000..284aeb0
+--- /dev/null
++++ b/src/pages/work/index.astro
+@@ -0,0 +1,38 @@
++---
++import BaseLayout from '../../layouts/BaseLayout.astro';
++import WorkCard from '../../components/WorkCard.astro';
++import { getCollection } from 'astro:content';
++import { withBase } from '../../lib/url';
++
++const all = await getCollection('work');
++const experience = all
++  .filter((item) => item.data.kind === 'experience')
++  .sort((a, b) => b.data.start.localeCompare(a.data.start));
++const projects = all
++  .filter((item) => item.data.kind === 'project')
++  .sort((a, b) => a.data.order - b.data.order);
++---
++<BaseLayout title="Work · Zicong Yang" description="Engineering experience and research projects.">
++  <div class="container measure" style="padding-top:40px">
++    <h1>Work</h1>
++
++    <section class="section">
++      <div class="section-head"><h2>Experience</h2></div>
++      <ul class="timeline">
++        {experience.map((job) => (
++          <li>
++            <h3><a href={withBase(`work/${job.id}`)}>{job.data.title}</a></h3>
++            <div class="org">{job.data.org}</div>
++            <div class="when">{job.data.start} – {job.data.end}</div>
++            <ul>{job.data.highlights.slice(0, 3).map((highlight) => <li>{highlight}</li>)}</ul>
++          </li>
++        ))}
++      </ul>
++    </section>
++
++    <section class="section">
++      <div class="section-head"><h2>Projects</h2></div>
++      <div class="work-grid">{projects.map((item) => <WorkCard item={item} />)}</div>
++    </section>
++  </div>
++</BaseLayout>
+diff --git a/src/styles/global.css b/src/styles/global.css
+index 30df3dc..4c4dee7 100644
+--- a/src/styles/global.css
++++ b/src/styles/global.css
+@@ -154,10 +154,21 @@ h3 { font-size: 1.125rem; }
+ .work-card { border: 1px solid var(--border); border-radius: 8px; padding: 16px; background: var(--bg); }
+ .work-card h3 { font-size: 1rem; }
+ .work-card p { margin: 8px 0 12px; font-size: 0.88rem; color: var(--muted); }
+ .stack { display: flex; flex-wrap: wrap; gap: 6px; }
+ .stack span { font-size: 0.72rem; padding: 1px 7px; border-radius: 999px; background: var(--bg-soft); border: 1px solid var(--border); color: var(--muted); }
+ .post-list { list-style: none; margin: 0; padding: 0; }
+ .post-list li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+ .post-list time { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+ .lang-badge { font-size: 0.68rem; border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; color: var(--muted); }
+ .links { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 20px; font-size: 0.88rem; }
++
++.timeline { list-style: none; margin: 0; padding: 0; }
++.timeline li { border-left: 2px solid var(--border); padding: 0 0 20px 16px; }
++.timeline h3 { font-size: 1rem; }
++.timeline .org { color: var(--accent); font-weight: 600; font-size: 0.9rem; }
++.timeline .when { font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
++.timeline ul { margin: 8px 0 0; padding-left: 18px; color: var(--muted); font-size: 0.88rem; }
++.work-detail h1 { margin-bottom: 8px; }
++.work-detail .meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 24px; }
++.work-detail ul { padding-left: 20px; }
++.work-detail li { margin-bottom: 8px; }

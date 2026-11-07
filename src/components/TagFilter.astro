@@ -1,0 +1,14 @@
+---
+interface Props {
+  tags: string[];
+}
+const { tags } = Astro.props;
+---
+{tags.length > 0 && (
+  <div class="filters" role="group" aria-label="Filter posts by tag">
+    <button type="button" data-tag="all" aria-pressed="true">All</button>
+    {tags.map((tag) => (
+      <button type="button" data-tag={tag} aria-pressed="false">{tag}</button>
+    ))}
+  </div>
+)}
