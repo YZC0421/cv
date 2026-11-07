@@ -23,6 +23,27 @@ test('toBibtex produces an article entry with doi and year', () => {
   assert.match(bib, /year = \{2024\}/);
 });
 
+test('toBibtex keys are unique for the same author and year', () => {
+  const keyOf = (bib: string) => bib.split('{')[1].split(',')[0];
+  const first = toBibtex({
+    title: 'First paper',
+    authors: ['Zicong Yang'],
+    venue: 'V',
+    year: 2024,
+    doi: '10.1/a',
+    type: 'journal',
+  });
+  const second = toBibtex({
+    title: 'Second paper',
+    authors: ['Zicong Yang'],
+    venue: 'V',
+    year: 2024,
+    doi: '10.1/b',
+    type: 'journal',
+  });
+  assert.notEqual(keyOf(first), keyOf(second));
+});
+
 test('toBibtex produces an inproceedings entry with booktitle', () => {
   const bib = toBibtex({
     title: 'Conference paper',

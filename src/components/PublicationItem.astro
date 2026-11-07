@@ -1,9 +1,10 @@
 ---
+import type { CollectionEntry } from 'astro:content';
 import BibtexButton from './BibtexButton.astro';
 import { boldSelf, toBibtex } from '../lib/format';
 
 interface Props {
-  pub: any;
+  pub: CollectionEntry<'publications'>;
 }
 const { pub } = Astro.props;
 const d = pub.data;
@@ -27,18 +28,19 @@ const badgeClass =
         ? 'badge-ei'
         : 'badge-neutral';
 const indexingLabel = d.indexing === 'EI' ? 'EI indexed' : `JCR ${d.indexing}`;
-const roleLabel = d.role === 'first' ? 'First author' : 'Co-author';
 ---
 <li class="pub-item" data-indexing={d.indexing} data-role={d.role} data-year={d.year}>
   <a class="pub-title" href={href} target="_blank" rel="noopener">{d.title}</a>
   <div class="pub-meta"><span set:html={boldSelf(d.authors)} /></div>
   <div class="pub-meta">
     {d.indexing !== 'none' && <span class={`badge ${badgeClass}`}>{indexingLabel}</span>}
-    <span class="badge badge-neutral">{roleLabel}</span>
+    {d.role === 'first' && <span class="badge badge-neutral">First author</span>}
     <span>{d.venueShort ?? d.venue} · {d.year}</span>
   </div>
   <div class="pub-actions">
-    <a href={`https://doi.org/${d.doi}`} target="_blank" rel="noopener">DOI</a>
+    <a href={`https://doi.org/${d.doi}`} target="_blank" rel="noopener" aria-label={`DOI for ${d.title}`}>
+      DOI
+    </a>
     <BibtexButton bibtex={bibtex} />
   </div>
 </li>

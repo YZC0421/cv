@@ -137,6 +137,7 @@ h3 { font-size: 1.125rem; }
 .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 8px; }
 .filters button { font: inherit; font-size: 0.8rem; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--muted); cursor: pointer; }
 .filters button[aria-pressed='true'] { border-color: var(--accent); color: var(--accent); }
+.bibtex-block { display: inline-flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
 .bibtex { margin-top: 10px; }
 .bibtex summary { cursor: pointer; font-size: 0.8rem; }
 .bibtex pre { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 6px; padding: 12px; overflow-x: auto; font-size: 0.78rem; }

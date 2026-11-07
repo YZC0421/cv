@@ -1,0 +1,199 @@
+## Commits
+7c218ce feat: 论文列表页支持筛选与 BibTeX 复制
+
+## Stat
+ .../20261107-115018-academic-homepage/progress.md  |   1 +
+ .../task-4-brief.md                                | 163 +++++++++++++++++++++
+ .../task-4-report.md                               |  38 +++++
+ src/components/BibtexButton.astro                  |  13 ++
+ src/components/PublicationItem.astro               |  44 ++++++
+ src/components/PublicationScripts.astro            |  16 ++
+ src/pages/publications.astro                       |  54 +++++++
+ src/styles/global.css                              |  18 +++
+ 8 files changed, 347 insertions(+)
+
+## Diff (package-lock.json and .superpowers excluded)
+diff --git a/src/components/BibtexButton.astro b/src/components/BibtexButton.astro
+new file mode 100644
+index 0000000..23a3fe5
+--- /dev/null
++++ b/src/components/BibtexButton.astro
+@@ -0,0 +1,13 @@
++---
++interface Props {
++  bibtex: string;
++}
++const { bibtex } = Astro.props;
++---
++<span class="bibtex-block">
++  <button type="button" class="copy-btn" data-bibtex={bibtex}>Copy BibTeX</button>
++  <details class="bibtex">
++    <summary>Show BibTeX</summary>
++    <pre><code>{bibtex}</code></pre>
++  </details>
++</span>
+diff --git a/src/components/PublicationItem.astro b/src/components/PublicationItem.astro
+new file mode 100644
+index 0000000..b41de38
+--- /dev/null
++++ b/src/components/PublicationItem.astro
+@@ -0,0 +1,44 @@
++---
++import BibtexButton from './BibtexButton.astro';
++import { boldSelf, toBibtex } from '../lib/format';
++
++interface Props {
++  pub: any;
++}
++const { pub } = Astro.props;
++const d = pub.data;
++const href = d.url ?? `https://doi.org/${d.doi}`;
++const bibtex =
++  d.bibtex ??
++  toBibtex({
++    title: d.title,
++    authors: d.authors,
++    venue: d.venue,
++    year: d.year,
++    doi: d.doi,
++    type: d.type,
++  });
++const badgeClass =
++  d.indexing === 'Q1'
++    ? 'badge-q1'
++    : d.indexing === 'Q4'
++      ? 'badge-q4'
++      : d.indexing === 'EI'
++        ? 'badge-ei'
++        : 'badge-neutral';
++const indexingLabel = d.indexing === 'EI' ? 'EI indexed' : `JCR ${d.indexing}`;
++const roleLabel = d.role === 'first' ? 'First author' : 'Co-author';
++---
++<li class="pub-item" data-indexing={d.indexing} data-role={d.role} data-year={d.year}>
++  <a class="pub-title" href={href} target="_blank" rel="noopener">{d.title}</a>
++  <div class="pub-meta"><span set:html={boldSelf(d.authors)} /></div>
++  <div class="pub-meta">
++    {d.indexing !== 'none' && <span class={`badge ${badgeClass}`}>{indexingLabel}</span>}
++    <span class="badge badge-neutral">{roleLabel}</span>
++    <span>{d.venueShort ?? d.venue} · {d.year}</span>
++  </div>
++  <div class="pub-actions">
++    <a href={`https://doi.org/${d.doi}`} target="_blank" rel="noopener">DOI</a>
++    <BibtexButton bibtex={bibtex} />
++  </div>
++</li>
+diff --git a/src/components/PublicationScripts.astro b/src/components/PublicationScripts.astro
+new file mode 100644
+index 0000000..533ed56
+--- /dev/null
++++ b/src/components/PublicationScripts.astro
+@@ -0,0 +1,16 @@
++<script is:inline>
++  document.querySelectorAll('.copy-btn').forEach((btn) => {
++    btn.addEventListener('click', async () => {
++      const text = btn.dataset.bibtex ?? '';
++      try {
++        await navigator.clipboard.writeText(text);
++        btn.textContent = 'Copied';
++        setTimeout(() => {
++          btn.textContent = 'Copy BibTeX';
++        }, 1500);
++      } catch {
++        btn.textContent = 'Select BibTeX below';
++      }
++    });
++  });
++</script>
+diff --git a/src/pages/publications.astro b/src/pages/publications.astro
+new file mode 100644
+index 0000000..07ebdcc
+--- /dev/null
++++ b/src/pages/publications.astro
+@@ -0,0 +1,54 @@
++---
++import BaseLayout from '../layouts/BaseLayout.astro';
++import PublicationItem from '../components/PublicationItem.astro';
++import PublicationScripts from '../components/PublicationScripts.astro';
++import { getCollection } from 'astro:content';
++import { sortPublications } from '../lib/publications';
++
++const pubs = sortPublications(await getCollection('publications'));
++const years = [...new Set(pubs.map((p) => p.data.year))].sort((a, b) => b - a);
++---
++<BaseLayout
++  title="Publications · Zicong Yang"
++  description="Peer-reviewed publications on medical signal processing and computer vision."
++>
++  <div class="container measure" style="padding-top:40px">
++    <h1>Publications</h1>
++    <p class="muted">Peer-reviewed journal and conference papers. {pubs.length} entries.</p>
++
++    <div class="filters" role="group" aria-label="Filter publications">
++      <button type="button" data-filter="all" aria-pressed="true">All</button>
++      <button type="button" data-filter="first" aria-pressed="false">First author</button>
++      <button type="button" data-filter="Q1" aria-pressed="false">JCR Q1</button>
++      <button type="button" data-filter="EI" aria-pressed="false">EI</button>
++      {years.map((year) => (
++        <button type="button" data-filter={String(year)} aria-pressed="false">{year}</button>
++      ))}
++    </div>
++
++    <ul class="pub-list" id="pub-list">
++      {pubs.map((pub) => <PublicationItem pub={pub} />)}
++    </ul>
++  </div>
++
++  <PublicationScripts />
++
++  <script is:inline>
++    const buttons = document.querySelectorAll('.filters button');
++    const items = document.querySelectorAll('#pub-list .pub-item');
++    buttons.forEach((btn) => {
++      btn.addEventListener('click', () => {
++        buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
++        const filter = btn.dataset.filter;
++        items.forEach((item) => {
++          const match =
++            filter === 'all' ||
++            item.dataset.role === filter ||
++            item.dataset.indexing === filter ||
++            item.dataset.year === filter;
++          item.hidden = !match;
++        });
++      });
++    });
++  </script>
++</BaseLayout>
+diff --git a/src/styles/global.css b/src/styles/global.css
+index 2b5b00e..633078a 100644
+--- a/src/styles/global.css
++++ b/src/styles/global.css
+@@ -115,10 +115,28 @@ h3 { font-size: 1.125rem; }
+     background: var(--bg);
+     border: 1px solid var(--border);
+     border-radius: 8px;
+     z-index: 60;
+   }
+ }
+ 
+ @media (prefers-reduced-motion: reduce) {
+   *, *::before, *::after { transition: none !important; animation: none !important; }
+ }
++
++.pub-list { list-style: none; margin: 0; padding: 0; }
++.pub-item { padding: 18px 0; border-bottom: 1px solid var(--border); }
++.pub-title { font-family: var(--font-serif); font-size: 1.05rem; font-weight: 600; line-height: 1.4; color: var(--fg); }
++.pub-meta { margin-top: 6px; font-size: 0.85rem; color: var(--muted); }
++.pub-actions { margin-top: 8px; display: flex; gap: 14px; font-size: 0.8rem; align-items: baseline; }
++.pub-actions button { background: none; border: 0; padding: 0; color: var(--accent); font: inherit; cursor: pointer; }
++.badge { display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; padding: 1px 6px; border-radius: 4px; margin-right: 6px; text-transform: uppercase; }
++.badge-q1 { background: var(--q1-bg); color: var(--q1-fg); }
++.badge-q4 { background: var(--q4-bg); color: var(--q4-fg); }
++.badge-ei { background: var(--ei-bg); color: var(--ei-fg); }
++.badge-neutral { background: var(--bg-soft); color: var(--muted); border: 1px solid var(--border); }
++.filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 8px; }
++.filters button { font: inherit; font-size: 0.8rem; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--muted); cursor: pointer; }
++.filters button[aria-pressed='true'] { border-color: var(--accent); color: var(--accent); }
++.bibtex { margin-top: 10px; }
++.bibtex summary { cursor: pointer; font-size: 0.8rem; }
++.bibtex pre { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 6px; padding: 12px; overflow-x: auto; font-size: 0.78rem; }

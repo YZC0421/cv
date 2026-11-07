@@ -36,3 +36,14 @@
 
 - 暗色模式下徽标颜色使用独立变量，未做自动对比度检查，最终验收任务会用 DevTools 复核。
 - 论文正文描述当前未在列表页渲染，仅随 Markdown 存在；若后续需要摘要展示，可在 `PublicationItem` 中增加插槽。
+
+## 审查修复
+
+- **BibTeX key 冲突**：`toBibtex` 的 key 改为"首作者姓氏 + 年份 + 标题 slug 前 8 位"，6 条论文现在产生 6 个唯一 key（`Yang2024acoordin`、`Yang2024thefusio`、`Yang2024wheatdis`、`Song2025enhancin`、`Wang2024enhanced`、`Wang2024surfacew`）。新增同作者同年不同标题的回归测试。
+- **复制降级**：失败时自动展开对应 `<details>` 并用 `Range` + `Window.getSelection()` 选中 BibTeX 文本。
+- **脚本自包含**：改为文档级事件委托 + `window.__bibtexBound` 守卫，并挂载到 `BaseLayout`，首页复用 `PublicationItem` 时无需额外引用。
+- **徽标收敛**：位次徽标只在 `role === 'first'` 时显示，其余条目不再出现 `Co-author`。
+- **无障碍**：DOI 链接补 `aria-label`。
+- **布局**：`.bibtex-block` 使用 inline-flex，按钮与展开控件保持同行。
+
+验证：`npm test` 18/18；`npm run build` 成功；`npm run check` 0 errors；产物中 6 个唯一 BibTeX key。

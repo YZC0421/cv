@@ -12,7 +12,12 @@ export function toBibtex(input: {
   doi: string;
   type: 'journal' | 'conference';
 }): string {
-  const key = `${input.authors[0]?.split(' ').pop() ?? 'anon'}${input.year}`;
+  const surname = input.authors[0]?.split(' ').pop() ?? 'anon';
+  const slug = input.title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '')
+    .slice(0, 8);
+  const key = `${surname}${input.year}${slug}`;
   const kind = input.type === 'journal' ? 'article' : 'inproceedings';
   const venueField = input.type === 'journal' ? 'journal' : 'booktitle';
   return `@${kind}{${key},
