@@ -1,6 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { boldSelf, toBibtex } from '../src/lib/format.ts';
+import { boldSelf, readingMinutes, toBibtex } from '../src/lib/format.ts';
+
+test('readingMinutes returns at least one minute for empty content', () => {
+  assert.equal(readingMinutes(''), 1);
+});
+
+test('readingMinutes grows with content length', () => {
+  assert.ok(readingMinutes('中'.repeat(1200)) >= 3);
+});
 
 test('boldSelf wraps the configured name only', () => {
   assert.equal(

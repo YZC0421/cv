@@ -33,3 +33,12 @@
 
 - 目录只收录 h2/h3，h4 不入目录；当前文章层级足够。
 - 文章页上下篇顺序为"较旧在左、较新在右"，与常见博客相反；如需要可调整。
+
+## 规格补齐
+
+规格要求文章页包含脚注与阅读时长，计划任务 7 的步骤未覆盖，已补齐：
+
+- **脚注**：Astro 内置 Markdown 处理器已支持 GFM 脚注，示例文章加入 `[^1]` 后产物出现 `data-footnotes`、`data-footnote-ref` 与回跳链接，无需额外插件。
+- **阅读时长**：`src/lib/format.ts` 新增 `readingMinutes()`，按中文字符 400/分钟、英文词 200/分钟估算；`PostLayout` 显示 `N min read`。新增 2 个单元测试。
+
+验证：`npm test` 20/20；`npm run build` 成功；产物显示 `2 min read` 与脚注标记；`npm run check` 0 errors。

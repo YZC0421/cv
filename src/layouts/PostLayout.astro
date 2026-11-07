@@ -9,8 +9,9 @@ interface Props {
   lang: 'en' | 'zh';
   tags: string[];
   headings: { depth: number; slug: string; text: string }[];
+  readingTime: number;
 }
-const { title, description, date, lang, tags, headings } = Astro.props;
+const { title, description, date, lang, tags, headings, readingTime } = Astro.props;
 ---
 <BaseLayout
   title={`${title} · Zicong Yang`}
@@ -29,6 +30,7 @@ const { title, description, date, lang, tags, headings } = Astro.props;
         <div class="post-meta">
           <time datetime={date}>{date}</time>
           <span class="lang-badge">{lang === 'zh' ? '中文' : 'EN'}</span>
+          <span>{readingTime} min read</span>
           {tags.map((tag) => <span class="lang-badge">{tag}</span>)}
         </div>
       </header>

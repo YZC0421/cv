@@ -36,4 +36,6 @@ draft: false
 
 `import.meta.env.BASE_URL` 在 Astro 中不带尾斜杠。直接拼 `${base}publications` 会得到
 `/cvpublications` 这样的坏链接。所有站内路径现在都经过 `src/lib/url.ts` 的 `withBase`，
-由它统一补斜杠并保留文件扩展名。
+由它统一补斜杠并保留文件扩展名。[^1]
+
+[^1]: 这个问题在本地 `npm run dev` 下同样存在，因为 `BASE_URL` 与构建时的取值一致。

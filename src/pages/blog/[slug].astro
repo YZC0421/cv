@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import PostLayout from '../../layouts/PostLayout.astro';
 import { getCollection, render } from 'astro:content';
 import { localToday } from '../../lib/date';
+import { readingMinutes } from '../../lib/format';
 import { withBase } from '../../lib/url';
 
 export async function getStaticPaths() {
@@ -22,6 +23,7 @@ interface Props {
 }
 const { post, prev, next } = Astro.props;
 const { Content, headings } = await render(post);
+const readingTime = readingMinutes(post.body ?? '');
 ---
 <PostLayout
   title={post.data.title}
@@ -30,6 +32,7 @@ const { Content, headings } = await render(post);
   lang={post.data.lang}
   tags={post.data.tags}
   headings={headings}
+  readingTime={readingTime}
 >
   <Content />
   <div class="next-prev" slot="footer">

@@ -1,3 +1,9 @@
+export function readingMinutes(body: string): number {
+  const cjk = body.match(/[\u4e00-\u9fa5]/g)?.length ?? 0;
+  const latin = body.match(/[A-Za-z0-9]+/g)?.length ?? 0;
+  return Math.max(1, Math.ceil(cjk / 400 + latin / 200));
+}
+
 export function boldSelf(authors: string[], self = 'Zicong Yang'): string {
   return authors
     .map((name) => (name.trim() === self ? `<strong>${name}</strong>` : name))
