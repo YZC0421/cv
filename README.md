@@ -1,0 +1,57 @@
+# cv
+
+Personal academic site of Zicong Yang: publications, work, and writing.
+
+Built with Astro 5, statically generated, deployed to GitHub Pages.
+
+## Local
+
+```bash
+npm install
+npm run dev      # http://localhost:4321/cv/
+npm run check    # type + content schema check
+npm test         # unit tests for schema and ordering rules
+npm run build    # build to dist/
+npm run verify   # assert build output
+```
+
+## Add a publication
+
+1. Create `src/content/publications/<slug>.md` with the frontmatter defined in
+   `src/lib/schema.ts`.
+2. `doi` is required. Set `selected: true` only for entries that should appear on the home
+   page.
+3. Run `npm run check` and `npm run build`.
+
+## Add a post
+
+1. Create `src/content/blog/<slug>.md`; `lang` is `en` or `zh`, `tags` needs at least one
+   entry, `summary` at most 160 characters.
+2. `draft: true` keeps it out of the list, RSS, and sitemap.
+3. Future dates publish automatically: entries dated after the build day are excluded.
+
+## Add a project or experience
+
+1. Create `src/content/work/<slug>.md`; `kind` is `experience` or `project`.
+2. `highlights` needs at least one factual bullet; do not add claims without a source.
+3. Projects sort by `order`; experiences sort by `start`, newest first.
+
+## Deploy
+
+Pushing to `main` triggers `.github/workflows/deploy.yml`. The site is served from
+`https://yzc0421.github.io/cv/`. If a custom domain is added, update `site` and `base` in
+`astro.config.mjs`, add `public/CNAME`, and update `public/robots.txt`.
+
+## Rollback
+
+Re-run the last successful `Deploy to GitHub Pages` workflow, or `git revert` the offending
+content commit. Build configuration changes revert the same way; no manual cleanup on Pages
+is required.
+
+## Notes
+
+- No runtime CDN dependencies and no external fonts.
+- Content is validated by Zod at build time; invalid frontmatter fails the build.
+- Paper metadata was cross-checked against Crossref and confirmed manually.
+- All internal links go through `withBase` in `src/lib/url.ts`; do not concatenate
+  `import.meta.env.BASE_URL` directly.
