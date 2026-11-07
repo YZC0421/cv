@@ -268,3 +268,4 @@ h3 { font-size: 1.125rem; }
 .area-items li { margin-bottom: 8px; }
 .area-note { display: block; color: var(--muted); font-size: 0.76rem; }
 .area-link { font-size: 0.85rem; }
+.badge-topic { background: var(--bg-soft); color: var(--muted); border: 1px solid var(--border); }

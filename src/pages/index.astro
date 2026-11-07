@@ -25,6 +25,7 @@ const work = allWork
   .slice(0, 3);
 const posts = visiblePosts(await getCollection('blog')).slice(0, 2);
 const about = await getEntry('pages', 'about-en');
+const workTitles = Object.fromEntries(allWork.map((item) => [item.id, item.data.title]));
 ---
 <BaseLayout
   title="Zicong Yang · Medical Signal Processing & Computer Vision"
@@ -40,7 +41,9 @@ const about = await getEntry('pages', 'about-en');
       <h2>Selected Publications</h2>
       <a href={withBase('publications')}>All publications →</a>
     </div>
-    <ul class="pub-list">{pubs.map((pub) => <PublicationItem pub={pub} />)}</ul>
+    <ul class="pub-list">
+      {pubs.map((pub) => <PublicationItem pub={pub} workTitles={workTitles} />)}
+    </ul>
   </section>
 
   {work.length > 0 && (
