@@ -1,7 +1,9 @@
 import { z } from 'zod';
+import { topicSlugs } from './topics';
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date must be YYYY-MM-DD');
 const month = z.string().regex(/^\d{4}-\d{2}$/, 'month must be YYYY-MM');
+const topic = z.enum(topicSlugs);
 
 export const publicationSchema = z.object({
   title: z.string().min(1),
@@ -12,9 +14,13 @@ export const publicationSchema = z.object({
   type: z.enum(['journal', 'conference']),
   indexing: z.enum(['Q1', 'Q2', 'Q3', 'Q4', 'EI', 'none']).default('none'),
   role: z.enum(['first', 'second', 'third', 'other']),
+  authorNote: z.string().max(40).optional(),
+  topics: z.array(topic).min(1),
   doi: z.string().min(3),
   url: z.string().url().optional(),
-  bibtex: z.string().optional(),
+  volume: z.string().optional(),
+  pages: z.string().optional(),
+  relatedWork: z.array(z.string()).default([]),
   selected: z.boolean().default(false),
   date: isoDate,
 });
@@ -32,7 +38,11 @@ export const workSchema = z
     links: z
       .array(z.object({ label: z.string().min(1), url: z.string().url() }))
       .default([]),
-    cover: z.string().optional(),
+    topics: z.array(topic).default([]),
+    problem: z.string().max(600).optional(),
+    approach: z.string().max(600).optional(),
+    results: z.string().max(600).optional(),
+    relatedPublications: z.array(z.string()).default([]),
     highlights: z.array(z.string().min(1)).min(1),
     order: z.number().int().default(0),
   })

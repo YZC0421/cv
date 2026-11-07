@@ -16,8 +16,11 @@ year: 2024
 type: journal
 indexing: Q1
 role: first
+topics: ["medical-signal"]
 doi: "10.1038/s41598-024-71700-z"
 url: "https://www.nature.com/articles/s41598-024-71700-z"
+volume: "14"
+relatedWork: ["sudden-cardiac-death-prediction"]
 selected: true
 date: "2024-09-06"
 ---

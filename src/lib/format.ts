@@ -23,6 +23,8 @@ export function toBibtex(input: {
   year: number;
   doi: string;
   type: 'journal' | 'conference';
+  volume?: string;
+  pages?: string;
 }): string {
   const surname = input.authors[0]?.split(' ').pop() ?? 'anon';
   const slug = input.title
@@ -32,11 +34,16 @@ export function toBibtex(input: {
   const key = `${surname}${input.year}${slug}`;
   const kind = input.type === 'journal' ? 'article' : 'inproceedings';
   const venueField = input.type === 'journal' ? 'journal' : 'booktitle';
-  return `@${kind}{${key},
-  author = {${input.authors.join(' and ')}},
-  title = {${input.title}},
-  ${venueField} = {${input.venue}},
-  year = {${input.year}},
-  doi = {${input.doi}}
-}`;
+  const lines = [
+    `@${kind}{${key},`,
+    `  author = {${input.authors.join(' and ')}},`,
+    `  title = {${input.title}},`,
+    `  ${venueField} = {${input.venue}},`,
+    `  year = {${input.year}},`,
+    ...(input.volume ? [`  volume = {${input.volume}},`] : []),
+    ...(input.pages ? [`  pages = {${input.pages}},`] : []),
+    `  doi = {${input.doi}}`,
+    '}',
+  ];
+  return lines.join('\n');
 }

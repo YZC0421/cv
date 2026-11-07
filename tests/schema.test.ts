@@ -10,6 +10,7 @@ const paper = {
   type: 'journal' as const,
   indexing: 'Q1' as const,
   role: 'first' as const,
+  topics: ['medical-signal'],
   doi: '10.1038/s41598-024-71700-z',
   date: '2024-09-01',
 };

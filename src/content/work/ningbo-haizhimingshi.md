@@ -6,6 +6,7 @@ role: "Algorithm Intern"
 start: "2024-09"
 end: "2024-12"
 summary: "Soft-shell crab detection with YOLOv5s for an automatic sorting system."
+topics: ["industrial-vision"]
 stack: ["YOLOv5", "Python", "OpenCV"]
 highlights:
   - "Built a multi-scene soft-shell crab dataset."

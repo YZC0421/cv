@@ -9,16 +9,16 @@ interface Props {
 const { pub } = Astro.props;
 const d = pub.data;
 const href = d.url ?? `https://doi.org/${d.doi}`;
-const bibtex =
-  d.bibtex ??
-  toBibtex({
-    title: d.title,
-    authors: d.authors,
-    venue: d.venue,
-    year: d.year,
-    doi: d.doi,
-    type: d.type,
-  });
+const bibtex = toBibtex({
+  title: d.title,
+  authors: d.authors,
+  venue: d.venue,
+  year: d.year,
+  doi: d.doi,
+  type: d.type,
+  volume: d.volume,
+  pages: d.pages,
+});
 const badgeClass =
   d.indexing === 'Q1'
     ? 'badge-q1'

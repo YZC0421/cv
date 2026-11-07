@@ -7,12 +7,20 @@ import PostList from '../components/PostList.astro';
 import { getCollection, getEntry } from 'astro:content';
 import { selectHomepage } from '../lib/publications';
 import { visiblePosts } from '../lib/posts';
+import { validateRelations } from '../lib/relations';
 import { withBase } from '../lib/url';
 
-const pubs = selectHomepage(await getCollection('publications'));
-const work = (await getCollection('work'))
+const allPublications = await getCollection('publications');
+const allWork = await getCollection('work');
+const relationErrors = validateRelations(allPublications, allWork);
+if (relationErrors.length > 0) {
+  throw new Error(`Content relations are invalid:\n${relationErrors.join('\n')}`);
+}
+
+const pubs = selectHomepage(allPublications);
+const work = allWork
   .filter((item) => item.data.kind === 'project')
-  .sort((a, b) => a.data.order - b.data.order)
+  .sort((a, b) => a.data.order - b.data.order || a.id.localeCompare(b.id))
   .slice(0, 3);
 const posts = visiblePosts(await getCollection('blog')).slice(0, 2);
 const about = await getEntry('pages', 'about-en');
