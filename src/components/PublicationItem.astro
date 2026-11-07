@@ -52,8 +52,11 @@ const relatedWork = d.relatedWork ?? [];
   {relatedWork.length > 0 && (
     <div class="pub-meta">
       Related work:
-      {relatedWork.map((slug) => (
-        <a href={withBase(`work/${slug}`)}>{workTitles[slug] ?? slug}</a>
+      {relatedWork.map((slug, index) => (
+        <span>
+          {index > 0 && ', '}
+          <a href={withBase(`work/${slug}`)}>{workTitles[slug] ?? slug}</a>
+        </span>
       ))}
     </div>
   )}

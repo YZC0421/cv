@@ -4,12 +4,11 @@ import PublicationItem from '../components/PublicationItem.astro';
 import { getCollection } from 'astro:content';
 import { sortPublications } from '../lib/publications';
 import { topics } from '../lib/topics';
+import { workTitleMap } from '../lib/work';
 
 const pubs = sortPublications(await getCollection('publications'));
 const years = [...new Set(pubs.map((pub) => pub.data.year))].sort((a, b) => b - a);
-const workTitles = Object.fromEntries(
-  (await getCollection('work')).map((item) => [item.id, item.data.title])
-);
+const workTitles = workTitleMap(await getCollection('work'));
 ---
 <BaseLayout
   title="Publications · Zicong Yang"
@@ -45,16 +44,14 @@ const workTitles = Object.fromEntries(
     <ul class="pub-list" id="pub-list">
       {pubs.map((pub) => <PublicationItem pub={pub} workTitles={workTitles} />)}
     </ul>
-    <p id="pub-empty" class="muted" aria-live="polite" hidden>
-      No publications match these filters.
-    </p>
+    <p id="pub-status" class="muted" role="status" aria-live="polite"></p>
   </div>
 
   <script is:inline>
     (() => {
       const buttons = document.querySelectorAll('.filters button');
       const rows = document.querySelectorAll('#pub-list .pub-item');
-      const empty = document.getElementById('pub-empty');
+      const status = document.getElementById('pub-status');
       const state = { topic: 'all', role: 'all', year: 'all' };
 
       const apply = () => {
@@ -68,12 +65,18 @@ const workTitles = Object.fromEntries(
           row.hidden = !match;
           if (match) visible += 1;
         });
-        if (empty) empty.hidden = visible > 0;
+        if (status) {
+          status.textContent =
+            visible === 0
+              ? 'No publications match these filters.'
+              : `Showing ${visible} of ${rows.length} publications.`;
+        }
       };
 
       buttons.forEach((btn) => {
         btn.addEventListener('click', () => {
           const group = btn.dataset.group;
+          if (!group) return;
           state[group] = btn.dataset.value;
           document
             .querySelectorAll(`.filters button[data-group="${group}"]`)
@@ -84,9 +87,10 @@ const workTitles = Object.fromEntries(
 
       const initial = new URLSearchParams(window.location.search).get('topic');
       if (initial) {
-        document
-          .querySelector(`.filters button[data-group="topic"][data-value="${initial}"]`)
-          ?.click();
+        const target = [...document.querySelectorAll('.filters button[data-group="topic"]')].find(
+          (btn) => btn.dataset.value === initial
+        );
+        target?.click();
       }
     })();
   </script>

@@ -1,0 +1,269 @@
+## Commits
+78bb475 feat: 论文页支持主题、位次与年份筛选
+
+## Stat
+ .../progress.md                                    |   1 +
+ .../task-4-brief.md                                | 228 +++++++++++++++++++++
+ .../task-4-report.md                               |  30 +++
+ src/components/PublicationItem.astro               |  30 ++-
+ src/pages/index.astro                              |   5 +-
+ src/pages/publications.astro                       |  84 ++++++--
+ src/styles/global.css                              |   1 +
+ 7 files changed, 351 insertions(+), 28 deletions(-)
+
+## Diff
+diff --git a/src/components/PublicationItem.astro b/src/components/PublicationItem.astro
+index 2773803..aeb887e 100644
+--- a/src/components/PublicationItem.astro
++++ b/src/components/PublicationItem.astro
+@@ -1,19 +1,22 @@
+ ---
+ import type { CollectionEntry } from 'astro:content';
+ import BibtexButton from './BibtexButton.astro';
+ import { boldSelf, toBibtex } from '../lib/format';
++import { topicName } from '../lib/topics';
++import { withBase } from '../lib/url';
+ 
+ interface Props {
+   pub: CollectionEntry<'publications'>;
++  workTitles?: Record<string, string>;
+ }
+-const { pub } = Astro.props;
++const { pub, workTitles = {} } = Astro.props;
+ const d = pub.data;
+ const href = d.url ?? `https://doi.org/${d.doi}`;
+ const bibtex = toBibtex({
+   title: d.title,
+   authors: d.authors,
+   venue: d.venue,
+   year: d.year,
+   doi: d.doi,
+   type: d.type,
+   volume: d.volume,
+@@ -21,26 +24,41 @@ const bibtex = toBibtex({
+ });
+ const badgeClass =
+   d.indexing === 'Q1'
+     ? 'badge-q1'
+     : d.indexing === 'Q4'
+       ? 'badge-q4'
+       : d.indexing === 'EI'
+         ? 'badge-ei'
+         : 'badge-neutral';
+ const indexingLabel = d.indexing === 'EI' ? 'EI indexed' : `JCR ${d.indexing}`;
++const roleLabel = d.role === 'first' ? 'First author' : (d.authorNote ?? 'Co-author');
++const relatedWork = d.relatedWork ?? [];
+ ---
+-<li class="pub-item" data-indexing={d.indexing} data-role={d.role} data-year={d.year}>
++<li
++  class="pub-item"
++  data-indexing={d.indexing}
++  data-role={d.role}
++  data-year={d.year}
++  data-topics={d.topics.join(' ')}
++>
+   <a class="pub-title" href={href} target="_blank" rel="noopener">{d.title}</a>
+   <div class="pub-meta"><span set:html={boldSelf(d.authors)} /></div>
+   <div class="pub-meta">
+     {d.indexing !== 'none' && <span class={`badge ${badgeClass}`}>{indexingLabel}</span>}
+-    {d.role === 'first' && <span class="badge badge-neutral">First author</span>}
++    <span class="badge badge-neutral">{roleLabel}</span>
++    {d.topics.map((topic) => <span class="badge badge-topic">{topicName(topic)}</span>)}
+     <span>{d.venueShort ?? d.venue} · {d.year}</span>
+   </div>
++  {relatedWork.length > 0 && (
++    <div class="pub-meta">
++      Related work:
++      {relatedWork.map((slug) => (
++        <a href={withBase(`work/${slug}`)}>{workTitles[slug] ?? slug}</a>
++      ))}
++    </div>
++  )}
+   <div class="pub-actions">
+-    <a href={`https://doi.org/${d.doi}`} target="_blank" rel="noopener" aria-label={`DOI for ${d.title}`}>
+-      DOI
+-    </a>
++    <a href={`https://doi.org/${d.doi}`} target="_blank" rel="noopener" aria-label={`DOI for ${d.title}`}>DOI</a>
+     <BibtexButton bibtex={bibtex} />
+   </div>
+ </li>
+diff --git a/src/pages/index.astro b/src/pages/index.astro
+index 923b311..9ee13bf 100644
+--- a/src/pages/index.astro
++++ b/src/pages/index.astro
+@@ -18,36 +18,39 @@ if (relationErrors.length > 0) {
+   throw new Error(`Content relations are invalid:\n${relationErrors.join('\n')}`);
+ }
+ 
+ const pubs = selectHomepage(allPublications);
+ const work = allWork
+   .filter((item) => item.data.kind === 'project')
+   .sort((a, b) => a.data.order - b.data.order || a.id.localeCompare(b.id))
+   .slice(0, 3);
+ const posts = visiblePosts(await getCollection('blog')).slice(0, 2);
+ const about = await getEntry('pages', 'about-en');
++const workTitles = Object.fromEntries(allWork.map((item) => [item.id, item.data.title]));
+ ---
+ <BaseLayout
+   title="Zicong Yang · Medical Signal Processing & Computer Vision"
+   description="Personal site of Zicong Yang: publications, engineering work, and technical writing."
+   profilePage
+ >
+   <Hero />
+ 
+   <ResearchAreas />
+ 
+   <section class="section container measure">
+     <div class="section-head">
+       <h2>Selected Publications</h2>
+       <a href={withBase('publications')}>All publications →</a>
+     </div>
+-    <ul class="pub-list">{pubs.map((pub) => <PublicationItem pub={pub} />)}</ul>
++    <ul class="pub-list">
++      {pubs.map((pub) => <PublicationItem pub={pub} workTitles={workTitles} />)}
++    </ul>
+   </section>
+ 
+   {work.length > 0 && (
+     <section class="section container measure">
+       <div class="section-head">
+         <h2>Selected Work</h2>
+         <a href={withBase('work')}>All work →</a>
+       </div>
+       <div class="work-grid">{work.map((item) => <WorkCard item={item} />)}</div>
+     </section>
+diff --git a/src/pages/publications.astro b/src/pages/publications.astro
+index 893b63d..cda6f4c 100644
+--- a/src/pages/publications.astro
++++ b/src/pages/publications.astro
+@@ -1,51 +1,93 @@
+ ---
+ import BaseLayout from '../layouts/BaseLayout.astro';
+ import PublicationItem from '../components/PublicationItem.astro';
+ import { getCollection } from 'astro:content';
+ import { sortPublications } from '../lib/publications';
++import { topics } from '../lib/topics';
+ 
+ const pubs = sortPublications(await getCollection('publications'));
+-const years = [...new Set(pubs.map((p) => p.data.year))].sort((a, b) => b - a);
++const years = [...new Set(pubs.map((pub) => pub.data.year))].sort((a, b) => b - a);
++const workTitles = Object.fromEntries(
++  (await getCollection('work')).map((item) => [item.id, item.data.title])
++);
+ ---
+ <BaseLayout
+   title="Publications · Zicong Yang"
+   description="Peer-reviewed publications on medical signal processing and computer vision."
+ >
+   <div class="container measure" style="padding-top:40px">
+     <h1>Publications</h1>
+     <p class="muted">Peer-reviewed journal and conference papers. {pubs.length} entries.</p>
+ 
+-    <div class="filters" role="group" aria-label="Filter publications">
+-      <button type="button" data-filter="all" aria-pressed="true">All</button>
+-      <button type="button" data-filter="first" aria-pressed="false">First author</button>
+-      <button type="button" data-filter="Q1" aria-pressed="false">JCR Q1</button>
+-      <button type="button" data-filter="EI" aria-pressed="false">EI</button>
++    <div class="filters" role="group" aria-label="Filter publications by topic">
++      <button type="button" data-group="topic" data-value="all" aria-pressed="true">All topics</button>
++      {topics.map((topic) => (
++        <button type="button" data-group="topic" data-value={topic.slug} aria-pressed="false">
++          {topic.name}
++        </button>
++      ))}
++    </div>
++
++    <div class="filters" role="group" aria-label="Filter publications by author role">
++      <button type="button" data-group="role" data-value="all" aria-pressed="true">All roles</button>
++      <button type="button" data-group="role" data-value="first" aria-pressed="false">First author</button>
++    </div>
++
++    <div class="filters" role="group" aria-label="Filter publications by year">
++      <button type="button" data-group="year" data-value="all" aria-pressed="true">All years</button>
+       {years.map((year) => (
+-        <button type="button" data-filter={String(year)} aria-pressed="false">{year}</button>
++        <button type="button" data-group="year" data-value={String(year)} aria-pressed="false">
++          {year}
++        </button>
+       ))}
+     </div>
+ 
+     <ul class="pub-list" id="pub-list">
+-      {pubs.map((pub) => <PublicationItem pub={pub} />)}
++      {pubs.map((pub) => <PublicationItem pub={pub} workTitles={workTitles} />)}
+     </ul>
++    <p id="pub-empty" class="muted" aria-live="polite" hidden>
++      No publications match these filters.
++    </p>
+   </div>
+ 
+   <script is:inline>
+-    const buttons = document.querySelectorAll('.filters button');
+-    const items = document.querySelectorAll('#pub-list .pub-item');
+-    buttons.forEach((btn) => {
+-      btn.addEventListener('click', () => {
+-        buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+-        const filter = btn.dataset.filter;
+-        items.forEach((item) => {
++    (() => {
++      const buttons = document.querySelectorAll('.filters button');
++      const rows = document.querySelectorAll('#pub-list .pub-item');
++      const empty = document.getElementById('pub-empty');
++      const state = { topic: 'all', role: 'all', year: 'all' };
++
++      const apply = () => {
++        let visible = 0;
++        rows.forEach((row) => {
++          const topics = (row.dataset.topics ?? '').split(' ').filter(Boolean);
+           const match =
+-            filter === 'all' ||
+-            item.dataset.role === filter ||
+-            item.dataset.indexing === filter ||
+-            item.dataset.year === filter;
+-          item.hidden = !match;
++            (state.topic === 'all' || topics.includes(state.topic)) &&
++            (state.role === 'all' || row.dataset.role === 'first') &&
++            (state.year === 'all' || row.dataset.year === state.year);
++          row.hidden = !match;
++          if (match) visible += 1;
++        });
++        if (empty) empty.hidden = visible > 0;
++      };
++
++      buttons.forEach((btn) => {
++        btn.addEventListener('click', () => {
++          const group = btn.dataset.group;
++          state[group] = btn.dataset.value;
++          document
++            .querySelectorAll(`.filters button[data-group="${group}"]`)
++            .forEach((other) => other.setAttribute('aria-pressed', String(other === btn)));
++          apply();
+         });
+       });
+-    });
++
++      const initial = new URLSearchParams(window.location.search).get('topic');
++      if (initial) {
++        document
++          .querySelector(`.filters button[data-group="topic"][data-value="${initial}"]`)
++          ?.click();
++      }
++    })();
+   </script>
+ </BaseLayout>
+diff --git a/src/styles/global.css b/src/styles/global.css
+index d269da4..71a60bd 100644
+--- a/src/styles/global.css
++++ b/src/styles/global.css
+@@ -261,10 +261,11 @@ h3 { font-size: 1.125rem; }
+ 
+ .area-grid { display: grid; gap: 20px; }
+ @media (min-width: 768px) { .area-grid { grid-template-columns: 1fr 1fr; } }
+ .area { border-top: 2px solid var(--accent); padding-top: 14px; }
+ .area h3 { font-size: 1.05rem; margin-bottom: 6px; }
+ .area p { margin: 0 0 12px; font-size: 0.88rem; }
+ .area-items { list-style: none; margin: 0 0 12px; padding: 0; font-size: 0.86rem; }
+ .area-items li { margin-bottom: 8px; }
+ .area-note { display: block; color: var(--muted); font-size: 0.76rem; }
+ .area-link { font-size: 0.85rem; }
++.badge-topic { background: var(--bg-soft); color: var(--muted); border: 1px solid var(--border); }

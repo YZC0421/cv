@@ -28,3 +28,13 @@
 
 - 查询参数预置与筛选都依赖 JS；禁用 JS 时全部条目可见、筛选不可用（规格允许，属于渐进增强）。
 - 年份按钮数量随数据增长，未做折叠；当前只有 2024/2025 两个年份。
+
+## 审查修复
+
+- 空结果提示改为始终存在的 `role="status" aria-live="polite"` 容器，`apply()` 写入 `No publications match these filters.` 或 `Showing N of M publications.`，让屏幕阅读器能感知内容变化。
+- `?topic=` 预置改用 `querySelectorAll + find` 匹配，避免把查询参数拼进 CSS 选择器。
+- 筛选处理器对缺失 `data-group` 的按钮提前返回。
+- 抽出 `workTitleMap()`，首页与论文页共用。
+- 多个 `relatedWork` 之间补逗号分隔。
+
+验证：`npm test` 42/42；`npm run check` 0 errors；`npm run build` 17 页；产物含 `id="pub-status"`。

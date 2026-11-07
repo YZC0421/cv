@@ -17,3 +17,7 @@ export function sortWork<T extends Work>(items: T[]): T[] {
 export function sortExperience<T extends Work>(items: T[]): T[] {
   return sortWork(items);
 }
+
+export function workTitleMap<T extends Work>(items: T[]): Record<string, string> {
+  return Object.fromEntries(items.map((item) => [item.id, item.data.title]));
+}

@@ -10,6 +10,7 @@ import { selectHomepage } from '../lib/publications';
 import { visiblePosts } from '../lib/posts';
 import { validateRelations } from '../lib/relations';
 import { withBase } from '../lib/url';
+import { workTitleMap } from '../lib/work';
 
 const allPublications = await getCollection('publications');
 const allWork = await getCollection('work');
@@ -25,7 +26,7 @@ const work = allWork
   .slice(0, 3);
 const posts = visiblePosts(await getCollection('blog')).slice(0, 2);
 const about = await getEntry('pages', 'about-en');
-const workTitles = Object.fromEntries(allWork.map((item) => [item.id, item.data.title]));
+const workTitles = workTitleMap(allWork);
 ---
 <BaseLayout
   title="Zicong Yang · Medical Signal Processing & Computer Vision"
