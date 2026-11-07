@@ -1,0 +1,51 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  lang?: string;
+  langLink?: { href: string; label: string; lang: string };
+  heading: string;
+  updated: string;
+  updatedLabel: string;
+  printLabel: string;
+  enHref: string | URL;
+  zhHref: string | URL;
+}
+const {
+  title,
+  description,
+  lang,
+  langLink,
+  heading,
+  updated,
+  updatedLabel,
+  printLabel,
+  enHref,
+  zhHref,
+} = Astro.props;
+---
+<BaseLayout
+  title={title}
+  description={description}
+  lang={lang}
+  langLink={langLink}
+  profilePage
+>
+  <Fragment slot="head">
+    <link rel="alternate" hreflang="en" href={enHref} />
+    <link rel="alternate" hreflang="zh-CN" href={zhHref} />
+    <link rel="alternate" hreflang="x-default" href={enHref} />
+  </Fragment>
+  <div class="container measure" style="padding-top:40px">
+    <div class="page-head">
+      <h1>{heading}</h1>
+      <span class="muted">{updatedLabel} {updated}</span>
+    </div>
+    <div class="about-actions">
+      <button type="button" onclick="window.print()">{printLabel}</button>
+    </div>
+    <div class="prose"><slot /></div>
+  </div>
+</BaseLayout>

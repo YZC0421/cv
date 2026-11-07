@@ -1,5 +1,5 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageLayout from '../../layouts/PageLayout.astro';
 import { getEntry, render } from 'astro:content';
 import { withBase } from '../../lib/url';
 
@@ -9,26 +9,17 @@ const { Content } = await render(entry);
 const enHref = new URL(withBase('about'), Astro.site);
 const zhHref = new URL(withBase('about/zh'), Astro.site);
 ---
-<BaseLayout
+<PageLayout
   title="关于 · 杨梓聪"
   description="教育经历、研究方向、技能与联系方式。"
   lang="zh-CN"
   langLink={{ href: withBase('about'), label: 'English', lang: 'en' }}
-  profilePage
+  heading={entry.data.title}
+  updated={entry.data.updated}
+  updatedLabel="更新于"
+  printLabel="下载 CV (PDF)"
+  enHref={enHref}
+  zhHref={zhHref}
 >
-  <Fragment slot="head">
-    <link rel="alternate" hreflang="en" href={enHref} />
-    <link rel="alternate" hreflang="zh-CN" href={zhHref} />
-    <link rel="alternate" hreflang="x-default" href={enHref} />
-  </Fragment>
-  <div class="container measure" style="padding-top:40px">
-    <div class="page-head">
-      <h1>{entry.data.title}</h1>
-      <span class="muted">更新于 {entry.data.updated}</span>
-    </div>
-    <div class="about-actions">
-      <button type="button" onclick="window.print()">下载 CV (PDF)</button>
-    </div>
-    <div class="prose"><Content /></div>
-  </div>
-</BaseLayout>
+  <Content />
+</PageLayout>

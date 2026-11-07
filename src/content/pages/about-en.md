@@ -1,6 +1,7 @@
 ---
 title: "About"
 updated: "2026-11-07"
+summary: "B.E. in Software Engineering at Zhuhai College of Science and Technology, with first-author publications in Scientific Reports and CVIDL."
 ---
 
 ## Education

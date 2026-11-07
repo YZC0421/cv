@@ -4,9 +4,15 @@ export function readingMinutes(body: string): number {
   return Math.max(1, Math.ceil(cjk / 400 + latin / 200));
 }
 
+const escapeHtml = (value: string) =>
+  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
 export function boldSelf(authors: string[], self = 'Zicong Yang'): string {
   return authors
-    .map((name) => (name.trim() === self ? `<strong>${name}</strong>` : name))
+    .map((name) => {
+      const safe = escapeHtml(name);
+      return name.trim() === self ? `<strong>${safe}</strong>` : safe;
+    })
     .join(', ');
 }
 

@@ -17,6 +17,13 @@ test('boldSelf wraps the configured name only', () => {
   );
 });
 
+test('boldSelf escapes HTML in author names', () => {
+  assert.equal(
+    boldSelf(['ATLAS <CMS> & Co', 'Zicong Yang'], 'Zicong Yang'),
+    'ATLAS &lt;CMS&gt; &amp; Co, <strong>Zicong Yang</strong>'
+  );
+});
+
 test('toBibtex produces an article entry with doi and year', () => {
   const bib = toBibtex({
     title: 'A paper',

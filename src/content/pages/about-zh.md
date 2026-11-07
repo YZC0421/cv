@@ -1,6 +1,7 @@
 ---
 title: "关于"
 updated: "2026-11-07"
+summary: "珠海科技学院软件工程本科，在 Scientific Reports 与 CVIDL 发表一作论文。"
 ---
 
 ## 教育经历

@@ -29,7 +29,8 @@ npm run verify   # assert build output
 1. Create `src/content/blog/<slug>.md`; `lang` is `en` or `zh`, `tags` needs at least one
    entry, `summary` at most 160 characters.
 2. `draft: true` keeps it out of the list, RSS, and sitemap.
-3. Future dates publish automatically: entries dated after the build day are excluded.
+3. Entries dated after the build day are excluded; they appear on the first build after
+   that date (a push or a manual workflow run).
 
 ## Add a project or experience
 

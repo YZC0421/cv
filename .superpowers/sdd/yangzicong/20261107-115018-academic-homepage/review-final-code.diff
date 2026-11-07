@@ -1,0 +1,2269 @@
+## Commits
+8f64dc6 fix: 收紧构建校验断言并同步文档
+f07dc76 chore: 增加构建校验、部署流水线与项目文档
+dec510d fix: 限定 ProfilePage 输出范围并标记 404 不索引
+b571a67 feat: 补齐 SEO、404 与站点图标
+1b49094 fix: 补齐 About 打印变量与 H1，语言入口移入导航
+3f7e9aa feat: 增加中英 About 页与打印样式
+c0672a2 fix: 修正目录锚点遮挡与脚注样式
+6eae7d9 fix: 启用 Shiki 深色变量并修正 RSS 站点链接
+e3d05d8 fix: 修复目录吸顶与标签筛选，统一文章过滤
+06fafaf feat: 文章页补充阅读时长与脚注示例
+b105474 feat: 实现博客列表、文章页与 RSS
+1d6e0d7 fix: 详情页分区展示并补齐项目外链
+7b6f8ea feat: 实现工作经历与项目页面
+dd894da fix: 文章发布判断改用本地日期
+38728c8 feat: 实现首页精选论文、项目与文章区块
+7d93165 fix: 修正 BibTeX key 冲突与复制降级
+7c218ce feat: 论文列表页支持筛选与 BibTeX 复制
+69751e6 fix: 对齐 cisse 论文出处显示
+981f04f feat: 录入六篇论文的结构化数据
+aeb57d2 test: 补齐 schema 与精选规则的边界覆盖
+a288d82 feat: 定义内容 schema 与论文排序规则
+d404f77 refactor: 收紧 withBase 边界并复用导航链接
+791ec84 fix: 桌面导航与移动菜单解耦，路由补尾斜杠
+b2504c1 fix: 修正子路径链接拼接与 canonical
+0c323e0 feat: 搭建 Astro 基座与设计 token
+
+## Stat
+ .github/workflows/deploy.yml                       |   43 +
+ .gitignore                                         |    5 +
+ .../20261107-115018-academic-homepage/plan.md      |   11 +-
+ .../20261107-115018-academic-homepage/progress.md  |   11 +
+ .../review-84e5b1d..0c323e0.diff                   | 7615 ++++++++++++++++++++
+ .../review-task-1-final.diff                       |  401 ++
+ .../review-task-1-fix.diff                         |  391 +
+ .../review-task-1-src.diff                         |  351 +
+ .../review-task-10-src.diff                        |  199 +
+ .../review-task-10.diff                            | 1778 +++++
+ .../review-task-2.diff                             |  370 +
+ .../review-task-3.diff                             |  305 +
+ .../review-task-4.diff                             |  199 +
+ .../review-task-5.diff                             |  214 +
+ .../review-task-6.diff                             |  322 +
+ .../review-task-7-final.diff                       |  375 +
+ .../review-task-7-final2.diff                      |  482 ++
+ .../review-task-7-final3.diff                      |  526 ++
+ .../review-task-7-fix.diff                         |  338 +
+ .../review-task-7-fix2.diff                        |  166 +
+ .../review-task-7.diff                             |  316 +
+ .../review-task-8-fix.diff                         |  353 +
+ .../review-task-8.diff                             |  254 +
+ .../review-task-9.diff                             |  137 +
+ .../task-1-brief.md                                |  340 +
+ .../task-1-report.md                               |   66 +
+ .../task-10-brief.md                               |  281 +
+ .../task-10-report.md                              |   43 +
+ .../task-2-brief.md                                |  345 +
+ .../task-2-report.md                               |   58 +
+ .../task-3-brief.md                                |  155 +
+ .../task-3-report.md                               |   50 +
+ .../task-4-brief.md                                |  163 +
+ .../task-4-report.md                               |   49 +
+ .../task-5-brief.md                                |  203 +
+ .../task-5-report.md                               |   38 +
+ .../task-6-brief.md                                |  141 +
+ .../task-6-report.md                               |   52 +
+ .../task-7-brief.md                                |  284 +
+ .../task-7-report.md                               |   71 +
+ .../task-8-brief.md                                |  204 +
+ .../task-8-report.md                               |   48 +
+ .../task-9-brief.md                                |  107 +
+ .../task-9-report.md                               |   33 +
+ CV.html                                            |  785 --
+ README.md                                          |   59 +
+ astro.config.mjs                                   |   19 +
+ index.html                                         |  785 --
+ package-lock.json                                  | 7265 +++++++++++++++++++
+ package.json                                       |   25 +
+ public/CV.html                                     |   11 +
+ public/favicon.svg                                 |    4 +
+ public/robots.txt                                  |    4 +
+ scripts/fetch-crossref.mjs                         |   99 +
+ scripts/verify-build.mjs                           |   94 +
+ src/components/BibtexButton.astro                  |   13 +
+ src/components/Footer.astro                        |   12 +
+ src/components/Header.astro                        |   39 +
+ src/components/Hero.astro                          |   13 +
+ src/components/NavLinks.astro                      |   15 +
+ src/components/PostList.astro                      |   18 +
+ src/components/PublicationItem.astro               |   46 +
+ src/components/PublicationScripts.astro            |   34 +
+ src/components/TagFilter.astro                     |   14 +
+ src/components/ThemeToggle.astro                   |   19 +
+ src/components/Toc.astro                           |   21 +
+ src/components/WorkCard.astro                      |   14 +
+ src/content.config.ts                              |   25 +
+ src/content/blog/.gitkeep                          |    0
+ src/content/blog/from-single-page-to-astro.md      |   51 +
+ src/content/pages/.gitkeep                         |    0
+ src/content/pages/about-en.md                      |   41 +
+ src/content/pages/about-zh.md                      |   37 +
+ src/content/publications/.gitkeep                  |    0
+ src/content/publications/cisse-2024.md             |   20 +
+ src/content/publications/cvidl-2024-garbage.md     |   21 +
+ src/content/publications/cvidl-2024-wheat.md       |   23 +
+ src/content/publications/ipmlp-2024.md             |   24 +
+ src/content/publications/mst-2025.md               |   21 +
+ .../publications/scientific-reports-2024.md        |   26 +
+ src/content/work/.gitkeep                          |    0
+ src/content/work/campus-startup.md                 |   17 +
+ src/content/work/coca-cola-consumer-analysis.md    |   17 +
+ src/content/work/guangzhou-chuzhong.md             |   17 +
+ src/content/work/guangzhou-xiyang.md               |   21 +
+ src/content/work/ningbo-haizhimingshi.md           |   17 +
+ src/content/work/ningbo-jiasi.md                   |   18 +
+ src/content/work/rural-revitalization.md           |   17 +
+ .../work/sudden-cardiac-death-prediction.md        |   23 +
+ src/content/work/wordle-analysis.md                |   17 +
+ src/layouts/BaseLayout.astro                       |   83 +
+ src/layouts/PostLayout.astro                       |   52 +
+ src/lib/date.ts                                    |    6 +
+ src/lib/format.ts                                  |   36 +
+ src/lib/posts.ts                                   |   10 +
+ src/lib/publications.ts                            |   28 +
+ src/lib/schema.ts                                  |   60 +
+ src/lib/url.ts                                     |   20 +
+ src/pages/404.astro                                |   11 +
+ src/pages/about.astro                              |   33 +
+ src/pages/about/zh.astro                           |   34 +
+ src/pages/blog/[slug].astro                        |   42 +
+ src/pages/blog/index.astro                         |   49 +
+ src/pages/index.astro                              |   66 +
+ src/pages/publications.astro                       |   51 +
+ src/pages/rss.xml.ts                               |   23 +
+ src/pages/work/[slug].astro                        |   49 +
+ src/pages/work/index.astro                         |   38 +
+ src/styles/global.css                              |  260 +
+ tests/format.test.ts                               |   66 +
+ tests/posts.test.ts                                |   32 +
+ tests/publications.test.ts                         |   51 +
+ tests/schema.test.ts                               |   86 +
+ tsconfig.json                                      |    7 +
+ 114 files changed, 27376 insertions(+), 1571 deletions(-)
+
+## Note
+Content markdown under src/content/** and the deleted root index.html/CV.html are excluded; review content structure via the file list in stat.
+
+## Diff
+diff --git a/.github/workflows/deploy.yml b/.github/workflows/deploy.yml
+new file mode 100644
+index 0000000..834388e
+--- /dev/null
++++ b/.github/workflows/deploy.yml
+@@ -0,0 +1,43 @@
++name: Deploy to GitHub Pages
++
++on:
++  push:
++    branches: [main]
++  workflow_dispatch:
++
++permissions:
++  contents: read
++  pages: write
++  id-token: write
++
++concurrency:
++  group: pages
++  cancel-in-progress: false
++
++jobs:
++  build:
++    runs-on: ubuntu-latest
++    steps:
++      - uses: actions/checkout@v4
++      - uses: actions/setup-node@v4
++        with:
++          node-version: 22
++          cache: npm
++      - run: npm ci
++      - run: npm test
++      - run: npm run check
++      - run: npm run build
++      - run: npm run verify
++      - uses: actions/upload-pages-artifact@v3
++        with:
++          path: dist
++
++  deploy:
++    needs: build
++    runs-on: ubuntu-latest
++    environment:
++      name: github-pages
++      url: ${{ steps.deployment.outputs.page_url }}
++    steps:
++      - id: deployment
++        uses: actions/deploy-pages@v4
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..6903e0e
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,5 @@
++node_modules/
++dist/
++.astro/
++scripts/out/
++.DS_Store
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000..7cd6069
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,59 @@
++# cv
++
++Personal academic site of Zicong Yang: publications, work, and writing.
++
++Built with Astro 5, statically generated, deployed to GitHub Pages.
++
++## Local
++
++```bash
++npm install
++npm run dev      # http://localhost:4321/cv/
++npm run preview  # preview the built site
++npm run check    # type + content schema check
++npm test         # unit tests for schema and ordering rules
++npm run build    # build to dist/
++npm run verify   # assert build output
++```
++
++## Add a publication
++
++1. Create `src/content/publications/<slug>.md` with the frontmatter defined in
++   `src/lib/schema.ts`.
++2. `doi` is required. `selected: true` pins an entry into the home page; the home page always
++   shows three entries, filling the remainder with first-author papers, then the newest.
++3. Run `npm run check`, `npm run build`, and `npm run verify`.
++
++## Add a post
++
++1. Create `src/content/blog/<slug>.md`; `lang` is `en` or `zh`, `tags` needs at least one
++   entry, `summary` at most 160 characters.
++2. `draft: true` keeps it out of the list, RSS, and sitemap.
++3. Future dates publish automatically: entries dated after the build day are excluded.
++
++## Add a project or experience
++
++1. Create `src/content/work/<slug>.md`; `kind` is `experience` or `project`.
++2. `highlights` needs at least one factual bullet; do not add claims without a source.
++3. Projects sort by `order`; experiences sort by `start`, newest first.
++
++## Deploy
++
++Pushing to `main` triggers `.github/workflows/deploy.yml`. The site is served from
++`https://yzc0421.github.io/cv/`. If a custom domain is added, update `site` and `base` in
++`astro.config.mjs`, add `public/CNAME`, update `public/robots.txt`, and update the RSS/base
++assertion in `scripts/verify-build.mjs`.
++
++## Rollback
++
++Re-run the last successful `Deploy to GitHub Pages` workflow, or `git revert` the offending
++content commit. Build configuration changes revert the same way; no manual cleanup on Pages
++is required.
++
++## Notes
++
++- No runtime CDN dependencies and no external fonts.
++- Content is validated by Zod at build time; invalid frontmatter fails the build.
++- Paper metadata was cross-checked against Crossref and confirmed manually.
++- All internal links go through `withBase` in `src/lib/url.ts`; do not concatenate
++  `import.meta.env.BASE_URL` directly.
+diff --git a/astro.config.mjs b/astro.config.mjs
+new file mode 100644
+index 0000000..63c1b0e
+--- /dev/null
++++ b/astro.config.mjs
+@@ -0,0 +1,19 @@
++import { defineConfig } from 'astro/config';
++import sitemap from '@astrojs/sitemap';
++
++export default defineConfig({
++  site: 'https://yzc0421.github.io',
++  base: '/cv',
++  output: 'static',
++  integrations: [
++    sitemap({
++      filter: (page) => !page.includes('/404'),
++    }),
++  ],
++  markdown: {
++    shikiConfig: {
++      themes: { light: 'github-light', dark: 'github-dark' },
++      defaultColor: false,
++    },
++  },
++});
+diff --git a/package.json b/package.json
+new file mode 100644
+index 0000000..1166d15
+--- /dev/null
++++ b/package.json
+@@ -0,0 +1,25 @@
++{
++  "name": "cv",
++  "type": "module",
++  "version": "1.0.0",
++  "private": true,
++  "scripts": {
++    "dev": "astro dev",
++    "build": "astro build",
++    "preview": "astro preview",
++    "check": "astro check",
++    "test": "tsx --test tests/*.test.ts",
++    "verify": "node scripts/verify-build.mjs"
++  },
++  "devDependencies": {
++    "@astrojs/check": "^0.9.12",
++    "tsx": "^4.23.15",
++    "typescript": "^6.0.3"
++  },
++  "dependencies": {
++    "@astrojs/rss": "^4.0.19",
++    "@astrojs/sitemap": "^3.7.4",
++    "astro": "^5.18.2",
++    "zod": "^3.25.76"
++  }
++}
+diff --git a/public/CV.html b/public/CV.html
+new file mode 100644
+index 0000000..b6d7f08
+--- /dev/null
++++ b/public/CV.html
+@@ -0,0 +1,11 @@
++<!doctype html>
++<html lang="en">
++  <head>
++    <meta charset="utf-8" />
++    <meta http-equiv="refresh" content="0; url=./about" />
++    <title>CV · Zicong Yang</title>
++  </head>
++  <body>
++    <p>This page has moved to <a href="./about">/about</a>.</p>
++  </body>
++</html>
+diff --git a/public/favicon.svg b/public/favicon.svg
+new file mode 100644
+index 0000000..f6162b7
+--- /dev/null
++++ b/public/favicon.svg
+@@ -0,0 +1,4 @@
++<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
++  <rect width="32" height="32" rx="6" fill="#111827"/>
++  <text x="16" y="22" font-family="Georgia, serif" font-size="16" fill="#ffffff" text-anchor="middle">Z</text>
++</svg>
+diff --git a/public/robots.txt b/public/robots.txt
+new file mode 100644
+index 0000000..cb38e34
+--- /dev/null
++++ b/public/robots.txt
+@@ -0,0 +1,4 @@
++User-agent: *
++Allow: /
++
++Sitemap: https://yzc0421.github.io/cv/sitemap-index.xml
+diff --git a/scripts/fetch-crossref.mjs b/scripts/fetch-crossref.mjs
+new file mode 100644
+index 0000000..7c8a327
+--- /dev/null
++++ b/scripts/fetch-crossref.mjs
+@@ -0,0 +1,99 @@
++import { mkdir, writeFile } from 'node:fs/promises';
++
++const OUT = 'scripts/out';
++const targets = [
++  { key: 'scientific-reports-2024', doi: '10.1038/s41598-024-71700-z' },
++  { key: 'cisse-2024', doi: '10.1007/978-3-031-57037-7_7' },
++  { key: 'mst-2025', doi: '10.1088/1361-6501/ae10d3' },
++  {
++    key: 'cvidl-2024-wheat',
++    title:
++      'Wheat Disease Recognition Based on a Fusion Model with Improved Spatial and Channel Reconstruction Convolution Combined with Contextual Transformer',
++  },
++  {
++    key: 'cvidl-2024-garbage',
++    title: 'Enhanced and improved garbage identification and classification of YOLOV5 based on data',
++  },
++  { key: 'ipmlp-2024', doi: '10.1145/3700906.3700946' },
++];
++
++const fetchJson = async (url) => {
++  const res = await fetch(url, {
++    headers: { 'User-Agent': 'cv-site-build/1.0 (mailto:402641915@qq.com)' },
++  });
++  if (!res.ok) throw new Error(`${res.status} ${url}`);
++  return res.json();
++};
++
++const lookup = async (target) => {
++  if (target.doi) {
++    const json = await fetchJson(`https://api.crossref.org/works/${encodeURIComponent(target.doi)}`);
++    return json.message;
++  }
++  const q = encodeURIComponent(target.title);
++  const json = await fetchJson(`https://api.crossref.org/works?query.bibliographic=${q}&rows=1`);
++  return json.message.items?.[0];
++};
++
++const toEntry = (item) => {
++  const authors = (item.author ?? []).map((a) => [a.given, a.family].filter(Boolean).join(' '));
++  const issued = item.issued?.['date-parts']?.[0] ?? [];
++  const year = issued[0];
++  const month = String(issued[1] ?? 1).padStart(2, '0');
++  const day = String(issued[2] ?? 1).padStart(2, '0');
++  const type = item.type === 'proceedings-article' ? 'conference' : 'journal';
++  return {
++    title: (item.title ?? [''])[0].replace(/\s+/g, ' ').trim(),
++    authors,
++    venue: (item['container-title'] ?? [''])[0],
++    year,
++    doi: item.DOI,
++    url: item.URL,
++    type,
++    date: `${year}-${month}-${day}`,
++  };
++};
++
++await mkdir(OUT, { recursive: true });
++const review = ['# 论文元数据核对表', ''];
++
++for (const target of targets) {
++  try {
++    const item = await lookup(target);
++    if (!item) throw new Error('no crossref match');
++    const entry = toEntry(item);
++    const fm = [
++      '---',
++      `title: ${JSON.stringify(entry.title)}`,
++      'authors:',
++      ...entry.authors.map((a) => `  - ${JSON.stringify(a)}`),
++      `venue: ${JSON.stringify(entry.venue)}`,
++      `year: ${entry.year}`,
++      `type: ${entry.type}`,
++      'indexing: none',
++      'role: other',
++      `doi: ${JSON.stringify(entry.doi)}`,
++      `url: ${JSON.stringify(entry.url)}`,
++      'selected: false',
++      `date: ${entry.date}`,
++      '---',
++      '',
++    ].join('\n');
++    await writeFile(`${OUT}/${target.key}.md`, fm, 'utf8');
++    review.push(
++      `## ${target.key}`,
++      '',
++      `- 标题：${entry.title}`,
++      `- 作者：${entry.authors.join(', ')}`,
++      `- 出处：${entry.venue} (${entry.year})`,
++      `- DOI：${entry.doi}`,
++      ''
++    );
++  } catch (error) {
++    review.push(`## ${target.key}`, '', `- 失败：${error.message}`, '');
++    console.warn(`[warn] ${target.key}: ${error.message}`);
++  }
++}
++
++await writeFile(`${OUT}/review.md`, review.join('\n'), 'utf8');
++console.log(`written to ${OUT}/`);
+diff --git a/scripts/verify-build.mjs b/scripts/verify-build.mjs
+new file mode 100644
+index 0000000..660b2e2
+--- /dev/null
++++ b/scripts/verify-build.mjs
+@@ -0,0 +1,94 @@
++import { readFile, access, readdir } from 'node:fs/promises';
++import { constants } from 'node:fs';
++
++const checks = [];
++
++const must = async (path, label) => {
++  try {
++    await access(path, constants.R_OK);
++    checks.push([label, true]);
++  } catch {
++    checks.push([label, false]);
++  }
++};
++
++const read = async (path) => {
++  try {
++    return await readFile(path, 'utf8');
++  } catch {
++    checks.push([`read ${path}`, false]);
++    return '';
++  }
++};
++
++const countFiles = async (dir, ext) =>
++  (await readdir(dir)).filter((file) => file.endsWith(ext)).length;
++
++const countDirs = async (dir) =>
++  (await readdir(dir, { withFileTypes: true })).filter((entry) => entry.isDirectory()).length;
++
++const indexRoutes = [
++  'dist/index.html',
++  'dist/publications/index.html',
++  'dist/work/index.html',
++  'dist/blog/index.html',
++  'dist/about/index.html',
++  'dist/about/zh/index.html',
++  'dist/404.html',
++  'dist/rss.xml',
++  'dist/sitemap-index.xml',
++  'dist/sitemap-0.xml',
++  'dist/robots.txt',
++  'dist/favicon.svg',
++  'dist/CV.html',
++];
++
++for (const route of indexRoutes) await must(route, route);
++
++const publicationFiles = await countFiles('src/content/publications', '.md');
++const workFiles = await countFiles('src/content/work', '.md');
++const workDetails = await countDirs('dist/work');
++const postDetails = await countDirs('dist/blog');
++
++checks.push(['work detail pages match content files', workDetails === workFiles]);
++checks.push(['blog has at least one post page', postDetails >= 1]);
++
++const home = await read('dist/index.html');
++checks.push(['home shows 3 publications', (home.match(/class="pub-item"/g) ?? []).length === 3]);
++checks.push(['home shows 3 work cards', (home.match(/class="work-card"/g) ?? []).length === 3]);
++
++const publications = await read('dist/publications/index.html');
++checks.push([
++  'publications count matches content files',
++  (publications.match(/class="pub-item"/g) ?? []).length === publicationFiles,
++]);
++checks.push([
++  'every publication links a doi',
++  (publications.match(/doi\.org\//g) ?? []).length >= publicationFiles,
++]);
++
++const rss = await read('dist/rss.xml');
++checks.push(['rss has items', rss.includes('<item>')]);
++checks.push(['rss channel link includes base', /<link>[^<]*\/cv\/<\/link>/.test(rss)]);
++
++const about = await read('dist/about/index.html');
++checks.push(['about has h1', /<h1[^>]*>About<\/h1>/.test(about)]);
++checks.push(['about declares alternate zh-CN', /rel="alternate" hreflang="zh-CN"/.test(about)]);
++checks.push(['about declares alternate en', /rel="alternate" hreflang="en"/.test(about)]);
++checks.push(['about declares x-default', /hreflang="x-default"/.test(about)]);
++
++const notFound = await read('dist/404.html');
++checks.push(['404 is noindex', /name="robots"[^>]*noindex/.test(notFound)]);
++
++const sitemap = await read('dist/sitemap-0.xml');
++checks.push(['sitemap excludes 404', !sitemap.includes('/404')]);
++checks.push(['sitemap excludes drafts', !sitemap.includes('/blog/draft-check/')]);
++
++const failed = checks.filter(([, ok]) => !ok);
++for (const [label, ok] of checks) console.log(`${ok ? 'ok  ' : 'FAIL'} ${label}`);
++
++if (failed.length) {
++  console.error(`\n${failed.length} check(s) failed`);
++  process.exit(1);
++}
++console.log('\nall checks passed');
+diff --git a/src/components/BibtexButton.astro b/src/components/BibtexButton.astro
+new file mode 100644
+index 0000000..23a3fe5
+--- /dev/null
++++ b/src/components/BibtexButton.astro
+@@ -0,0 +1,13 @@
++---
++interface Props {
++  bibtex: string;
++}
++const { bibtex } = Astro.props;
++---
++<span class="bibtex-block">
++  <button type="button" class="copy-btn" data-bibtex={bibtex}>Copy BibTeX</button>
++  <details class="bibtex">
++    <summary>Show BibTeX</summary>
++    <pre><code>{bibtex}</code></pre>
++  </details>
++</span>
+diff --git a/src/components/Footer.astro b/src/components/Footer.astro
+new file mode 100644
+index 0000000..ddc8231
+--- /dev/null
++++ b/src/components/Footer.astro
+@@ -0,0 +1,12 @@
++---
++import { withBase } from '../lib/url';
++
++const year = new Date().getFullYear();
++---
++<footer class="site-footer">
++  <div class="container">
++    © {year} Zicong Yang · <a href={withBase('rss.xml')}>RSS</a> ·
++    <a href="https://scholar.google.com/citations?user=0Ynn-awAAAAJ">Scholar</a> ·
++    <a href="https://orcid.org/0009-0001-0948-3606">ORCID</a>
++  </div>
++</footer>
+diff --git a/src/components/Header.astro b/src/components/Header.astro
+new file mode 100644
+index 0000000..66ca7bb
+--- /dev/null
++++ b/src/components/Header.astro
+@@ -0,0 +1,39 @@
++---
++import ThemeToggle from './ThemeToggle.astro';
++import NavLinks from './NavLinks.astro';
++import { stripBase, withBase } from '../lib/url';
++
++interface Props {
++  langLink?: { href: string; label: string; lang: string };
++}
++const { langLink } = Astro.props;
++
++const links = [
++  { path: 'publications', label: 'Publications' },
++  { path: 'work', label: 'Work' },
++  { path: 'blog', label: 'Writing' },
++  { path: 'about', label: 'About' },
++];
++const current = stripBase(Astro.url.pathname);
++const isHome = current === '/';
++---
++<header class="site-header">
++  <div class="inner">
++    <a class="brand" href={withBase()} aria-current={isHome ? 'page' : undefined}>Zicong Yang</a>
++    <nav class="nav desktop-nav" aria-label="Primary">
++      <NavLinks links={links} current={current} />
++    </nav>
++    <details class="nav-details">
++      <summary class="nav-toggle">Menu</summary>
++      <nav class="nav" aria-label="Primary mobile">
++        <NavLinks links={links} current={current} />
++      </nav>
++    </details>
++    {langLink && (
++      <a class="lang-link" href={langLink.href} hreflang={langLink.lang} lang={langLink.lang}>
++        {langLink.label}
++      </a>
++    )}
++    <ThemeToggle />
++  </div>
++</header>
+diff --git a/src/components/Hero.astro b/src/components/Hero.astro
+new file mode 100644
+index 0000000..a3098ca
+--- /dev/null
++++ b/src/components/Hero.astro
+@@ -0,0 +1,13 @@
++<section class="hero container measure">
++  <h1>Zicong Yang</h1>
++  <p>
++    Software engineer and researcher working on medical signal processing and computer vision —
++    ECG arrhythmia detection, industrial defect inspection, and applied deep learning.
++  </p>
++  <div class="social">
++    <a href="https://scholar.google.com/citations?user=0Ynn-awAAAAJ" target="_blank" rel="noopener">Google Scholar</a>
++    <a href="https://orcid.org/0009-0001-0948-3606" target="_blank" rel="noopener">ORCID</a>
++    <a href="https://github.com/YZC0421" target="_blank" rel="noopener">GitHub</a>
++    <a href="mailto:402641915@qq.com">Email</a>
++  </div>
++</section>
+diff --git a/src/components/NavLinks.astro b/src/components/NavLinks.astro
+new file mode 100644
+index 0000000..c369bbe
+--- /dev/null
++++ b/src/components/NavLinks.astro
+@@ -0,0 +1,15 @@
++---
++import { withBase } from '../lib/url';
++
++interface Props {
++  links: { path: string; label: string }[];
++  current: string;
++}
++const { links, current } = Astro.props;
++const isCurrent = (path: string) => current.startsWith(`/${path}/`);
++---
++{links.map((link) => (
++  <a href={withBase(link.path)} aria-current={isCurrent(link.path) ? 'page' : undefined}>
++    {link.label}
++  </a>
++))}
+diff --git a/src/components/PostList.astro b/src/components/PostList.astro
+new file mode 100644
+index 0000000..ceb2ecf
+--- /dev/null
++++ b/src/components/PostList.astro
+@@ -0,0 +1,18 @@
++---
++import type { CollectionEntry } from 'astro:content';
++import { withBase } from '../lib/url';
++
++interface Props {
++  posts: CollectionEntry<'blog'>[];
++}
++const { posts } = Astro.props;
++---
++<ul class="post-list">
++  {posts.map((post) => (
++    <li>
++      <time datetime={post.data.date}>{post.data.date}</time>
++      <a href={withBase(`blog/${post.id}`)}>{post.data.title}</a>
++      <span class="lang-badge">{post.data.lang === 'zh' ? '中文' : 'EN'}</span>
++    </li>
++  ))}
++</ul>
+diff --git a/src/components/PublicationItem.astro b/src/components/PublicationItem.astro
+new file mode 100644
+index 0000000..1fc1265
+--- /dev/null
++++ b/src/components/PublicationItem.astro
+@@ -0,0 +1,46 @@
++---
++import type { CollectionEntry } from 'astro:content';
++import BibtexButton from './BibtexButton.astro';
++import { boldSelf, toBibtex } from '../lib/format';
++
++interface Props {
++  pub: CollectionEntry<'publications'>;
++}
++const { pub } = Astro.props;
++const d = pub.data;
++const href = d.url ?? `https://doi.org/${d.doi}`;
++const bibtex =
++  d.bibtex ??
++  toBibtex({
++    title: d.title,
++    authors: d.authors,
++    venue: d.venue,
++    year: d.year,
++    doi: d.doi,
++    type: d.type,
++  });
++const badgeClass =
++  d.indexing === 'Q1'
++    ? 'badge-q1'
++    : d.indexing === 'Q4'
++      ? 'badge-q4'
++      : d.indexing === 'EI'
++        ? 'badge-ei'
++        : 'badge-neutral';
++const indexingLabel = d.indexing === 'EI' ? 'EI indexed' : `JCR ${d.indexing}`;
++---
++<li class="pub-item" data-indexing={d.indexing} data-role={d.role} data-year={d.year}>
++  <a class="pub-title" href={href} target="_blank" rel="noopener">{d.title}</a>
++  <div class="pub-meta"><span set:html={boldSelf(d.authors)} /></div>
++  <div class="pub-meta">
++    {d.indexing !== 'none' && <span class={`badge ${badgeClass}`}>{indexingLabel}</span>}
++    {d.role === 'first' && <span class="badge badge-neutral">First author</span>}
++    <span>{d.venueShort ?? d.venue} · {d.year}</span>
++  </div>
++  <div class="pub-actions">
++    <a href={`https://doi.org/${d.doi}`} target="_blank" rel="noopener" aria-label={`DOI for ${d.title}`}>
++      DOI
++    </a>
++    <BibtexButton bibtex={bibtex} />
++  </div>
++</li>
+diff --git a/src/components/PublicationScripts.astro b/src/components/PublicationScripts.astro
+new file mode 100644
+index 0000000..6e93267
+--- /dev/null
++++ b/src/components/PublicationScripts.astro
+@@ -0,0 +1,34 @@
++<script is:inline>
++  (() => {
++    if (window.__bibtexBound) return;
++    window.__bibtexBound = true;
++
++    document.addEventListener('click', async (event) => {
++      const btn = event.target.closest('.copy-btn');
++      if (!btn) return;
++
++      const block = btn.closest('.bibtex-block');
++      const text = btn.dataset.bibtex ?? block?.querySelector('code')?.textContent ?? '';
++
++      try {
++        await navigator.clipboard.writeText(text);
++        btn.textContent = 'Copied';
++        setTimeout(() => {
++          btn.textContent = 'Copy BibTeX';
++        }, 1500);
++      } catch {
++        btn.textContent = 'Select BibTeX below';
++        const details = block?.querySelector('details');
++        if (details) details.open = true;
++        const code = block?.querySelector('code');
++        if (code) {
++          const range = document.createRange();
++          range.selectNodeContents(code);
++          const selection = window.getSelection();
++          selection?.removeAllRanges();
++          selection?.addRange(range);
++        }
++      }
++    });
++  })();
++</script>
+diff --git a/src/components/TagFilter.astro b/src/components/TagFilter.astro
+new file mode 100644
+index 0000000..6c30744
+--- /dev/null
++++ b/src/components/TagFilter.astro
+@@ -0,0 +1,14 @@
++---
++interface Props {
++  tags: string[];
++}
++const { tags } = Astro.props;
++---
++{tags.length > 0 && (
++  <div class="filters" role="group" aria-label="Filter posts by tag">
++    <button type="button" data-tag="all" aria-pressed="true">All</button>
++    {tags.map((tag) => (
++      <button type="button" data-tag={tag} aria-pressed="false">{tag}</button>
++    ))}
++  </div>
++)}
+diff --git a/src/components/ThemeToggle.astro b/src/components/ThemeToggle.astro
+new file mode 100644
+index 0000000..4a9ffdd
+--- /dev/null
++++ b/src/components/ThemeToggle.astro
+@@ -0,0 +1,19 @@
++<button id="theme-toggle" type="button" aria-label="Dark mode" aria-pressed="false" class="theme-toggle">◐</button>
++<script is:inline>
++  (() => {
++    const btn = document.getElementById('theme-toggle');
++    const root = document.documentElement;
++    const sync = () => btn?.setAttribute('aria-pressed', String(root.dataset.theme === 'dark'));
++    sync();
++    btn?.addEventListener('click', () => {
++      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
++      root.dataset.theme = next;
++      try {
++        localStorage.setItem('theme', next);
++      } catch {
++        /* storage unavailable */
++      }
++      sync();
++    });
++  })();
++</script>
+diff --git a/src/components/Toc.astro b/src/components/Toc.astro
+new file mode 100644
+index 0000000..ea659a7
+--- /dev/null
++++ b/src/components/Toc.astro
+@@ -0,0 +1,21 @@
++---
++interface Props {
++  headings: { depth: number; slug: string; text: string }[];
++}
++const { headings } = Astro.props;
++const items = headings.filter(
++  (heading) =>
++    (heading.depth === 2 || heading.depth === 3) && heading.slug !== 'footnote-label'
++);
++---
++{items.length > 0 && (
++  <nav class="toc" aria-label="Table of contents">
++    <ul>
++      {items.map((heading) => (
++        <li style={heading.depth === 3 ? 'padding-left:12px' : undefined}>
++          <a href={`#${heading.slug}`}>{heading.text}</a>
++        </li>
++      ))}
++    </ul>
++  </nav>
++)}
+diff --git a/src/components/WorkCard.astro b/src/components/WorkCard.astro
+new file mode 100644
+index 0000000..20ac52c
+--- /dev/null
++++ b/src/components/WorkCard.astro
+@@ -0,0 +1,14 @@
++---
++import type { CollectionEntry } from 'astro:content';
++import { withBase } from '../lib/url';
++
++interface Props {
++  item: CollectionEntry<'work'>;
++}
++const { item } = Astro.props;
++---
++<article class="work-card">
++  <h3><a href={withBase(`work/${item.id}`)}>{item.data.title}</a></h3>
++  <p>{item.data.summary}</p>
++  <div class="stack">{item.data.stack.map((tech) => <span>{tech}</span>)}</div>
++</article>
+diff --git a/src/content.config.ts b/src/content.config.ts
+new file mode 100644
+index 0000000..f155c7c
+--- /dev/null
++++ b/src/content.config.ts
+@@ -0,0 +1,25 @@
++import { defineCollection } from 'astro:content';
++import { glob } from 'astro/loaders';
++import { publicationSchema, workSchema, blogSchema, pageSchema } from './lib/schema';
++
++const publications = defineCollection({
++  loader: glob({ pattern: '**/*.md', base: './src/content/publications' }),
++  schema: publicationSchema,
++});
++
++const work = defineCollection({
++  loader: glob({ pattern: '**/*.md', base: './src/content/work' }),
++  schema: workSchema,
++});
++
++const blog = defineCollection({
++  loader: glob({ pattern: '**/*.md', base: './src/content/blog' }),
++  schema: blogSchema,
++});
++
++const pages = defineCollection({
++  loader: glob({ pattern: '**/*.md', base: './src/content/pages' }),
++  schema: pageSchema,
++});
++
++export const collections = { publications, work, blog, pages };
+diff --git a/src/layouts/BaseLayout.astro b/src/layouts/BaseLayout.astro
+new file mode 100644
+index 0000000..31ffd50
+--- /dev/null
++++ b/src/layouts/BaseLayout.astro
+@@ -0,0 +1,83 @@
++---
++import '../styles/global.css';
++import Header from '../components/Header.astro';
++import Footer from '../components/Footer.astro';
++import PublicationScripts from '../components/PublicationScripts.astro';
++import { withBase } from '../lib/url';
++
++interface Props {
++  title: string;
++  description: string;
++  lang?: string;
++  type?: 'website' | 'article';
++  langLink?: { href: string; label: string; lang: string };
++  profilePage?: boolean;
++  noindex?: boolean;
++}
++const {
++  title,
++  description,
++  lang = 'en',
++  type = 'website',
++  langLink,
++  profilePage = false,
++  noindex = false,
++} = Astro.props;
++const canonical = new URL(Astro.url.pathname.replace(/\/?$/, '/'), Astro.site);
++const personId = `${new URL(withBase(), Astro.site).href}#person`;
++const profile = {
++  '@context': 'https://schema.org',
++  '@graph': [
++    { '@type': 'ProfilePage', mainEntity: { '@id': personId } },
++    {
++      '@type': 'Person',
++      '@id': personId,
++      name: 'Zicong Yang',
++      jobTitle: 'Software Engineer',
++      sameAs: [
++        'https://scholar.google.com/citations?user=0Ynn-awAAAAJ',
++        'https://orcid.org/0009-0001-0948-3606',
++        'https://github.com/YZC0421',
++      ],
++    },
++  ],
++};
++---
++<!doctype html>
++<html lang={lang}>
++  <head>
++    <meta charset="utf-8" />
++    <meta name="viewport" content="width=device-width, initial-scale=1" />
++    <title>{title}</title>
++    <meta name="description" content={description} />
++    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
++    <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
++    <meta property="og:title" content={title} />
++    <meta property="og:description" content={description} />
++    <meta property="og:type" content={type} />
++    <meta property="og:url" content={canonical} />
++    <slot name="head" />
++    {profilePage && <script type="application/ld+json" set:html={JSON.stringify(profile)} />}
++    <script is:inline>
++      (() => {
++        let saved = null;
++        try {
++          saved = localStorage.getItem('theme');
++        } catch {
++          /* storage unavailable */
++        }
++        const dark = saved
++          ? saved === 'dark'
++          : window.matchMedia('(prefers-color-scheme: dark)').matches;
++        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
++      })();
++    </script>
++  </head>
++  <body>
++    <a class="skip" href="#main">Skip to content</a>
++    <Header langLink={langLink} />
++    <main id="main" tabindex="-1"><slot /></main>
++    <Footer />
++    <PublicationScripts />
++  </body>
++</html>
+diff --git a/src/layouts/PostLayout.astro b/src/layouts/PostLayout.astro
+new file mode 100644
+index 0000000..cbeda88
+--- /dev/null
++++ b/src/layouts/PostLayout.astro
+@@ -0,0 +1,52 @@
++---
++import BaseLayout from './BaseLayout.astro';
++import Toc from '../components/Toc.astro';
++
++interface Props {
++  title: string;
++  description: string;
++  date: string;
++  lang: 'en' | 'zh';
++  tags: string[];
++  headings: { depth: number; slug: string; text: string }[];
++  readingTime: number;
++}
++const { title, description, date, lang, tags, headings, readingTime } = Astro.props;
++const readingLabel = lang === 'zh' ? `约 ${readingTime} 分钟` : `${readingTime} min read`;
++const hasToc = headings.some(
++  (heading) => (heading.depth === 2 || heading.depth === 3) && heading.slug !== 'footnote-label'
++);
++---
++<BaseLayout
++  title={`${title} · Zicong Yang`}
++  description={description}
++  lang={lang === 'zh' ? 'zh-CN' : 'en'}
++  type="article"
++>
++  <Fragment slot="head">
++    <meta property="article:published_time" content={date} />
++    {tags.map((tag) => <meta property="article:tag" content={tag} />)}
++  </Fragment>
++  <div class="post-grid container" style="padding-top:24px">
++    <article>
++      <header class="post-header">
++        <h1>{title}</h1>
++        <div class="post-meta">
++          <time datetime={date}>{date}</time>
++          <span class="lang-badge">{lang === 'zh' ? '中文' : 'EN'}</span>
++          <span>{readingLabel}</span>
++          {tags.map((tag) => <span class="lang-badge">{tag}</span>)}
++        </div>
++      </header>
++      {hasToc && (
++        <details class="toc-mobile">
++          <summary>Table of contents</summary>
++          <Toc headings={headings} />
++        </details>
++      )}
++      <div class="prose"><slot /></div>
++      <slot name="footer" />
++    </article>
++    <aside class="toc-aside"><Toc headings={headings} /></aside>
++  </div>
++</BaseLayout>
+diff --git a/src/lib/date.ts b/src/lib/date.ts
+new file mode 100644
+index 0000000..e28a64a
+--- /dev/null
++++ b/src/lib/date.ts
+@@ -0,0 +1,6 @@
++export function localToday(now = new Date()): string {
++  const year = now.getFullYear();
++  const month = String(now.getMonth() + 1).padStart(2, '0');
++  const day = String(now.getDate()).padStart(2, '0');
++  return `${year}-${month}-${day}`;
++}
+diff --git a/src/lib/format.ts b/src/lib/format.ts
+new file mode 100644
+index 0000000..84c28b9
+--- /dev/null
++++ b/src/lib/format.ts
+@@ -0,0 +1,36 @@
++export function readingMinutes(body: string): number {
++  const cjk = body.match(/[\u4e00-\u9fa5]/g)?.length ?? 0;
++  const latin = body.match(/[A-Za-z0-9]+/g)?.length ?? 0;
++  return Math.max(1, Math.ceil(cjk / 400 + latin / 200));
++}
++
++export function boldSelf(authors: string[], self = 'Zicong Yang'): string {
++  return authors
++    .map((name) => (name.trim() === self ? `<strong>${name}</strong>` : name))
++    .join(', ');
++}
++
++export function toBibtex(input: {
++  title: string;
++  authors: string[];
++  venue: string;
++  year: number;
++  doi: string;
++  type: 'journal' | 'conference';
++}): string {
++  const surname = input.authors[0]?.split(' ').pop() ?? 'anon';
++  const slug = input.title
++    .toLowerCase()
++    .replace(/[^a-z0-9]+/g, '')
++    .slice(0, 8);
++  const key = `${surname}${input.year}${slug}`;
++  const kind = input.type === 'journal' ? 'article' : 'inproceedings';
++  const venueField = input.type === 'journal' ? 'journal' : 'booktitle';
++  return `@${kind}{${key},
++  author = {${input.authors.join(' and ')}},
++  title = {${input.title}},
++  ${venueField} = {${input.venue}},
++  year = {${input.year}},
++  doi = {${input.doi}}
++}`;
++}
+diff --git a/src/lib/posts.ts b/src/lib/posts.ts
+new file mode 100644
+index 0000000..6b5f653
+--- /dev/null
++++ b/src/lib/posts.ts
+@@ -0,0 +1,10 @@
++import type { CollectionEntry } from 'astro:content';
++import { localToday } from './date';
++
++type Post = CollectionEntry<'blog'>;
++
++export function visiblePosts<T extends Post>(posts: T[], today = localToday()): T[] {
++  return posts
++    .filter((post) => !post.data.draft && post.data.date <= today)
++    .sort((a, b) => b.data.date.localeCompare(a.data.date) || a.id.localeCompare(b.id));
++}
+diff --git a/src/lib/publications.ts b/src/lib/publications.ts
+new file mode 100644
+index 0000000..44f6371
+--- /dev/null
++++ b/src/lib/publications.ts
+@@ -0,0 +1,28 @@
++import type { CollectionEntry } from 'astro:content';
++
++type Pub = CollectionEntry<'publications'>;
++
++const roleRank: Record<string, number> = { first: 0, second: 1, third: 2, other: 3 };
++
++export function sortPublications<T extends Pub>(items: T[]): T[] {
++  return [...items].sort((a, b) => {
++    const byDate = b.data.date.localeCompare(a.data.date);
++    if (byDate !== 0) return byDate;
++    return (roleRank[a.data.role] ?? 3) - (roleRank[b.data.role] ?? 3);
++  });
++}
++
++export function selectHomepage<T extends Pub>(items: T[], limit = 3): T[] {
++  const chosen: T[] = [];
++  const take = (list: T[]) => {
++    for (const item of list) {
++      if (chosen.length >= limit) break;
++      if (!chosen.some((c) => c.id === item.id)) chosen.push(item);
++    }
++  };
++  const sorted = sortPublications(items);
++  take(sorted.filter((p) => p.data.selected));
++  take(sorted.filter((p) => p.data.role === 'first'));
++  take(sorted);
++  return chosen.slice(0, limit);
++}
+diff --git a/src/lib/schema.ts b/src/lib/schema.ts
+new file mode 100644
+index 0000000..412b060
+--- /dev/null
++++ b/src/lib/schema.ts
+@@ -0,0 +1,60 @@
++import { z } from 'zod';
++
++const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date must be YYYY-MM-DD');
++const month = z.string().regex(/^\d{4}-\d{2}$/, 'month must be YYYY-MM');
++
++export const publicationSchema = z.object({
++  title: z.string().min(1),
++  authors: z.array(z.string().min(1)).min(1),
++  venue: z.string().min(1),
++  venueShort: z.string().optional(),
++  year: z.number().int().min(2000).max(2100),
++  type: z.enum(['journal', 'conference']),
++  indexing: z.enum(['Q1', 'Q2', 'Q3', 'Q4', 'EI', 'none']).default('none'),
++  role: z.enum(['first', 'second', 'third', 'other']),
++  doi: z.string().min(3),
++  url: z.string().url().optional(),
++  bibtex: z.string().optional(),
++  selected: z.boolean().default(false),
++  date: isoDate,
++});
++
++export const workSchema = z
++  .object({
++    title: z.string().min(1),
++    org: z.string().min(1),
++    kind: z.enum(['experience', 'project']),
++    role: z.string().min(1),
++    start: month,
++    end: z.union([month, z.literal('present')]),
++    summary: z.string().min(1).max(200),
++    stack: z.array(z.string()).default([]),
++    links: z
++      .array(z.object({ label: z.string().min(1), url: z.string().url() }))
++      .default([]),
++    cover: z.string().optional(),
++    highlights: z.array(z.string().min(1)).min(1),
++    order: z.number().int().default(0),
++  })
++  .refine((w) => w.end === 'present' || w.start <= w.end, {
++    message: 'start must not be later than end',
++    path: ['end'],
++  });
++
++export const blogSchema = z.object({
++  title: z.string().min(1),
++  date: isoDate,
++  lang: z.enum(['en', 'zh']),
++  tags: z.array(z.string().min(1)).min(1),
++  summary: z.string().min(1).max(160),
++  draft: z.boolean().default(false),
++});
++
++export const pageSchema = z.object({
++  title: z.string().min(1),
++  updated: isoDate,
++});
++
++export type Publication = z.infer<typeof publicationSchema>;
++export type Work = z.infer<typeof workSchema>;
++export type BlogPost = z.infer<typeof blogSchema>;
+diff --git a/src/lib/url.ts b/src/lib/url.ts
+new file mode 100644
+index 0000000..524cf09
+--- /dev/null
++++ b/src/lib/url.ts
+@@ -0,0 +1,20 @@
++const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
++
++export function withBase(path = ''): string {
++  const match = path.match(/^([^?#]*)(.*)$/);
++  const pathname = match?.[1] ?? '';
++  const suffix = match?.[2] ?? '';
++  const clean = pathname.replace(/^\/+/, '').replace(/\/+$/, '');
++
++  if (!clean) return `${BASE}/${suffix}`;
++
++  const isFile = /\.[a-z0-9]+$/i.test(clean);
++  return `${BASE}/${clean}${isFile ? '' : '/'}${suffix}`;
++}
++
++export function stripBase(pathname: string): string {
++  if (pathname === BASE) return '/';
++  if (!pathname.startsWith(`${BASE}/`)) return pathname;
++  const stripped = pathname.slice(BASE.length);
++  return stripped === '' ? '/' : stripped;
++}
+diff --git a/src/pages/404.astro b/src/pages/404.astro
+new file mode 100644
+index 0000000..48118be
+--- /dev/null
++++ b/src/pages/404.astro
+@@ -0,0 +1,11 @@
++---
++import BaseLayout from '../layouts/BaseLayout.astro';
++import { withBase } from '../lib/url';
++---
++<BaseLayout title="Not found · Zicong Yang" description="Page not found." noindex>
++  <div class="container measure" style="padding:80px 24px">
++    <h1>404</h1>
++    <p class="muted">This page does not exist.</p>
++    <p><a href={withBase()}>Back to home <span aria-hidden="true">→</span></a></p>
++  </div>
++</BaseLayout>
+diff --git a/src/pages/about.astro b/src/pages/about.astro
+new file mode 100644
+index 0000000..881d0ad
+--- /dev/null
++++ b/src/pages/about.astro
+@@ -0,0 +1,33 @@
++---
++import BaseLayout from '../layouts/BaseLayout.astro';
++import { getEntry, render } from 'astro:content';
++import { withBase } from '../lib/url';
++
++const entry = await getEntry('pages', 'about-en');
++if (!entry) throw new Error('about-en.md is missing');
++const { Content } = await render(entry);
++const enHref = new URL(withBase('about'), Astro.site);
++const zhHref = new URL(withBase('about/zh'), Astro.site);
++---
++<BaseLayout
++  title="About · Zicong Yang"
++  description="Education, research, skills, and contact."
++  langLink={{ href: withBase('about/zh'), label: '中文', lang: 'zh-CN' }}
++  profilePage
++>
++  <Fragment slot="head">
++    <link rel="alternate" hreflang="en" href={enHref} />
++    <link rel="alternate" hreflang="zh-CN" href={zhHref} />
++    <link rel="alternate" hreflang="x-default" href={enHref} />
++  </Fragment>
++  <div class="container measure" style="padding-top:40px">
++    <div class="page-head">
++      <h1>{entry.data.title}</h1>
++      <span class="muted">Updated {entry.data.updated}</span>
++    </div>
++    <div class="about-actions">
++      <button type="button" onclick="window.print()">Download CV (PDF)</button>
++    </div>
++    <div class="prose"><Content /></div>
++  </div>
++</BaseLayout>
+diff --git a/src/pages/about/zh.astro b/src/pages/about/zh.astro
+new file mode 100644
+index 0000000..31a4490
+--- /dev/null
++++ b/src/pages/about/zh.astro
+@@ -0,0 +1,34 @@
++---
++import BaseLayout from '../../layouts/BaseLayout.astro';
++import { getEntry, render } from 'astro:content';
++import { withBase } from '../../lib/url';
++
++const entry = await getEntry('pages', 'about-zh');
++if (!entry) throw new Error('about-zh.md is missing');
++const { Content } = await render(entry);
++const enHref = new URL(withBase('about'), Astro.site);
++const zhHref = new URL(withBase('about/zh'), Astro.site);
++---
++<BaseLayout
++  title="关于 · 杨梓聪"
++  description="教育经历、研究方向、技能与联系方式。"
++  lang="zh-CN"
++  langLink={{ href: withBase('about'), label: 'English', lang: 'en' }}
++  profilePage
++>
++  <Fragment slot="head">
++    <link rel="alternate" hreflang="en" href={enHref} />
++    <link rel="alternate" hreflang="zh-CN" href={zhHref} />
++    <link rel="alternate" hreflang="x-default" href={enHref} />
++  </Fragment>
++  <div class="container measure" style="padding-top:40px">
++    <div class="page-head">
++      <h1>{entry.data.title}</h1>
++      <span class="muted">更新于 {entry.data.updated}</span>
++    </div>
++    <div class="about-actions">
++      <button type="button" onclick="window.print()">下载 CV (PDF)</button>
++    </div>
++    <div class="prose"><Content /></div>
++  </div>
++</BaseLayout>
+diff --git a/src/pages/blog/[slug].astro b/src/pages/blog/[slug].astro
+new file mode 100644
+index 0000000..db8f35f
+--- /dev/null
++++ b/src/pages/blog/[slug].astro
+@@ -0,0 +1,42 @@
++---
++import type { CollectionEntry } from 'astro:content';
++import PostLayout from '../../layouts/PostLayout.astro';
++import { getCollection, render } from 'astro:content';
++import { readingMinutes } from '../../lib/format';
++import { visiblePosts } from '../../lib/posts';
++import { withBase } from '../../lib/url';
++
++export async function getStaticPaths() {
++  const posts = visiblePosts(await getCollection('blog'));
++  return posts.map((post, index) => ({
++    params: { slug: post.id },
++    props: { post, prev: posts[index + 1], next: posts[index - 1] },
++  }));
++}
++
++interface Props {
++  post: CollectionEntry<'blog'>;
++  prev?: CollectionEntry<'blog'>;
++  next?: CollectionEntry<'blog'>;
++}
++const { post, prev, next } = Astro.props;
++const { Content, headings } = await render(post);
++const readingTime = readingMinutes(post.body ?? '');
++---
++<PostLayout
++  title={post.data.title}
++  description={post.data.summary}
++  date={post.data.date}
++  lang={post.data.lang}
++  tags={post.data.tags}
++  headings={headings}
++  readingTime={readingTime}
++>
++  <Content />
++  {(prev || next) && (
++    <div class="next-prev" slot="footer">
++      <span>{prev ? <a href={withBase(`blog/${prev.id}`)}>← {prev.data.title}</a> : null}</span>
++      <span>{next ? <a href={withBase(`blog/${next.id}`)}>{next.data.title} →</a> : null}</span>
++    </div>
++  )}
++</PostLayout>
+diff --git a/src/pages/blog/index.astro b/src/pages/blog/index.astro
+new file mode 100644
+index 0000000..5a77cc2
+--- /dev/null
++++ b/src/pages/blog/index.astro
+@@ -0,0 +1,49 @@
++---
++import BaseLayout from '../../layouts/BaseLayout.astro';
++import TagFilter from '../../components/TagFilter.astro';
++import { getCollection } from 'astro:content';
++import { visiblePosts } from '../../lib/posts';
++import { withBase } from '../../lib/url';
++
++const posts = visiblePosts(await getCollection('blog'));
++const tags = [...new Set(posts.flatMap((post) => post.data.tags))].sort();
++---
++<BaseLayout
++  title="Writing · Zicong Yang"
++  description="Notes on software engineering, computer vision, and research."
++  lang="zh-CN"
++>
++  <div class="container measure" style="padding-top:40px">
++    <h1>Writing</h1>
++    <p class="muted">
++      Technical notes, mostly in Chinese. {posts.length} {posts.length === 1 ? 'post' : 'posts'}.
++      <a href={withBase('rss.xml')}>RSS</a>
++    </p>
++    <TagFilter tags={tags} />
++    <ul class="post-list" id="post-list">
++      {posts.map((post) => (
++        <li data-tags={post.data.tags.join('|')}>
++          <time datetime={post.data.date}>{post.data.date}</time>
++          <a href={withBase(`blog/${post.id}`)}>{post.data.title}</a>
++          <span class="lang-badge">{post.data.lang === 'zh' ? '中文' : 'EN'}</span>
++        </li>
++      ))}
++    </ul>
++  </div>
++
++  <script is:inline>
++    (() => {
++      const buttons = document.querySelectorAll('.filters button');
++      const rows = document.querySelectorAll('#post-list li');
++      buttons.forEach((btn) => {
++        btn.addEventListener('click', () => {
++          buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
++          const tag = btn.dataset.tag;
++          rows.forEach((row) => {
++            row.hidden = tag !== 'all' && !(row.dataset.tags ?? '').split('|').includes(tag);
++          });
++        });
++      });
++    })();
++  </script>
++</BaseLayout>
+diff --git a/src/pages/index.astro b/src/pages/index.astro
+new file mode 100644
+index 0000000..c559ae7
+--- /dev/null
++++ b/src/pages/index.astro
+@@ -0,0 +1,66 @@
++---
++import BaseLayout from '../layouts/BaseLayout.astro';
++import Hero from '../components/Hero.astro';
++import PublicationItem from '../components/PublicationItem.astro';
++import WorkCard from '../components/WorkCard.astro';
++import PostList from '../components/PostList.astro';
++import { getCollection } from 'astro:content';
++import { selectHomepage } from '../lib/publications';
++import { visiblePosts } from '../lib/posts';
++import { withBase } from '../lib/url';
++
++const pubs = selectHomepage(await getCollection('publications'));
++const work = (await getCollection('work'))
++  .filter((item) => item.data.kind === 'project')
++  .sort((a, b) => a.data.order - b.data.order)
++  .slice(0, 3);
++const posts = visiblePosts(await getCollection('blog')).slice(0, 2);
++---
++<BaseLayout
++  title="Zicong Yang · Medical Signal Processing & Computer Vision"
++  description="Personal site of Zicong Yang: publications, engineering work, and technical writing."
++  profilePage
++>
++  <Hero />
++
++  <section class="section container measure">
++    <div class="section-head">
++      <h2>Selected Publications</h2>
++      <a href={withBase('publications')}>All publications →</a>
++    </div>
++    <ul class="pub-list">{pubs.map((pub) => <PublicationItem pub={pub} />)}</ul>
++  </section>
++
++  {work.length > 0 && (
++    <section class="section container measure">
++      <div class="section-head">
++        <h2>Selected Work</h2>
++        <a href={withBase('work')}>All work →</a>
++      </div>
++      <div class="work-grid">{work.map((item) => <WorkCard item={item} />)}</div>
++    </section>
++  )}
++
++  {posts.length > 0 && (
++    <section class="section container measure">
++      <div class="section-head">
++        <h2>Latest Writing</h2>
++        <a href={withBase('blog')}>All writing →</a>
++      </div>
++      <PostList posts={posts} />
++    </section>
++  )}
++
++  <section class="section container measure">
++    <div class="section-head"><h2>About</h2></div>
++    <p class="muted">
++      B.E. in Software Engineering, Zhuhai College of Science and Technology (2021–2025).
++      First-author publications in Scientific Reports and CVIDL; research on ECG analysis and
++      industrial visual inspection.
++    </p>
++    <div class="links">
++      <a href={withBase('about')}>More about me →</a>
++      <a href={withBase('about')}>Download CV (PDF)</a>
++    </div>
++  </section>
++</BaseLayout>
+diff --git a/src/pages/publications.astro b/src/pages/publications.astro
+new file mode 100644
+index 0000000..893b63d
+--- /dev/null
++++ b/src/pages/publications.astro
+@@ -0,0 +1,51 @@
++---
++import BaseLayout from '../layouts/BaseLayout.astro';
++import PublicationItem from '../components/PublicationItem.astro';
++import { getCollection } from 'astro:content';
++import { sortPublications } from '../lib/publications';
++
++const pubs = sortPublications(await getCollection('publications'));
++const years = [...new Set(pubs.map((p) => p.data.year))].sort((a, b) => b - a);
++---
++<BaseLayout
++  title="Publications · Zicong Yang"
++  description="Peer-reviewed publications on medical signal processing and computer vision."
++>
++  <div class="container measure" style="padding-top:40px">
++    <h1>Publications</h1>
++    <p class="muted">Peer-reviewed journal and conference papers. {pubs.length} entries.</p>
++
++    <div class="filters" role="group" aria-label="Filter publications">
++      <button type="button" data-filter="all" aria-pressed="true">All</button>
++      <button type="button" data-filter="first" aria-pressed="false">First author</button>
++      <button type="button" data-filter="Q1" aria-pressed="false">JCR Q1</button>
++      <button type="button" data-filter="EI" aria-pressed="false">EI</button>
++      {years.map((year) => (
++        <button type="button" data-filter={String(year)} aria-pressed="false">{year}</button>
++      ))}
++    </div>
++
++    <ul class="pub-list" id="pub-list">
++      {pubs.map((pub) => <PublicationItem pub={pub} />)}
++    </ul>
++  </div>
++
++  <script is:inline>
++    const buttons = document.querySelectorAll('.filters button');
++    const items = document.querySelectorAll('#pub-list .pub-item');
++    buttons.forEach((btn) => {
++      btn.addEventListener('click', () => {
++        buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
++        const filter = btn.dataset.filter;
++        items.forEach((item) => {
++          const match =
++            filter === 'all' ||
++            item.dataset.role === filter ||
++            item.dataset.indexing === filter ||
++            item.dataset.year === filter;
++          item.hidden = !match;
++        });
++      });
++    });
++  </script>
++</BaseLayout>
+diff --git a/src/pages/rss.xml.ts b/src/pages/rss.xml.ts
+new file mode 100644
+index 0000000..26014e8
+--- /dev/null
++++ b/src/pages/rss.xml.ts
+@@ -0,0 +1,23 @@
++import rss from '@astrojs/rss';
++import type { APIContext } from 'astro';
++import { getCollection } from 'astro:content';
++import { visiblePosts } from '../lib/posts';
++import { withBase } from '../lib/url';
++
++export async function GET(context: APIContext) {
++  const posts = visiblePosts(await getCollection('blog'));
++
++  return rss({
++    title: 'Zicong Yang · Writing',
++    description: 'Notes on software engineering, computer vision, and research.',
++    site: new URL(import.meta.env.BASE_URL, context.site!),
++    customData: '<language>zh-CN</language>',
++    items: posts.map((post) => ({
++      title: post.data.title,
++      pubDate: new Date(post.data.date),
++      description: post.data.summary,
++      link: withBase(`blog/${post.id}`),
++      categories: post.data.tags,
++    })),
++  });
++}
+diff --git a/src/pages/work/[slug].astro b/src/pages/work/[slug].astro
+new file mode 100644
+index 0000000..f4aff34
+--- /dev/null
++++ b/src/pages/work/[slug].astro
+@@ -0,0 +1,49 @@
++---
++import type { CollectionEntry } from 'astro:content';
++import BaseLayout from '../../layouts/BaseLayout.astro';
++import { getCollection, render } from 'astro:content';
++
++export async function getStaticPaths() {
++  const items = await getCollection('work');
++  return items.map((item) => ({ params: { slug: item.id }, props: { item } }));
++}
++
++interface Props {
++  item: CollectionEntry<'work'>;
++}
++const { item } = Astro.props;
++const { Content } = await render(item);
++---
++<BaseLayout title={`${item.data.title} · Zicong Yang`} description={item.data.summary}>
++  <article class="container measure work-detail" style="padding-top:40px">
++    <h1>{item.data.title}</h1>
++    <p class="meta">
++      {item.data.role} · {item.data.org} · {item.data.start} – {item.data.end}
++    </p>
++
++    <Content />
++
++    <h2>Results</h2>
++    <ul>{item.data.highlights.map((highlight) => <li>{highlight}</li>)}</ul>
++
++    {item.data.stack.length > 0 && (
++      <>
++        <h2>Stack</h2>
++        <div class="stack">
++          {item.data.stack.map((tech) => <span>{tech}</span>)}
++        </div>
++      </>
++    )}
++
++    {item.data.links.length > 0 && (
++      <>
++        <h2>Links</h2>
++        <div class="links">
++          {item.data.links.map((link) => (
++            <a href={link.url} target="_blank" rel="noopener">{link.label}</a>
++          ))}
++        </div>
++      </>
++    )}
++  </article>
++</BaseLayout>
+diff --git a/src/pages/work/index.astro b/src/pages/work/index.astro
+new file mode 100644
+index 0000000..e3ca7de
+--- /dev/null
++++ b/src/pages/work/index.astro
+@@ -0,0 +1,38 @@
++---
++import BaseLayout from '../../layouts/BaseLayout.astro';
++import WorkCard from '../../components/WorkCard.astro';
++import { getCollection } from 'astro:content';
++import { withBase } from '../../lib/url';
++
++const all = await getCollection('work');
++const experience = all
++  .filter((item) => item.data.kind === 'experience')
++  .sort((a, b) => b.data.start.localeCompare(a.data.start) || a.id.localeCompare(b.id));
++const projects = all
++  .filter((item) => item.data.kind === 'project')
++  .sort((a, b) => a.data.order - b.data.order || a.id.localeCompare(b.id));
++---
++<BaseLayout title="Work · Zicong Yang" description="Engineering experience and research projects.">
++  <div class="container measure" style="padding-top:40px">
++    <h1>Work</h1>
++
++    <section class="section">
++      <div class="section-head"><h2>Experience</h2></div>
++      <ul class="timeline">
++        {experience.map((job) => (
++          <li>
++            <h3><a href={withBase(`work/${job.id}`)}>{job.data.title}</a></h3>
++            <div class="org">{job.data.org}</div>
++            <div class="when">{job.data.start} – {job.data.end}</div>
++            <ul>{job.data.highlights.slice(0, 3).map((highlight) => <li>{highlight}</li>)}</ul>
++          </li>
++        ))}
++      </ul>
++    </section>
++
++    <section class="section">
++      <div class="section-head"><h2>Projects</h2></div>
++      <div class="work-grid">{projects.map((item) => <WorkCard item={item} />)}</div>
++    </section>
++  </div>
++</BaseLayout>
+diff --git a/src/styles/global.css b/src/styles/global.css
+new file mode 100644
+index 0000000..5adb062
+--- /dev/null
++++ b/src/styles/global.css
+@@ -0,0 +1,260 @@
++:root {
++  --bg: #ffffff;
++  --bg-soft: #f8fafc;
++  --fg: #111827;
++  --muted: #5b6b82;
++  --border: #e2e8f0;
++  --accent: #1d4ed8;
++  --q1-bg: #fffbeb;
++  --q1-fg: #b45309;
++  --q4-bg: #f3e8ff;
++  --q4-fg: #7e22ce;
++  --ei-bg: #ecfdf5;
++  --ei-fg: #047857;
++  --font-serif: "Source Serif 4", Georgia, "Songti SC", serif;
++  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
++  --measure: 720px;
++  --wide: 1120px;
++  color-scheme: light;
++}
++
++[data-theme='dark'] {
++  --bg: #0b1120;
++  --bg-soft: #111a2e;
++  --fg: #e5e7eb;
++  --muted: #94a3b8;
++  --border: #1f2a3d;
++  --accent: #60a5fa;
++  --q1-bg: #2a1f06;
++  --q1-fg: #fbbf24;
++  --q4-bg: #241432;
++  --q4-fg: #d8b4fe;
++  --ei-bg: #052e22;
++  --ei-fg: #6ee7b7;
++  color-scheme: dark;
++}
++
++* { box-sizing: border-box; }
++
++body {
++  margin: 0;
++  background: var(--bg);
++  color: var(--fg);
++  font-family: var(--font-sans);
++  font-size: 16px;
++  line-height: 1.7;
++  transition: background-color 150ms ease, color 150ms ease;
++}
++
++a { color: var(--accent); text-decoration: none; }
++a:hover { text-decoration: underline; }
++:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
++
++h1, h2, h3 { font-family: var(--font-serif); line-height: 1.25; margin: 0; }
++h1 { font-size: 2.25rem; letter-spacing: -0.02em; }
++h2 { font-size: 1.5rem; }
++h3 { font-size: 1.125rem; }
++
++.container { width: 100%; max-width: var(--wide); margin: 0 auto; padding: 0 24px; }
++.measure { max-width: var(--measure); }
++.muted { color: var(--muted); }
++.rule { border: 0; border-top: 1px solid var(--border); margin: 0; }
++
++.skip {
++  position: fixed;
++  left: -9999px;
++  top: 0;
++  background: var(--bg);
++  padding: 8px 12px;
++  z-index: 100;
++}
++.skip:focus { left: 8px; }
++
++.site-header {
++  border-bottom: 1px solid var(--border);
++  position: sticky;
++  top: 0;
++  background: var(--bg);
++  background: color-mix(in srgb, var(--bg) 92%, transparent);
++  backdrop-filter: blur(8px);
++  z-index: 50;
++}
++.site-header .inner {
++  max-width: var(--wide);
++  margin: 0 auto;
++  padding: 14px 24px;
++  display: flex;
++  align-items: center;
++  gap: 24px;
++}
++.brand { font-family: var(--font-serif); font-size: 1.05rem; font-weight: 600; color: var(--fg); }
++.desktop-nav { margin-left: auto; }
++.nav-details { display: none; }
++.nav-details > summary { list-style: none; }
++.nav-details > summary::-webkit-details-marker { display: none; }
++.nav { display: flex; gap: 18px; font-size: 0.9rem; }
++.nav a { color: var(--muted); }
++.nav a[aria-current='page'] { color: var(--fg); font-weight: 600; }
++.nav-toggle { display: none; cursor: pointer; background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; color: var(--fg); font: inherit; }
++.theme-toggle { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; color: var(--muted); cursor: pointer; font: inherit; }
++.site-footer { border-top: 1px solid var(--border); margin-top: 72px; padding: 28px 0; color: var(--muted); font-size: 0.85rem; }
++
++@media (max-width: 767px) {
++  .desktop-nav { display: none; }
++  .nav-details { display: block; position: relative; margin-left: auto; }
++  .nav-toggle { display: block; }
++  .nav-details > .nav { display: none; }
++  .nav-details[open] > .nav {
++    display: flex;
++    flex-direction: column;
++    position: absolute;
++    right: 0;
++    top: calc(100% + 8px);
++    min-width: 180px;
++    padding: 16px;
++    background: var(--bg);
++    border: 1px solid var(--border);
++    border-radius: 8px;
++    z-index: 60;
++  }
++}
++
++@media (prefers-reduced-motion: reduce) {
++  *, *::before, *::after { transition: none !important; animation: none !important; }
++}
++
++.pub-list { list-style: none; margin: 0; padding: 0; }
++.pub-item { padding: 18px 0; border-bottom: 1px solid var(--border); }
++.pub-title { font-family: var(--font-serif); font-size: 1.05rem; font-weight: 600; line-height: 1.4; color: var(--fg); }
++.pub-meta { margin-top: 6px; font-size: 0.85rem; color: var(--muted); }
++.pub-actions { margin-top: 8px; display: flex; gap: 14px; font-size: 0.8rem; align-items: baseline; }
++.pub-actions button { background: none; border: 0; padding: 0; color: var(--accent); font: inherit; cursor: pointer; }
++.badge { display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; padding: 1px 6px; border-radius: 4px; margin-right: 6px; text-transform: uppercase; }
++.badge-q1 { background: var(--q1-bg); color: var(--q1-fg); }
++.badge-q4 { background: var(--q4-bg); color: var(--q4-fg); }
++.badge-ei { background: var(--ei-bg); color: var(--ei-fg); }
++.badge-neutral { background: var(--bg-soft); color: var(--muted); border: 1px solid var(--border); }
++.filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 8px; }
++.filters button { font: inherit; font-size: 0.8rem; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--muted); cursor: pointer; }
++.filters button[aria-pressed='true'] { border-color: var(--accent); color: var(--accent); }
++.bibtex-block { display: inline-flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
++.bibtex { margin-top: 10px; }
++.bibtex summary { cursor: pointer; font-size: 0.8rem; }
++.bibtex pre { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 6px; padding: 12px; overflow-x: auto; font-size: 0.78rem; }
++
++.hero { padding: 64px 0 40px; }
++.hero p { max-width: 46ch; margin: 16px 0 0; color: var(--muted); }
++.social { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 20px; font-size: 0.85rem; }
++.section { margin-top: 56px; }
++.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
++.section-head h2 { border-bottom: 1px solid var(--border); padding-bottom: 8px; flex: 1; font-size: 0.95rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-family: var(--font-sans); }
++.section-head a { font-size: 0.85rem; white-space: nowrap; }
++.work-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
++@media (min-width: 768px) { .work-grid { grid-template-columns: 1fr 1fr; } }
++.work-card { border: 1px solid var(--border); border-radius: 8px; padding: 16px; background: var(--bg); }
++.work-card h3 { font-size: 1rem; }
++.work-card p { margin: 8px 0 12px; font-size: 0.88rem; color: var(--muted); }
++.stack { display: flex; flex-wrap: wrap; gap: 6px; }
++.stack span { font-size: 0.72rem; padding: 1px 7px; border-radius: 999px; background: var(--bg-soft); border: 1px solid var(--border); color: var(--muted); }
++.post-list { list-style: none; margin: 0; padding: 0; }
++.post-list li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
++.post-list time { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
++.lang-badge { font-size: 0.68rem; border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; color: var(--muted); }
++.links { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 20px; font-size: 0.88rem; }
++
++.timeline { list-style: none; margin: 0; padding: 0; }
++.timeline li { border-left: 2px solid var(--border); padding: 0 0 20px 16px; }
++.timeline h3 { font-size: 1rem; }
++.timeline .org { color: var(--accent); font-weight: 600; font-size: 0.9rem; }
++.timeline .when { font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
++.timeline ul { margin: 8px 0 0; padding-left: 18px; color: var(--muted); font-size: 0.88rem; }
++.timeline li:last-child { padding-bottom: 0; }
++.work-detail h1 { margin-bottom: 8px; }
++.work-detail .meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 24px; }
++.work-detail ul { padding-left: 20px; }
++.work-detail li { margin-bottom: 8px; }
++
++.post-header { padding: 32px 0 8px; }
++.post-header h1 { font-size: 2rem; }
++.post-meta { color: var(--muted); font-size: 0.85rem; margin-top: 8px; display: flex; gap: 10px; flex-wrap: wrap; }
++.prose { font-size: 1rem; }
++.prose h2 { margin: 40px 0 12px; font-size: 1.35rem; }
++.prose h3 { margin: 28px 0 10px; font-size: 1.1rem; }
++.prose p, .prose li { color: var(--fg); }
++.prose code { font-size: 0.86em; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 4px; padding: 1px 4px; }
++.prose pre { border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; }
++.prose pre code { background: none; border: 0; padding: 0; }
++.prose blockquote { margin: 20px 0; padding-left: 16px; border-left: 3px solid var(--border); color: var(--muted); }
++.toc { font-size: 0.82rem; border-left: 1px solid var(--border); padding-left: 14px; }
++.toc ul { list-style: none; margin: 0; padding: 0; }
++.toc li { margin: 6px 0; }
++.toc a { color: var(--muted); }
++.post-grid { display: grid; gap: 32px; }
++@media (min-width: 1024px) { .post-grid { grid-template-columns: 680px 200px; justify-content: center; } }
++.toc-mobile { margin: 20px 0; }
++.toc-mobile summary { cursor: pointer; font-size: 0.85rem; color: var(--muted); margin-bottom: 10px; }
++@media (min-width: 1024px) { .toc-mobile { display: none; } }
++.toc-aside { display: none; }
++@media (min-width: 1024px) {
++  .toc-aside {
++    display: block;
++    position: sticky;
++    top: 80px;
++    align-self: start;
++    max-height: calc(100vh - 100px);
++    overflow-y: auto;
++  }
++}
++.prose :is(h2, h3)[id] { scroll-margin-top: 76px; }
++.sr-only {
++  position: absolute;
++  width: 1px;
++  height: 1px;
++  padding: 0;
++  margin: -1px;
++  overflow: hidden;
++  clip: rect(0, 0, 0, 0);
++  white-space: nowrap;
++  border: 0;
++}
++[data-footnotes] { margin-top: 40px; font-size: 0.9rem; color: var(--muted); }
++
++.page-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px; margin-bottom: 8px; }
++.lang-link { font-size: 0.82rem; color: var(--muted); }
++.lang-link:hover { color: var(--accent); }
++.about-actions { display: flex; flex-wrap: wrap; gap: 16px; margin: 20px 0 32px; font-size: 0.88rem; }
++.about-actions button {
++  font: inherit;
++  background: none;
++  border: 1px solid var(--border);
++  border-radius: 6px;
++  padding: 4px 10px;
++  color: var(--accent);
++  cursor: pointer;
++}
++
++@page { size: A4; margin: 16mm; }
++
++@media print {
++  :root,
++  [data-theme='dark'] {
++    --bg: #fff;
++    --bg-soft: #fff;
++    --fg: #000;
++    --muted: #333;
++    --border: #999;
++    --accent: #000;
++  }
++  .site-header, .site-footer, .skip, .about-actions, .theme-toggle { display: none !important; }
++  body { background: #fff; color: #000; font-size: 11pt; }
++  .container { max-width: none; padding: 0; }
++  a { color: #000; text-decoration: none; }
++  h2 { break-after: avoid; }
++  .prose p, li, .print-block { break-inside: avoid; }
++}
++.post-list li[hidden] { display: none; }
++.astro-code { background-color: var(--shiki-light-bg); border-radius: 8px; }
++.astro-code span { color: var(--shiki-light); }
++[data-theme='dark'] .astro-code { background-color: var(--shiki-dark-bg); }
++[data-theme='dark'] .astro-code span { color: var(--shiki-dark); }
++.next-prev { display: flex; justify-content: space-between; gap: 16px; margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 0.88rem; }
+diff --git a/tests/format.test.ts b/tests/format.test.ts
+new file mode 100644
+index 0000000..93d79b2
+--- /dev/null
++++ b/tests/format.test.ts
+@@ -0,0 +1,66 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { boldSelf, readingMinutes, toBibtex } from '../src/lib/format.ts';
++
++test('readingMinutes returns at least one minute for empty content', () => {
++  assert.equal(readingMinutes(''), 1);
++});
++
++test('readingMinutes grows with content length', () => {
++  assert.ok(readingMinutes('中'.repeat(1200)) >= 3);
++});
++
++test('boldSelf wraps the configured name only', () => {
++  assert.equal(
++    boldSelf(['Zicong Yang', 'A. Other'], 'Zicong Yang'),
++    '<strong>Zicong Yang</strong>, A. Other'
++  );
++});
++
++test('toBibtex produces an article entry with doi and year', () => {
++  const bib = toBibtex({
++    title: 'A paper',
++    authors: ['Zicong Yang', 'A. Other'],
++    venue: 'Scientific Reports',
++    year: 2024,
++    doi: '10.1038/s41598-024-71700-z',
++    type: 'journal',
++  });
++  assert.match(bib, /@article\{/);
++  assert.match(bib, /doi = \{10\.1038\/s41598-024-71700-z\}/);
++  assert.match(bib, /year = \{2024\}/);
++});
++
++test('toBibtex keys are unique for the same author and year', () => {
++  const keyOf = (bib: string) => bib.split('{')[1].split(',')[0];
++  const first = toBibtex({
++    title: 'First paper',
++    authors: ['Zicong Yang'],
++    venue: 'V',
++    year: 2024,
++    doi: '10.1/a',
++    type: 'journal',
++  });
++  const second = toBibtex({
++    title: 'Second paper',
++    authors: ['Zicong Yang'],
++    venue: 'V',
++    year: 2024,
++    doi: '10.1/b',
++    type: 'journal',
++  });
++  assert.notEqual(keyOf(first), keyOf(second));
++});
++
++test('toBibtex produces an inproceedings entry with booktitle', () => {
++  const bib = toBibtex({
++    title: 'Conference paper',
++    authors: ['Zicong Yang'],
++    venue: 'CVIDL 2024',
++    year: 2024,
++    doi: '10.1109/example',
++    type: 'conference',
++  });
++  assert.match(bib, /@inproceedings\{/);
++  assert.match(bib, /booktitle = \{CVIDL 2024\}/);
++});
+diff --git a/tests/posts.test.ts b/tests/posts.test.ts
+new file mode 100644
+index 0000000..27c8727
+--- /dev/null
++++ b/tests/posts.test.ts
+@@ -0,0 +1,32 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { visiblePosts } from '../src/lib/posts.ts';
++
++const make = (over: Record<string, unknown>) =>
++  ({
++    id: String(over.id ?? Math.random()),
++    data: { title: 'T', date: '2026-01-01', lang: 'zh', tags: ['t'], summary: 's', draft: false, ...over },
++  }) as any;
++
++test('visiblePosts filters drafts and future dates', () => {
++  const posts = [
++    make({ id: 'a', date: '2026-01-01' }),
++    make({ id: 'b', draft: true }),
++    make({ id: 'c', date: '2099-01-01' }),
++  ];
++  assert.deepEqual(
++    visiblePosts(posts, '2026-11-07').map((post: any) => post.id),
++    ['a']
++  );
++});
++
++test('visiblePosts sorts newest first', () => {
++  const posts = [
++    make({ id: 'old', date: '2025-01-01' }),
++    make({ id: 'new', date: '2026-06-01' }),
++  ];
++  assert.deepEqual(
++    visiblePosts(posts, '2026-11-07').map((post: any) => post.id),
++    ['new', 'old']
++  );
++});
+diff --git a/tests/publications.test.ts b/tests/publications.test.ts
+new file mode 100644
+index 0000000..fe8299d
+--- /dev/null
++++ b/tests/publications.test.ts
+@@ -0,0 +1,51 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { sortPublications, selectHomepage } from '../src/lib/publications.ts';
++
++const make = (over: Record<string, unknown>) =>
++  ({
++    id: String(over.id ?? Math.random()),
++    data: {
++      title: 'T',
++      authors: ['Zicong Yang'],
++      venue: 'V',
++      year: 2024,
++      type: 'journal',
++      indexing: 'Q1',
++      role: 'other',
++      doi: '10.1/x',
++      selected: false,
++      date: '2024-01-01',
++      ...over,
++    },
++  }) as any;
++
++test('sortPublications orders by date desc, then role rank', () => {
++  const a = make({ id: 'a', date: '2024-01-01' });
++  const b = make({ id: 'b', date: '2025-01-01' });
++  const c = make({ id: 'c', date: '2025-01-01', role: 'first' });
++  assert.deepEqual(sortPublications([a, b, c]).map((p: any) => p.id), ['c', 'b', 'a']);
++});
++
++test('selectHomepage prefers selected, then first author, then newest', () => {
++  const selected = make({ id: 'sel', selected: true, date: '2020-01-01' });
++  const first = make({ id: 'first', role: 'first', date: '2025-01-01' });
++  const newestOther = make({ id: 'new', date: '2025-06-01' });
++  const old = make({ id: 'old', date: '2019-01-01' });
++  const result = selectHomepage([selected, first, newestOther, old]);
++  assert.deepEqual(result.map((p: any) => p.id), ['sel', 'first', 'new']);
++});
++
++test('selectHomepage returns all entries when fewer than three', () => {
++  const one = make({ id: 'one' });
++  assert.equal(selectHomepage([one]).length, 1);
++});
++
++test('selectHomepage deduplicates an entry that is both selected and first-authored', () => {
++  const both = make({ id: 'both', selected: true, role: 'first', date: '2025-01-01' });
++  const other = make({ id: 'other', date: '2024-01-01' });
++  const third = make({ id: 'third', date: '2023-01-01' });
++  const result = selectHomepage([both, other, third]);
++  assert.deepEqual(result.map((p: any) => p.id), ['both', 'other', 'third']);
++  assert.equal(new Set(result.map((p: any) => p.id)).size, 3);
++});
+diff --git a/tests/schema.test.ts b/tests/schema.test.ts
+new file mode 100644
+index 0000000..18303b0
+--- /dev/null
++++ b/tests/schema.test.ts
+@@ -0,0 +1,86 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { publicationSchema, workSchema, blogSchema } from '../src/lib/schema.ts';
++
++const paper = {
++  title: 'A paper',
++  authors: ['Zicong Yang', 'Someone Else'],
++  venue: 'Scientific Reports',
++  year: 2024,
++  type: 'journal' as const,
++  indexing: 'Q1' as const,
++  role: 'first' as const,
++  doi: '10.1038/s41598-024-71700-z',
++  date: '2024-09-01',
++};
++
++test('publication accepts a valid entry', () => {
++  assert.equal(publicationSchema.safeParse(paper).success, true);
++});
++
++test('publication rejects a missing doi', () => {
++  const { doi, ...rest } = paper;
++  const result = publicationSchema.safeParse(rest);
++  assert.equal(result.success, false);
++});
++
++test('publication rejects a year below 2000', () => {
++  assert.equal(publicationSchema.safeParse({ ...paper, year: 1999 }).success, false);
++});
++
++test('work rejects start later than end', () => {
++  const job = {
++    title: 'Software Engineer',
++    org: 'Acme',
++    kind: 'experience' as const,
++    role: 'Engineer',
++    start: '2025-09',
++    end: '2025-01',
++    summary: 'Built things.',
++    highlights: ['Did work'],
++  };
++  assert.equal(workSchema.safeParse(job).success, false);
++});
++
++test('work accepts present as end', () => {
++  const job = {
++    title: 'Software Engineer',
++    org: 'Acme',
++    kind: 'experience' as const,
++    role: 'Engineer',
++    start: '2025-09',
++    end: 'present',
++    summary: 'Built things.',
++    highlights: ['Did work'],
++  };
++  assert.equal(workSchema.safeParse(job).success, true);
++});
++
++test('blog rejects summary longer than 160 chars', () => {
++  const post = {
++    title: 'Post',
++    date: '2026-01-01',
++    lang: 'zh' as const,
++    tags: ['astro'],
++    summary: 'x'.repeat(161),
++  };
++  assert.equal(blogSchema.safeParse(post).success, false);
++});
++
++test('publication rejects empty authors', () => {
++  assert.equal(publicationSchema.safeParse({ ...paper, authors: [] }).success, false);
++});
++
++test('publication rejects a year above 2100', () => {
++  assert.equal(publicationSchema.safeParse({ ...paper, year: 2101 }).success, false);
++});
++
++test('publication rejects an invalid date format', () => {
++  assert.equal(publicationSchema.safeParse({ ...paper, date: '2024/09/01' }).success, false);
++});
++
++test('publication ignores unknown frontmatter fields', () => {
++  const result = publicationSchema.safeParse({ ...paper, unknownField: 'ignored' });
++  assert.equal(result.success, true);
++  assert.equal('unknownField' in (result.success ? result.data : {}), false);
++});
+diff --git a/tsconfig.json b/tsconfig.json
+new file mode 100644
+index 0000000..f9c6efa
+--- /dev/null
++++ b/tsconfig.json
+@@ -0,0 +1,7 @@
++{
++  "extends": "astro/tsconfigs/strict",
++  "compilerOptions": {
++    "strictNullChecks": true,
++    "allowJs": true
++  }
++}

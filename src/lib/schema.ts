@@ -53,6 +53,7 @@ export const blogSchema = z.object({
 export const pageSchema = z.object({
   title: z.string().min(1),
   updated: isoDate,
+  summary: z.string().min(1).max(200).optional(),
 });
 
 export type Publication = z.infer<typeof publicationSchema>;

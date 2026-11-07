@@ -82,7 +82,33 @@ checks.push(['404 is noindex', /name="robots"[^>]*noindex/.test(notFound)]);
 
 const sitemap = await read('dist/sitemap-0.xml');
 checks.push(['sitemap excludes 404', !sitemap.includes('/404')]);
-checks.push(['sitemap excludes drafts', !sitemap.includes('/blog/draft-check/')]);
+
+const blogList = await read('dist/blog/index.html');
+const blogFiles = (await readdir('src/content/blog')).filter((file) => file.endsWith('.md'));
+const today = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Shanghai',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+}).format(new Date());
+const hiddenPosts = [];
+
+for (const file of blogFiles) {
+  const source = await readFile(`src/content/blog/${file}`, 'utf8');
+  const draft = /^draft:\s*true\s*$/m.test(source);
+  const date = source.match(/^date:\s*"(\d{4}-\d{2}-\d{2})"/m)?.[1];
+  if (draft || (date && date > today)) hiddenPosts.push(file.replace(/\.md$/, ''));
+}
+
+checks.push([
+  'hidden posts stay out of list, rss and sitemap',
+  hiddenPosts.every(
+    (slug) =>
+      !blogList.includes(`/blog/${slug}/`) &&
+      !rss.includes(`/blog/${slug}/`) &&
+      !sitemap.includes(`/blog/${slug}/`)
+  ),
+]);
 
 const failed = checks.filter(([, ok]) => !ok);
 for (const [label, ok] of checks) console.log(`${ok ? 'ok  ' : 'FAIL'} ${label}`);
