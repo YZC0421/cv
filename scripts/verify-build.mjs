@@ -1,5 +1,5 @@
 import { readFile, access, readdir } from 'node:fs/promises';
-import { constants } from 'node:fs';
+import { constants, existsSync } from 'node:fs';
 
 const checks = [];
 
@@ -110,6 +110,36 @@ checks.push([
       !rss.includes(`/blog/${slug}/`) &&
       !sitemap.includes(`/blog/${slug}/`)
   ),
+]);
+
+checks.push(['publications expose topic filters', publications.includes('data-group="topic"')]);
+checks.push(['publications expose role filter', publications.includes('data-group="role"')]);
+checks.push(['publications expose topic badges', publications.includes('badge-topic')]);
+
+const workIndex = await read('dist/work/index.html');
+checks.push(['work exposes topic filter', workIndex.includes('data-value="medical-signal"')]);
+
+checks.push(['home has research areas', home.includes('Research Areas')]);
+checks.push(['home has og image', home.includes('og:image')]);
+checks.push(['home has twitter card', home.includes('twitter:card')]);
+
+const tagPages = await countDirs('dist/blog/tag');
+const tagSet = new Set();
+for (const file of blogFiles) {
+  const slug = file.replace(/\.md$/, '');
+  if (hiddenPosts.includes(slug)) continue;
+  const source = await readFile(`src/content/blog/${file}`, 'utf8');
+  const match = source.match(/^tags:\s*\[(.+)\]$/m);
+  if (match) {
+    for (const tag of match[1].split(',')) tagSet.add(tag.trim().replace(/["']/g, ''));
+  }
+}
+checks.push(['tag pages match visible tags', tagPages === tagSet.size]);
+
+const cvExists = existsSync('public/cv.pdf');
+checks.push([
+  'cv link matches pdf presence',
+  cvExists ? home.includes('/cv/cv.pdf') : !home.includes('/cv/cv.pdf'),
 ]);
 
 const failed = checks.filter(([, ok]) => !ok);
