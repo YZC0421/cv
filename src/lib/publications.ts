@@ -8,7 +8,9 @@ export function sortPublications<T extends Pub>(items: T[]): T[] {
   return [...items].sort((a, b) => {
     const byDate = b.data.date.localeCompare(a.data.date);
     if (byDate !== 0) return byDate;
-    return (roleRank[a.data.role] ?? 3) - (roleRank[b.data.role] ?? 3);
+    const byRole = (roleRank[a.data.role] ?? 3) - (roleRank[b.data.role] ?? 3);
+    if (byRole !== 0) return byRole;
+    return a.id.localeCompare(b.id);
   });
 }
 

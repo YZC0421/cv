@@ -8,14 +8,12 @@ export function sortProjects<T extends Work>(items: T[]): T[] {
   );
 }
 
-export function sortExperience<T extends Work>(items: T[]): T[] {
+export function sortWork<T extends Work>(items: T[]): T[] {
   return [...items].sort(
     (a, b) => b.data.start.localeCompare(a.data.start) || a.id.localeCompare(b.id)
   );
 }
 
-export function sortWork<T extends Work>(items: T[]): T[] {
-  return [...items].sort(
-    (a, b) => b.data.start.localeCompare(a.data.start) || a.id.localeCompare(b.id)
-  );
+export function sortExperience<T extends Work>(items: T[]): T[] {
+  return sortWork(items);
 }

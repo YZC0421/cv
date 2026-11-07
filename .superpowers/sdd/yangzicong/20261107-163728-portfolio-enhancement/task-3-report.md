@@ -22,3 +22,11 @@
 ## 疑虑
 
 - 代表成果里论文只取一作；如果某主题没有一作论文，会只显示 work 条目。当前两个主题都有一作论文。
+
+## 审查修复
+
+- 两个 `View all →` 链接补 `aria-label`，区分主题。
+- `sortExperience` 改为复用 `sortWork`，消除逐字重复；`/work` 的接线留在任务 5。
+- `sortPublications` 在同日期同角色时补 `id` 兜底，代表论文的选择变为确定性。
+
+验证：`npm test` 42/42；`npm run check` 0 errors；`npm run build` 17 页。

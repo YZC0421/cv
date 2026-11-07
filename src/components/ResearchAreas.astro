@@ -48,7 +48,11 @@ const areas = topics
               </li>
             )}
           </ul>
-          <a class="area-link" href={`${withBase('publications')}?topic=${area.slug}`}>
+          <a
+            class="area-link"
+            href={`${withBase('publications')}?topic=${area.slug}`}
+            aria-label={`View all publications on ${area.name}`}
+          >
             View all →
           </a>
         </article>
