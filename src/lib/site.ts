@@ -1,6 +1,8 @@
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
+// Resolve from the module location instead of the build cwd, so the check keeps
+// working when the site is built from a different working directory.
 const CV_FILE = fileURLToPath(new URL('../../public/cv.pdf', import.meta.url));
 
 export const site = {

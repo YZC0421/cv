@@ -55,7 +55,9 @@ export const blogSchema = z.object({
   title: z.string().min(1),
   date: isoDate,
   lang: z.enum(['en', 'zh']),
-  tags: z.array(z.string().min(1)).min(1),
+  tags: z
+    .array(z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'tag must be kebab-case'))
+    .min(1),
   summary: z.string().min(1).max(160),
   draft: z.boolean().default(false),
 });

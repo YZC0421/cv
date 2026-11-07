@@ -14,7 +14,6 @@ interface Props {
 const { item } = Astro.props;
 const { Content } = await render(item);
 const d = item.data;
-const hasSections = Boolean(d.problem || d.approach || d.results);
 const dois = d.relatedPublications ?? [];
 const publications = dois.length > 0 ? await getCollection('publications') : [];
 const relatedPublications = publications.filter((pub) => dois.includes(pub.data.doi));
@@ -28,18 +27,16 @@ const relatedPublications = publications.filter((pub) => dois.includes(pub.data.
     {d.approach && <section class="work-block"><h2>Approach</h2><p>{d.approach}</p></section>}
     {d.results && <section class="work-block"><h2>Results</h2><p>{d.results}</p></section>}
 
-    {!hasSections && (
-      <section class="work-block">
-        <h2>Highlights</h2>
-        <ul>{d.highlights.map((highlight) => <li>{highlight}</li>)}</ul>
-      </section>
-    )}
-
     <div class="prose"><Content /></div>
 
     <section class="work-block">
       <h2>Role</h2>
-      <p>{d.role === d.title ? d.summary : `${d.role} at ${d.org}.`}</p>
+      <p>{d.role} at {d.org}.</p>
+    </section>
+
+    <section class="work-block">
+      <h2>Highlights</h2>
+      <ul>{d.highlights.map((highlight) => <li>{highlight}</li>)}</ul>
     </section>
 
     {d.stack.length > 0 && (

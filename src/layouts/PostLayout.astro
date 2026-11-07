@@ -37,7 +37,7 @@ const hasToc = headings.some(
           <span class="lang-badge">{lang === 'zh' ? '中文' : 'EN'}</span>
           <span>{readingLabel}</span>
           {tags.map((tag) => (
-            <a class="lang-badge" href={withBase(`blog/tag/${tag}`)}>{tag}</a>
+            <a class="lang-badge" href={withBase(`blog/tag/${encodeURIComponent(tag)}`)}>{tag}</a>
           ))}
         </div>
       </header>

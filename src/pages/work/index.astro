@@ -9,6 +9,9 @@ import { sortExperience, sortProjects } from '../../lib/work';
 const all = await getCollection('work');
 const experience = sortExperience(all.filter((item) => item.data.kind === 'experience'));
 const projects = sortProjects(all.filter((item) => item.data.kind === 'project'));
+const projectTopics = topics.filter((topic) =>
+  projects.some((item) => (item.data.topics ?? []).includes(topic.slug))
+);
 ---
 <BaseLayout title="Work · Zicong Yang" description="Engineering experience and research projects.">
   <div class="container measure" style="padding-top:40px">
@@ -30,12 +33,14 @@ const projects = sortProjects(all.filter((item) => item.data.kind === 'project')
 
     <section class="section">
       <div class="section-head"><h2>Projects</h2></div>
-      <div class="filters" role="group" aria-label="Filter projects by topic">
-        <button type="button" data-value="all" aria-pressed="true">All topics</button>
-        {topics.map((topic) => (
-          <button type="button" data-value={topic.slug} aria-pressed="false">{topic.name}</button>
-        ))}
-      </div>
+      {projectTopics.length > 0 && (
+        <div class="filters" role="group" aria-label="Filter projects by topic">
+          <button type="button" data-value="all" aria-pressed="true">All topics</button>
+          {projectTopics.map((topic) => (
+            <button type="button" data-value={topic.slug} aria-pressed="false">{topic.name}</button>
+          ))}
+        </div>
+      )}
       <div class="work-grid">{projects.map((item) => <WorkCard item={item} />)}</div>
       <p id="work-status" class="muted" role="status" aria-live="polite"></p>
     </section>

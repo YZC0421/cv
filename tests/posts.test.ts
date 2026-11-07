@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { visiblePosts } from '../src/lib/posts.ts';
+import { postTags, visiblePosts } from '../src/lib/posts.ts';
 
 const make = (over: Record<string, unknown>) =>
   ({
@@ -29,4 +29,12 @@ test('visiblePosts sorts newest first', () => {
     visiblePosts(posts, '2026-11-07').map((post: any) => post.id),
     ['new', 'old']
   );
+});
+
+test('postTags returns sorted unique tags', () => {
+  const posts = [
+    make({ id: 'a', tags: ['typescript', 'astro'] }),
+    make({ id: 'b', tags: ['astro'] }),
+  ];
+  assert.deepEqual(postTags(posts), ['astro', 'typescript']);
 });

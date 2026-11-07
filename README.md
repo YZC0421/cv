@@ -21,15 +21,17 @@ npm run og       # regenerate public/og.png (committed; manual only)
 
 1. Create `src/content/publications/<slug>.md` with the frontmatter defined in
    `src/lib/schema.ts`.
-2. `doi` is required. `selected: true` pins an entry into the home page; the home page always
-   shows three entries, filling the remainder with first-author papers, then the newest.
+2. `doi` and `topics` (one or more of `medical-signal`, `industrial-vision`) are required.
+   `relatedWork` slugs must exist in `src/content/work/`. `volume`/`pages` only feed BibTeX.
+   `selected: true` pins an entry into the home page; the home page always shows three
+   entries, filling the remainder with first-author papers, then the newest.
 3. Run `npm run check`, `npm run build`, and `npm run verify`.
 
 ## CV PDF
 
-Place the exported PDF at `public/cv.pdf`. The About pages and the home page will show a
-direct download link; without the file they fall back to the print action. Regenerate the
-PDF manually whenever the About content changes.
+Place the exported PDF at `public/cv.pdf`. The About pages and the home page will then show
+an additional direct download link; the print action is always available. Regenerate the PDF
+manually whenever the About content changes.
 
 ## Add a post
 
@@ -43,7 +45,9 @@ PDF manually whenever the About content changes.
 
 1. Create `src/content/work/<slug>.md`; `kind` is `experience` or `project`.
 2. `highlights` needs at least one factual bullet; do not add claims without a source.
-3. Projects sort by `order`; experiences sort by `start`, newest first.
+3. `topics` is optional, but project cards only filter on topics they declare.
+   `relatedPublications` must reference existing DOIs.
+4. Projects sort by `order`; experiences sort by `start`, newest first.
 
 ## Deploy
 
