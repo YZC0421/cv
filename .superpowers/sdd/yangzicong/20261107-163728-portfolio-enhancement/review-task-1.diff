@@ -1,0 +1,637 @@
+## Commits
+4a403e0 feat: 增加研究主题与位次字段
+
+## Stat
+ .../progress.md                                    |   4 +
+ .../task-1-brief.md                                | 306 +++++++++++++++++++++
+ .../task-1-report.md                               |  35 +++
+ scripts/fetch-bib-meta.mjs                         |  24 ++
+ src/components/PublicationItem.astro               |  20 +-
+ src/content/publications/cisse-2024.md             |   2 +
+ src/content/publications/cvidl-2024-garbage.md     |   3 +
+ src/content/publications/cvidl-2024-wheat.md       |   2 +
+ src/content/publications/ipmlp-2024.md             |   3 +
+ src/content/publications/mst-2025.md               |   5 +
+ .../publications/scientific-reports-2024.md        |   3 +
+ src/content/work/guangzhou-xiyang.md               |   1 +
+ src/content/work/ningbo-haizhimingshi.md           |   1 +
+ .../work/sudden-cardiac-death-prediction.md        |   2 +
+ src/lib/format.ts                                  |  21 +-
+ src/lib/relations.ts                               |  28 ++
+ src/lib/schema.ts                                  |  14 +-
+ src/lib/topics.ts                                  |  20 ++
+ src/pages/index.astro                              |  14 +-
+ tests/relations.test.ts                            |  37 +++
+ tests/schema.test.ts                               |   1 +
+ tests/topics.test.ts                               |  17 ++
+ 22 files changed, 541 insertions(+), 22 deletions(-)
+
+## Diff
+diff --git a/scripts/fetch-bib-meta.mjs b/scripts/fetch-bib-meta.mjs
+new file mode 100644
+index 0000000..c27ce30
+--- /dev/null
++++ b/scripts/fetch-bib-meta.mjs
+@@ -0,0 +1,24 @@
++const targets = [
++  { file: 'scientific-reports-2024', doi: '10.1038/s41598-024-71700-z' },
++  { file: 'cisse-2024', doi: '10.1007/978-3-031-57037-7_7' },
++  { file: 'mst-2025', doi: '10.1088/1361-6501/ae10d3' },
++  { file: 'cvidl-2024-wheat', doi: '10.1109/cvidl62147.2024.10604082' },
++  { file: 'cvidl-2024-garbage', doi: '10.1109/cvidl62147.2024.10604280' },
++  { file: 'ipmlp-2024', doi: '10.1145/3700906.3700946' },
++];
++
++for (const target of targets) {
++  try {
++    const res = await fetch(`https://api.crossref.org/works/${encodeURIComponent(target.doi)}`, {
++      headers: { 'User-Agent': 'cv-site-build/1.0 (mailto:402641915@qq.com)' },
++    });
++    if (!res.ok) {
++      console.log(`${target.file}: fetch failed (${res.status})`);
++      continue;
++    }
++    const { message } = await res.json();
++    console.log(`${target.file}: volume=${message.volume ?? ''} pages=${message.page ?? ''}`);
++  } catch (error) {
++    console.log(`${target.file}: ${error.message}`);
++  }
++}
+diff --git a/src/components/PublicationItem.astro b/src/components/PublicationItem.astro
+index 1fc1265..2773803 100644
+--- a/src/components/PublicationItem.astro
++++ b/src/components/PublicationItem.astro
+@@ -2,30 +2,30 @@
+ import type { CollectionEntry } from 'astro:content';
+ import BibtexButton from './BibtexButton.astro';
+ import { boldSelf, toBibtex } from '../lib/format';
+ 
+ interface Props {
+   pub: CollectionEntry<'publications'>;
+ }
+ const { pub } = Astro.props;
+ const d = pub.data;
+ const href = d.url ?? `https://doi.org/${d.doi}`;
+-const bibtex =
+-  d.bibtex ??
+-  toBibtex({
+-    title: d.title,
+-    authors: d.authors,
+-    venue: d.venue,
+-    year: d.year,
+-    doi: d.doi,
+-    type: d.type,
+-  });
++const bibtex = toBibtex({
++  title: d.title,
++  authors: d.authors,
++  venue: d.venue,
++  year: d.year,
++  doi: d.doi,
++  type: d.type,
++  volume: d.volume,
++  pages: d.pages,
++});
+ const badgeClass =
+   d.indexing === 'Q1'
+     ? 'badge-q1'
+     : d.indexing === 'Q4'
+       ? 'badge-q4'
+       : d.indexing === 'EI'
+         ? 'badge-ei'
+         : 'badge-neutral';
+ const indexingLabel = d.indexing === 'EI' ? 'EI indexed' : `JCR ${d.indexing}`;
+ ---
+diff --git a/src/content/publications/cisse-2024.md b/src/content/publications/cisse-2024.md
+index 834e2f3..b4e42dc 100644
+--- a/src/content/publications/cisse-2024.md
++++ b/src/content/publications/cisse-2024.md
+@@ -4,17 +4,19 @@ authors:
+   - "Zicong Yang"
+   - "Aitong Jin"
+   - "Yan Liu"
+   - "Wei Lv"
+   - "Xiaolin Zhu"
+ venue: "Studies in Computational Intelligence"
+ year: 2024
+ type: conference
+ indexing: Q4
+ role: first
++topics: ["medical-signal"]
+ doi: "10.1007/978-3-031-57037-7_7"
+ url: "https://doi.org/10.1007/978-3-031-57037-7_7"
++pages: "87-103"
+ selected: false
+ date: "2024-01-01"
+ ---
+ 
+ A ResNet-GRU fusion model with simplified self-attention for ECG classification on PTB-XL.
+diff --git a/src/content/publications/cvidl-2024-garbage.md b/src/content/publications/cvidl-2024-garbage.md
+index b702b40..e4af120 100644
+--- a/src/content/publications/cvidl-2024-garbage.md
++++ b/src/content/publications/cvidl-2024-garbage.md
+@@ -4,18 +4,21 @@ authors:
+   - "Junxi Wang"
+   - "Xin Zhan"
+   - "Zicong Yang"
+   - "Yangwen Li"
+ venue: "2024 5th International Conference on Computer Vision, Image and Deep Learning (CVIDL)"
+ venueShort: "CVIDL 2024"
+ year: 2024
+ type: conference
+ indexing: EI
+ role: second
++authorNote: "Student 2nd author"
++topics: ["industrial-vision"]
+ doi: "10.1109/cvidl62147.2024.10604280"
+ url: "https://ieeexplore.ieee.org/abstract/document/10604280"
++pages: "334-338"
+ selected: false
+ date: "2024-04-19"
+ ---
+ 
+ Data-centric improvements to YOLOv5 for garbage identification and classification. Second
+ author among student contributors.
+diff --git a/src/content/publications/cvidl-2024-wheat.md b/src/content/publications/cvidl-2024-wheat.md
+index 43f3b2e..1c35be7 100644
+--- a/src/content/publications/cvidl-2024-wheat.md
++++ b/src/content/publications/cvidl-2024-wheat.md
+@@ -6,18 +6,20 @@ authors:
+   - "Junxi Wang"
+   - "Haifan Xie"
+   - "Xin Zhan"
+   - "Qiaolin Li"
+ venue: "2024 5th International Conference on Computer Vision, Image and Deep Learning (CVIDL)"
+ venueShort: "CVIDL 2024"
+ year: 2024
+ type: conference
+ indexing: EI
+ role: first
++topics: ["industrial-vision"]
+ doi: "10.1109/cvidl62147.2024.10604082"
+ url: "https://ieeexplore.ieee.org/abstract/document/10604082"
++pages: "339-343"
+ selected: true
+ date: "2024-04-01"
+ ---
+ 
+ Wheat disease recognition with improved spatial and channel reconstruction convolution and a
+ contextual transformer.
+diff --git a/src/content/publications/ipmlp-2024.md b/src/content/publications/ipmlp-2024.md
+index bdf2638..53b4ee1 100644
+--- a/src/content/publications/ipmlp-2024.md
++++ b/src/content/publications/ipmlp-2024.md
+@@ -7,18 +7,21 @@ authors:
+   - "Kairong Deng"
+   - "Zicong Yang"
+   - "Huixin Zeng"
+   - "Zhengpeng Wang"
+ venue: "Proceedings of the International Conference on Image Processing, Machine Learning and Pattern Recognition"
+ venueShort: "IPMLP 2024"
+ year: 2024
+ type: conference
+ indexing: EI
+ role: other
++authorNote: "Student 4th author"
++topics: ["industrial-vision"]
+ doi: "10.1145/3700906.3700946"
+ url: "https://dl.acm.org/doi/abs/10.1145/3700906.3700946"
++pages: "245-250"
+ selected: false
+ date: "2024-09-13"
+ ---
+ 
+ Surface waste identification with an improved YOLOv8 detector. Fourth author among student
+ contributors.
+diff --git a/src/content/publications/mst-2025.md b/src/content/publications/mst-2025.md
+index 7d1ccb2..315eda2 100644
+--- a/src/content/publications/mst-2025.md
++++ b/src/content/publications/mst-2025.md
+@@ -4,18 +4,23 @@ authors:
+   - "Ziming Song"
+   - "Xuyi Yu"
+   - "Yanchun Liang"
+   - "Zicong Yang"
+ venue: "Measurement Science and Technology"
+ venueShort: "Meas Sci Technol"
+ year: 2025
+ type: journal
+ indexing: Q1
+ role: third
++authorNote: "Student 3rd author"
++topics: ["industrial-vision"]
+ doi: "10.1088/1361-6501/ae10d3"
+ url: "https://iopscience.iop.org/article/10.1088/1361-6501/ae10d3/meta"
++volume: "36"
++pages: "116107"
++relatedWork: ["guangzhou-xiyang"]
+ selected: false
+ date: "2025-11-07"
+ ---
+ 
+ Diffusion-model-based data synthesis for industrial defect detection. Third author among
+ student contributors.
+diff --git a/src/content/publications/scientific-reports-2024.md b/src/content/publications/scientific-reports-2024.md
+index a6b0755..b6b428e 100644
+--- a/src/content/publications/scientific-reports-2024.md
++++ b/src/content/publications/scientific-reports-2024.md
+@@ -9,18 +9,21 @@ authors:
+   - "Junxi Wang"
+   - "Qiaolin Li"
+   - "Xiaoyan Guo"
+   - "Yan Liu"
+ venue: "Scientific Reports"
+ venueShort: "Sci Rep"
+ year: 2024
+ type: journal
+ indexing: Q1
+ role: first
++topics: ["medical-signal"]
+ doi: "10.1038/s41598-024-71700-z"
+ url: "https://www.nature.com/articles/s41598-024-71700-z"
++volume: "14"
++relatedWork: ["sudden-cardiac-death-prediction"]
+ selected: true
+ date: "2024-09-06"
+ ---
+ 
+ A multiscale spatio-temporal fusion network with coordinated channel-spatial attention for
+ multi-lead ECG arrhythmia detection.
+diff --git a/src/content/work/guangzhou-xiyang.md b/src/content/work/guangzhou-xiyang.md
+index 93c5d16..cda8a88 100644
+--- a/src/content/work/guangzhou-xiyang.md
++++ b/src/content/work/guangzhou-xiyang.md
+@@ -1,18 +1,19 @@
+ ---
+ title: "Software Engineer"
+ org: "Guangzhou Xiyang Information Technology Co., Ltd."
+ kind: experience
+ role: "Software Engineer"
+ start: "2025-01"
+ end: "2025-09"
+ summary: "Cable surface defect detection and intelligent reporting, from model research to desktop delivery."
++topics: ["industrial-vision"]
+ stack: ["Python", "PyQt5", "YOLO", "OpenCV", "SQLAlchemy", "RAG"]
+ highlights:
+   - "Annotated 3,500 cable-defect images and co-built the CSDDdb dataset with a municipal key laboratory."
+   - "Built an offline augmentation pipeline with YOLO XYWH-linked geometric and photometric transforms for long-tail cases."
+   - "Developed OpenCV preprocessing with Wiener deblurring, background suppression, and adaptive threshold segmentation."
+   - "Proposed CSDDNet, migrating LWGANet with PWCSA and a lightweight detection head for small defects."
+   - "Delivered a PyQt5 + YOLO desktop system with 4-channel parallel processing, 30 FPS detection, and 12 FPS UI rendering."
+   - "Built a RAG reporting module with multilingual MiniLM retrieval and OpenAI/Spark dual fallback."
+ order: 0
+ ---
+diff --git a/src/content/work/ningbo-haizhimingshi.md b/src/content/work/ningbo-haizhimingshi.md
+index 24418e1..c3e21dd 100644
+--- a/src/content/work/ningbo-haizhimingshi.md
++++ b/src/content/work/ningbo-haizhimingshi.md
+@@ -1,17 +1,18 @@
+ ---
+ title: "Algorithm Intern"
+ org: "Ningbo Haizhimingshi Technology Co., Ltd."
+ kind: experience
+ role: "Algorithm Intern"
+ start: "2024-09"
+ end: "2024-12"
+ summary: "Soft-shell crab detection with YOLOv5s for an automatic sorting system."
++topics: ["industrial-vision"]
+ stack: ["YOLOv5", "Python", "OpenCV"]
+ highlights:
+   - "Built a multi-scene soft-shell crab dataset."
+   - "Trained YOLOv5s with tuned learning rate and loss: Precision 92.3%, Recall 89.7%, mAP 90.5%, F1 90.9%."
+   - "Optimized inference to 45 FPS to meet the real-time requirement of automatic sorting."
+ order: 0
+ ---
+ 
+ Built the detection dataset and trained a YOLOv5s model for soft-shell crab sorting.
+diff --git a/src/content/work/sudden-cardiac-death-prediction.md b/src/content/work/sudden-cardiac-death-prediction.md
+index c8c0db8..ad66978 100644
+--- a/src/content/work/sudden-cardiac-death-prediction.md
++++ b/src/content/work/sudden-cardiac-death-prediction.md
+@@ -1,23 +1,25 @@
+ ---
+ title: "Sudden Cardiac Death Prediction Model"
+ org: "Guangdong Provincial Student Innovation Program"
+ kind: project
+ role: "Project Lead"
+ start: "2023-03"
+ end: "2024-06"
+ summary: "End-to-end ECG research project that produced two first-author papers."
++topics: ["medical-signal"]
+ stack: ["PyTorch", "CNN/RNN", "Attention", "PTB-XL"]
+ highlights:
+   - "Led proposal, design, implementation, publication, and final acceptance."
+   - "Designed STFAC-ECGNet with coordinated channel-spatial attention and temporal fusion."
+   - "Published two first-author papers (JCR Q1 and Q4)."
+ links:
+   - label: "Scientific Reports (Q1)"
+     url: "https://www.nature.com/articles/s41598-024-71700-z"
+   - label: "CISSE 2024 (Q4)"
+     url: "https://doi.org/10.1007/978-3-031-57037-7_7"
++relatedPublications: ["10.1038/s41598-024-71700-z"]
+ order: 1
+ ---
+ 
+ Led the project end-to-end and designed a multiscale spatio-temporal fusion network for
+ multi-lead ECG classification on PTB-XL and CPSC2018.
+diff --git a/src/lib/format.ts b/src/lib/format.ts
+index 0e4b04d..e66b18d 100644
+--- a/src/lib/format.ts
++++ b/src/lib/format.ts
+@@ -16,27 +16,34 @@ export function boldSelf(authors: string[], self = 'Zicong Yang'): string {
+     .join(', ');
+ }
+ 
+ export function toBibtex(input: {
+   title: string;
+   authors: string[];
+   venue: string;
+   year: number;
+   doi: string;
+   type: 'journal' | 'conference';
++  volume?: string;
++  pages?: string;
+ }): string {
+   const surname = input.authors[0]?.split(' ').pop() ?? 'anon';
+   const slug = input.title
+     .toLowerCase()
+     .replace(/[^a-z0-9]+/g, '')
+     .slice(0, 8);
+   const key = `${surname}${input.year}${slug}`;
+   const kind = input.type === 'journal' ? 'article' : 'inproceedings';
+   const venueField = input.type === 'journal' ? 'journal' : 'booktitle';
+-  return `@${kind}{${key},
+-  author = {${input.authors.join(' and ')}},
+-  title = {${input.title}},
+-  ${venueField} = {${input.venue}},
+-  year = {${input.year}},
+-  doi = {${input.doi}}
+-}`;
++  const lines = [
++    `@${kind}{${key},`,
++    `  author = {${input.authors.join(' and ')}},`,
++    `  title = {${input.title}},`,
++    `  ${venueField} = {${input.venue}},`,
++    `  year = {${input.year}},`,
++    ...(input.volume ? [`  volume = {${input.volume}},`] : []),
++    ...(input.pages ? [`  pages = {${input.pages}},`] : []),
++    `  doi = {${input.doi}}`,
++    '}',
++  ];
++  return lines.join('\n');
+ }
+diff --git a/src/lib/relations.ts b/src/lib/relations.ts
+new file mode 100644
+index 0000000..bfea148
+--- /dev/null
++++ b/src/lib/relations.ts
+@@ -0,0 +1,28 @@
++import type { CollectionEntry } from 'astro:content';
++
++type Pub = CollectionEntry<'publications'>;
++type Work = CollectionEntry<'work'>;
++
++export function validateRelations(publications: Pub[], work: Work[]): string[] {
++  const workIds = new Set(work.map((item) => item.id));
++  const dois = new Set(publications.map((pub) => pub.data.doi));
++  const errors: string[] = [];
++
++  for (const pub of publications) {
++    for (const slug of pub.data.relatedWork ?? []) {
++      if (!workIds.has(slug)) {
++        errors.push(`publications/${pub.id}.md: relatedWork "${slug}" not found`);
++      }
++    }
++  }
++
++  for (const item of work) {
++    for (const doi of item.data.relatedPublications ?? []) {
++      if (!dois.has(doi)) {
++        errors.push(`work/${item.id}.md: relatedPublications "${doi}" not found`);
++      }
++    }
++  }
++
++  return errors;
++}
+diff --git a/src/lib/schema.ts b/src/lib/schema.ts
+index 7864c51..6da25bd 100644
+--- a/src/lib/schema.ts
++++ b/src/lib/schema.ts
+@@ -1,45 +1,55 @@
+ import { z } from 'zod';
++import { topicSlugs } from './topics';
+ 
+ const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date must be YYYY-MM-DD');
+ const month = z.string().regex(/^\d{4}-\d{2}$/, 'month must be YYYY-MM');
++const topic = z.enum(topicSlugs);
+ 
+ export const publicationSchema = z.object({
+   title: z.string().min(1),
+   authors: z.array(z.string().min(1)).min(1),
+   venue: z.string().min(1),
+   venueShort: z.string().optional(),
+   year: z.number().int().min(2000).max(2100),
+   type: z.enum(['journal', 'conference']),
+   indexing: z.enum(['Q1', 'Q2', 'Q3', 'Q4', 'EI', 'none']).default('none'),
+   role: z.enum(['first', 'second', 'third', 'other']),
++  authorNote: z.string().max(40).optional(),
++  topics: z.array(topic).min(1),
+   doi: z.string().min(3),
+   url: z.string().url().optional(),
+-  bibtex: z.string().optional(),
++  volume: z.string().optional(),
++  pages: z.string().optional(),
++  relatedWork: z.array(z.string()).default([]),
+   selected: z.boolean().default(false),
+   date: isoDate,
+ });
+ 
+ export const workSchema = z
+   .object({
+     title: z.string().min(1),
+     org: z.string().min(1),
+     kind: z.enum(['experience', 'project']),
+     role: z.string().min(1),
+     start: month,
+     end: z.union([month, z.literal('present')]),
+     summary: z.string().min(1).max(200),
+     stack: z.array(z.string()).default([]),
+     links: z
+       .array(z.object({ label: z.string().min(1), url: z.string().url() }))
+       .default([]),
+-    cover: z.string().optional(),
++    topics: z.array(topic).default([]),
++    problem: z.string().max(600).optional(),
++    approach: z.string().max(600).optional(),
++    results: z.string().max(600).optional(),
++    relatedPublications: z.array(z.string()).default([]),
+     highlights: z.array(z.string().min(1)).min(1),
+     order: z.number().int().default(0),
+   })
+   .refine((w) => w.end === 'present' || w.start <= w.end, {
+     message: 'start must not be later than end',
+     path: ['end'],
+   });
+ 
+ export const blogSchema = z.object({
+   title: z.string().min(1),
+diff --git a/src/lib/topics.ts b/src/lib/topics.ts
+new file mode 100644
+index 0000000..124a58e
+--- /dev/null
++++ b/src/lib/topics.ts
+@@ -0,0 +1,20 @@
++export const topicSlugs = ['medical-signal', 'industrial-vision'] as const;
++
++export type TopicSlug = (typeof topicSlugs)[number];
++
++export const topics: { slug: TopicSlug; name: string; blurb: string }[] = [
++  {
++    slug: 'medical-signal',
++    name: 'Medical Signal Processing',
++    blurb: 'ECG arrhythmia detection and cardiac risk modelling with multiscale deep networks.',
++  },
++  {
++    slug: 'industrial-vision',
++    name: 'Industrial Visual Inspection',
++    blurb: 'Defect detection and lightweight deployment for manufacturing and agriculture.',
++  },
++];
++
++export function topicName(slug: TopicSlug): string {
++  return topics.find((topic) => topic.slug === slug)?.name ?? slug;
++}
+diff --git a/src/pages/index.astro b/src/pages/index.astro
+index 1342a8d..7ecc3b5 100644
+--- a/src/pages/index.astro
++++ b/src/pages/index.astro
+@@ -1,25 +1,33 @@
+ ---
+ import BaseLayout from '../layouts/BaseLayout.astro';
+ import Hero from '../components/Hero.astro';
+ import PublicationItem from '../components/PublicationItem.astro';
+ import WorkCard from '../components/WorkCard.astro';
+ import PostList from '../components/PostList.astro';
+ import { getCollection, getEntry } from 'astro:content';
+ import { selectHomepage } from '../lib/publications';
+ import { visiblePosts } from '../lib/posts';
++import { validateRelations } from '../lib/relations';
+ import { withBase } from '../lib/url';
+ 
+-const pubs = selectHomepage(await getCollection('publications'));
+-const work = (await getCollection('work'))
++const allPublications = await getCollection('publications');
++const allWork = await getCollection('work');
++const relationErrors = validateRelations(allPublications, allWork);
++if (relationErrors.length > 0) {
++  throw new Error(`Content relations are invalid:\n${relationErrors.join('\n')}`);
++}
++
++const pubs = selectHomepage(allPublications);
++const work = allWork
+   .filter((item) => item.data.kind === 'project')
+-  .sort((a, b) => a.data.order - b.data.order)
++  .sort((a, b) => a.data.order - b.data.order || a.id.localeCompare(b.id))
+   .slice(0, 3);
+ const posts = visiblePosts(await getCollection('blog')).slice(0, 2);
+ const about = await getEntry('pages', 'about-en');
+ ---
+ <BaseLayout
+   title="Zicong Yang · Medical Signal Processing & Computer Vision"
+   description="Personal site of Zicong Yang: publications, engineering work, and technical writing."
+   profilePage
+ >
+   <Hero />
+diff --git a/tests/relations.test.ts b/tests/relations.test.ts
+new file mode 100644
+index 0000000..eb6a5dc
+--- /dev/null
++++ b/tests/relations.test.ts
+@@ -0,0 +1,37 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { validateRelations } from '../src/lib/relations.ts';
++
++const pub = (over: Record<string, unknown> = {}) =>
++  ({
++    id: 'paper',
++    data: { doi: '10.1/x', relatedWork: [], ...over },
++  }) as any;
++
++const work = (over: Record<string, unknown> = {}) =>
++  ({
++    id: 'project',
++    data: { relatedPublications: [], ...over },
++  }) as any;
++
++test('validateRelations accepts resolvable references', () => {
++  assert.deepEqual(
++    validateRelations(
++      [pub({ relatedWork: ['project'] })],
++      [work({ relatedPublications: ['10.1/x'] })]
++    ),
++    []
++  );
++});
++
++test('validateRelations reports missing work slugs', () => {
++  const errors = validateRelations([pub({ relatedWork: ['missing'] })], [work()]);
++  assert.equal(errors.length, 1);
++  assert.match(errors[0]!, /relatedWork "missing" not found/);
++});
++
++test('validateRelations reports missing dois', () => {
++  const errors = validateRelations([pub()], [work({ relatedPublications: ['10.9/x'] })]);
++  assert.equal(errors.length, 1);
++  assert.match(errors[0]!, /relatedPublications "10\.9\/x" not found/);
++});
+diff --git a/tests/schema.test.ts b/tests/schema.test.ts
+index 18303b0..207f3e7 100644
+--- a/tests/schema.test.ts
++++ b/tests/schema.test.ts
+@@ -3,20 +3,21 @@ import assert from 'node:assert/strict';
+ import { publicationSchema, workSchema, blogSchema } from '../src/lib/schema.ts';
+ 
+ const paper = {
+   title: 'A paper',
+   authors: ['Zicong Yang', 'Someone Else'],
+   venue: 'Scientific Reports',
+   year: 2024,
+   type: 'journal' as const,
+   indexing: 'Q1' as const,
+   role: 'first' as const,
++  topics: ['medical-signal'],
+   doi: '10.1038/s41598-024-71700-z',
+   date: '2024-09-01',
+ };
+ 
+ test('publication accepts a valid entry', () => {
+   assert.equal(publicationSchema.safeParse(paper).success, true);
+ });
+ 
+ test('publication rejects a missing doi', () => {
+   const { doi, ...rest } = paper;
+diff --git a/tests/topics.test.ts b/tests/topics.test.ts
+new file mode 100644
+index 0000000..71f93e4
+--- /dev/null
++++ b/tests/topics.test.ts
+@@ -0,0 +1,17 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { topicName, topicSlugs, topics } from '../src/lib/topics.ts';
++
++test('topic slugs are unique and non-empty', () => {
++  assert.equal(new Set(topicSlugs).size, topicSlugs.length);
++  assert.ok(topicSlugs.every((slug) => slug.length > 0));
++});
++
++test('every topic has a name and blurb', () => {
++  assert.ok(topics.every((topic) => topic.name.length > 0 && topic.blurb.length > 0));
++});
++
++test('topicName resolves known slugs and falls back to the slug', () => {
++  assert.equal(topicName('medical-signal'), 'Medical Signal Processing');
++  assert.equal(topicName('unknown' as never), 'unknown');
++});

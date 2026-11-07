@@ -16,7 +16,7 @@ role: first
 topics: ["industrial-vision"]
 doi: "10.1109/cvidl62147.2024.10604082"
 url: "https://ieeexplore.ieee.org/abstract/document/10604082"
-pages: "339-343"
+pages: "339--343"
 selected: true
 date: "2024-04-01"
 ---

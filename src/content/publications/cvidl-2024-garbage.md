@@ -15,7 +15,7 @@ authorNote: "Student 2nd author"
 topics: ["industrial-vision"]
 doi: "10.1109/cvidl62147.2024.10604280"
 url: "https://ieeexplore.ieee.org/abstract/document/10604280"
-pages: "334-338"
+pages: "334--338"
 selected: false
 date: "2024-04-19"
 ---

@@ -33,3 +33,12 @@
 
 - `authorNote` 与 `role` 并存：位次筛选仍只按 `role === 'first'`，学生位次只影响徽标文案，符合规格。
 - `relatedWork` 只放了两条，其余论文暂无关联项目。
+
+## 审查修复
+
+- 补 6 条测试：`toBibtex` 含/省略 volume 与 pages；publication 缺 topics、topics 为空、authorNote 超 40 字符；work 的 problem 超 600 字符。
+- 页码范围改为 BibTeX 惯例的 `--`（CISSE 87--103、CVIDL 339--343 / 334--338、IPMLP 245--250）。
+- 补记：首页 project 排序增加了 `id` 次级键（简报外的小改动，用于确定性排序）。
+- `?? []` 兜底保留：实测 `getCollection` 返回的 work 条目未应用 schema default，`relatedPublications` 为 undefined 时构建抛 `is not iterable`。
+
+验证：`npm test` 42/42；`npm run check` 0 errors；`npm run build` 17 页。

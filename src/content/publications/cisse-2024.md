@@ -14,7 +14,7 @@ role: first
 topics: ["medical-signal"]
 doi: "10.1007/978-3-031-57037-7_7"
 url: "https://doi.org/10.1007/978-3-031-57037-7_7"
-pages: "87-103"
+pages: "87--103"
 selected: false
 date: "2024-01-01"
 ---

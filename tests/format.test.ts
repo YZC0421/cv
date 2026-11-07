@@ -71,3 +71,31 @@ test('toBibtex produces an inproceedings entry with booktitle', () => {
   assert.match(bib, /@inproceedings\{/);
   assert.match(bib, /booktitle = \{CVIDL 2024\}/);
 });
+
+test('toBibtex includes volume and pages when provided', () => {
+  const bib = toBibtex({
+    title: 'A paper',
+    authors: ['Zicong Yang'],
+    venue: 'Measurement Science and Technology',
+    year: 2025,
+    doi: '10.1088/example',
+    type: 'journal',
+    volume: '36',
+    pages: '116107',
+  });
+  assert.match(bib, /volume = \{36\}/);
+  assert.match(bib, /pages = \{116107\}/);
+});
+
+test('toBibtex omits volume and pages when absent', () => {
+  const bib = toBibtex({
+    title: 'A paper',
+    authors: ['Zicong Yang'],
+    venue: 'Scientific Reports',
+    year: 2024,
+    doi: '10.1038/example',
+    type: 'journal',
+  });
+  assert.equal(bib.includes('volume'), false);
+  assert.equal(bib.includes('pages'), false);
+});

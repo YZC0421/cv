@@ -85,3 +85,34 @@ test('publication ignores unknown frontmatter fields', () => {
   assert.equal(result.success, true);
   assert.equal('unknownField' in (result.success ? result.data : {}), false);
 });
+
+test('publication rejects missing topics', () => {
+  const { topics, ...rest } = paper;
+  assert.equal(publicationSchema.safeParse(rest).success, false);
+});
+
+test('publication rejects an empty topics list', () => {
+  assert.equal(publicationSchema.safeParse({ ...paper, topics: [] }).success, false);
+});
+
+test('publication rejects an authorNote longer than 40 characters', () => {
+  assert.equal(
+    publicationSchema.safeParse({ ...paper, authorNote: 'x'.repeat(41) }).success,
+    false
+  );
+});
+
+test('work rejects a problem statement longer than 600 characters', () => {
+  const job = {
+    title: 'Project',
+    org: 'Lab',
+    kind: 'project' as const,
+    role: 'Lead',
+    start: '2024-01',
+    end: '2024-06',
+    summary: 'Short summary.',
+    highlights: ['A highlight'],
+    problem: 'x'.repeat(601),
+  };
+  assert.equal(workSchema.safeParse(job).success, false);
+});
