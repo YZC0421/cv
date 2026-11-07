@@ -3,7 +3,10 @@ interface Props {
   headings: { depth: number; slug: string; text: string }[];
 }
 const { headings } = Astro.props;
-const items = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+const items = headings.filter(
+  (heading) =>
+    (heading.depth === 2 || heading.depth === 3) && heading.slug !== 'footnote-label'
+);
 ---
 {items.length > 0 && (
   <nav class="toc" aria-label="Table of contents">

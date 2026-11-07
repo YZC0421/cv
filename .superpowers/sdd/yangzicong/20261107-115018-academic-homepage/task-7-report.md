@@ -57,3 +57,15 @@
 - **RSS**：补 `<language>zh-CN</language>`。
 
 验证：`npm test` 22/22；`npm run build` 成功；产物含 `toc-aside`、`sticky`、`shiki-dark`；单篇文章页无空 `next-prev`；`npm run check` 0 errors。
+
+## 第二轮审查修复
+
+- **Shiki 深色模式**：`astro.config.mjs` 加 `defaultColor: false`，Shiki 改为只输出 `--shiki-light/dark` 变量，现有 CSS 规则生效；示例文章补一个 ```bash 代码块，产物确认 `class="astro-code ..."` 与 `--shiki-light:#24292e`。
+- **目录混入脚注**：`Toc` 过滤 `footnote-label`，产物中 `href="#footnote-label"` 为 0。
+- **RSS 频道链接**：`site` 改为 `new URL(import.meta.env.BASE_URL, context.site)`，`<link>` 输出 `https://yzc0421.github.io/cv/`。
+- **hidden 收窄**：全局 `[hidden] !important` 改为 `.post-list li[hidden]`。
+- **空目录控件**：`hasToc` 判断后才渲染移动端 `<details>`。
+- **文案与分隔符**：单篇文章显示 `1 post`；标签用 `|` 连接，避免含空格标签失配。
+- **排序稳定**：`visiblePosts` 增加 `id` 次级键。
+
+验证：`npm test` 22/22；`npm run build` 成功；`npm run check` 0 errors。

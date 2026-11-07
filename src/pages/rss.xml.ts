@@ -10,7 +10,7 @@ export async function GET(context: APIContext) {
   return rss({
     title: 'Zicong Yang · Writing',
     description: 'Notes on software engineering, computer vision, and research.',
-    site: context.site!,
+    site: new URL(import.meta.env.BASE_URL, context.site!),
     customData: '<language>zh-CN</language>',
     items: posts.map((post) => ({
       title: post.data.title,

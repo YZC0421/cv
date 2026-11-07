@@ -20,6 +20,16 @@ draft: false
 论文、项目、文章被拆成独立的 Markdown 文件，frontmatter 由 Zod 校验。构建期完成排序、
 首页精选、RSS 与 sitemap，运行期只保留三段原生 JS：主题切换、列表筛选、BibTeX 复制。
 
+## 构建与校验
+
+每次提交前跑同一组命令：
+
+```bash
+npm test
+npm run check
+npm run build
+```
+
 ## 得到什么
 
 - 新增一篇论文只需新增一个文件。

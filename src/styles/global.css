@@ -198,7 +198,7 @@ h3 { font-size: 1.125rem; }
 @media (min-width: 1024px) {
   .toc-aside { display: block; position: sticky; top: 80px; align-self: start; }
 }
-[hidden] { display: none !important; }
+.post-list li[hidden] { display: none; }
 .astro-code { background-color: var(--shiki-light-bg); border-radius: 8px; }
 .astro-code span { color: var(--shiki-light); }
 [data-theme='dark'] .astro-code { background-color: var(--shiki-dark-bg); }

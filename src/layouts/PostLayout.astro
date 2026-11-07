@@ -13,6 +13,9 @@ interface Props {
 }
 const { title, description, date, lang, tags, headings, readingTime } = Astro.props;
 const readingLabel = lang === 'zh' ? `约 ${readingTime} 分钟` : `${readingTime} min read`;
+const hasToc = headings.some(
+  (heading) => (heading.depth === 2 || heading.depth === 3) && heading.slug !== 'footnote-label'
+);
 ---
 <BaseLayout
   title={`${title} · Zicong Yang`}
@@ -35,10 +38,12 @@ const readingLabel = lang === 'zh' ? `约 ${readingTime} 分钟` : `${readingTim
           {tags.map((tag) => <span class="lang-badge">{tag}</span>)}
         </div>
       </header>
-      <details class="toc-mobile">
-        <summary>Table of contents</summary>
-        <Toc headings={headings} />
-      </details>
+      {hasToc && (
+        <details class="toc-mobile">
+          <summary>Table of contents</summary>
+          <Toc headings={headings} />
+        </details>
+      )}
       <div class="prose"><slot /></div>
       <slot name="footer" />
     </article>
