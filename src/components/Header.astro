@@ -1,0 +1,30 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+const base = import.meta.env.BASE_URL;
+const path = Astro.url.pathname;
+const links = [
+  { href: `${base}publications`, label: 'Publications' },
+  { href: `${base}work`, label: 'Work' },
+  { href: `${base}blog`, label: 'Writing' },
+  { href: `${base}about`, label: 'About' },
+];
+const trail = path.replace(base, '/');
+const isCurrent = (href: string) => {
+  const target = href.replace(base, '/');
+  return target === '/' ? trail === '/' : trail.startsWith(target);
+};
+---
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href={base}>Zicong Yang</a>
+    <details class="nav-details">
+      <summary class="nav-toggle">Menu</summary>
+      <nav class="nav">
+        {links.map((link) => (
+          <a href={link.href} aria-current={isCurrent(link.href) ? 'page' : undefined}>{link.label}</a>
+        ))}
+      </nav>
+    </details>
+    <ThemeToggle />
+  </div>
+</header>
