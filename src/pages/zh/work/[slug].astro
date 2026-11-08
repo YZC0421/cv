@@ -1,7 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import { getCollection, render } from 'astro:content';
+import { getCollection } from 'astro:content';
 import { localizedProject } from '../../../lib/projects';
 import { t } from '../../../i18n/ui';
 
@@ -14,7 +14,6 @@ interface Props {
   item: CollectionEntry<'work'>;
 }
 const { item } = Astro.props;
-const { Content } = await render(item);
 const d = item.data;
 const dois = d.relatedPublications ?? [];
 const publications = dois.length > 0 ? await getCollection('publications') : [];

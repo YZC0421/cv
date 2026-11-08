@@ -34,7 +34,12 @@ export function statusLabel(
   return status === 'complete' ? 'Completed' : status === 'ongoing' ? 'Ongoing' : 'Planned';
 }
 
-export function localizedProject(item: Project, lang: 'en' | 'zh') {
+type ProjectZh = NonNullable<Project['data']['zh']>;
+
+export function localizedProject(
+  item: Project,
+  lang: 'en' | 'zh'
+): Project['data'] & Partial<ProjectZh> {
   const data = item.data;
   if (lang !== 'zh' || !data.zh) return data;
   return {
@@ -42,7 +47,7 @@ export function localizedProject(item: Project, lang: 'en' | 'zh') {
     ...Object.fromEntries(
       Object.entries(data.zh).filter(([, value]) => value !== undefined)
     ),
-  } as typeof data;
+  };
 }
 
 export function sortProjects(items: Project[]): Project[] {
