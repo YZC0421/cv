@@ -9,8 +9,9 @@ const paper = {
   year: 2024,
   type: 'journal' as const,
   indexing: 'Q1' as const,
+  area: 'biomedical-signal' as const,
   role: 'first' as const,
-  topics: ['medical-signal'],
+  topics: ['ecg-classification'],
   doi: '10.1038/s41598-024-71700-z',
   date: '2024-09-01',
 };
@@ -19,10 +20,10 @@ test('publication accepts a valid entry', () => {
   assert.equal(publicationSchema.safeParse(paper).success, true);
 });
 
-test('publication rejects a missing doi', () => {
+test('publication accepts an entry without a doi', () => {
   const { doi, ...rest } = paper;
   const result = publicationSchema.safeParse(rest);
-  assert.equal(result.success, false);
+  assert.equal(result.success, true);
 });
 
 test('publication rejects a year below 2000', () => {
