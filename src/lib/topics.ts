@@ -11,10 +11,8 @@ export const subtopicSlugs = [
   'object-detection',
   'industrial-defect',
   'ecg-classification',
-  'spatio-temporal',
-  'multiscale-fusion',
-  'predictive-modeling',
-  'data-driven-decision',
+  'spatio-temporal-multiscale',
+  'predictive-data-driven',
 ] as const;
 
 export type SubtopicSlug = (typeof subtopicSlugs)[number];
@@ -62,8 +60,8 @@ export const researchAreas: ResearchArea[] = [
         name: 'Object Detection and Visual Recognition',
         nameZh: '目标检测与视觉识别',
         description:
-          'YOLO-family models and deep vision architectures for detection and classification in complex environments.',
-        descriptionZh: '基于 YOLO 系列模型与深度视觉架构的复杂环境目标检测、图像分类与智能识别。',
+          'YOLO-family models and deep vision architectures for localisation, classification, and recognition in complex backgrounds.',
+        descriptionZh: '基于 YOLO 系列模型与深度视觉架构，研究复杂背景下的目标定位、图像分类与智能识别。',
       },
       {
         slug: 'industrial-defect',
@@ -71,7 +69,7 @@ export const researchAreas: ResearchArea[] = [
         nameZh: '工业缺陷检测与扩散模型',
         description:
           'Generative AI, diffusion models, deep features, and detection for small defects in industrial settings.',
-        descriptionZh: '结合生成式 AI、扩散模型、深度特征与检测技术，研究复杂工业环境中的缺陷识别与小目标检测。',
+        descriptionZh: '结合生成式 AI、扩散模型、深度特征与检测技术，研究复杂工业环境中的缺陷识别、小目标检测与特征增强。',
       },
     ],
   },
@@ -90,24 +88,16 @@ export const researchAreas: ResearchArea[] = [
         name: 'ECG Classification and Arrhythmia Detection',
         nameZh: '心电信号分类与心律失常检测',
         description:
-          'Deep networks for feature extraction, classification, and arrhythmia detection on multi-lead ECG.',
-        descriptionZh: '利用深度神经网络对多导联心电信号进行特征提取、分类与心律失常检测。',
+          'Deep networks, residual and recurrent architectures, and attention for multi-lead ECG feature extraction and arrhythmia detection.',
+        descriptionZh: '利用深度神经网络、残差网络、循环神经网络与注意力机制，对多导联心电信号进行特征提取、分类与心律失常检测。',
       },
       {
-        slug: 'spatio-temporal',
-        name: 'Spatio-Temporal Representation Learning',
-        nameZh: '时空特征表征学习',
+        slug: 'spatio-temporal-multiscale',
+        name: 'Spatio-Temporal Representation Learning and Multiscale Feature Fusion',
+        nameZh: '时空特征表征学习与多尺度特征融合',
         description:
-          'Joint modelling of temporal signals and spatial features, and dependency learning in multi-dimensional data.',
-        descriptionZh: '研究时序信号与空间特征的联合建模，探索多维数据中的时空依赖与特征表示。',
-      },
-      {
-        slug: 'multiscale-fusion',
-        name: 'Multiscale Feature Fusion',
-        nameZh: '多尺度特征融合',
-        description:
-          'Multiscale extraction, attention, and cross-architecture feature interaction for richer representations.',
-        descriptionZh: '利用多尺度特征提取、注意力机制与跨架构特征交互增强模型表达能力。',
+          'Joint modelling of spatio-temporal dependencies with adaptive multiscale extraction and fusion for complex biomedical signals.',
+        descriptionZh: '研究深度神经网络对多导联生物医学信号的时空依赖建模，利用自适应多尺度特征提取与融合提升复杂信号识别能力。',
       },
     ],
   },
@@ -122,20 +112,12 @@ export const researchAreas: ResearchArea[] = [
     blurbZh: '面向业务与运营问题的预测建模与数据驱动决策支持。',
     subtopics: [
       {
-        slug: 'predictive-modeling',
-        name: 'Predictive Modeling',
-        nameZh: '预测建模',
+        slug: 'predictive-data-driven',
+        name: 'Predictive Modeling and Data-Driven Decision Making',
+        nameZh: '预测建模与数据驱动决策',
         description:
-          'Machine learning for classification, prediction, and intelligent analysis of structured data.',
-        descriptionZh: '利用机器学习算法挖掘数据规律，构建分类、预测与智能分析模型。',
-      },
-      {
-        slug: 'data-driven-decision',
-        name: 'Data-Driven Decision Making',
-        nameZh: '数据驱动的智能决策',
-        description:
-          'Turning model predictions into business analysis and operational decisions.',
-        descriptionZh: '利用预测结果辅助业务分析与决策，探索 AI 在管理与数据驱动决策中的应用。',
+          'Machine learning for pattern discovery, predictive modelling, intelligent classification, and decision support.',
+        descriptionZh: '利用机器学习算法挖掘数据规律，构建数据驱动的预测模型，实现智能分类、预测分析与辅助决策。',
       },
     ],
   },
@@ -147,16 +129,16 @@ export function areaName(slug: AreaSlug, lang: 'en' | 'zh' = 'en'): string {
   return lang === 'zh' ? area.nameZh : area.name;
 }
 
-export function areaShort(slug: AreaSlug, lang: 'en' | 'zh' = 'en'): string {
-  const area = researchAreas.find((entry) => entry.slug === slug);
-  if (!area) return slug;
-  return lang === 'zh' ? area.shortZh : area.short;
-}
-
 export function areaBlurb(slug: AreaSlug, lang: 'en' | 'zh' = 'en'): string {
   const area = researchAreas.find((entry) => entry.slug === slug);
   if (!area) return '';
   return lang === 'zh' ? area.blurbZh : area.blurb;
+}
+
+export function areaShort(slug: AreaSlug, lang: 'en' | 'zh' = 'en'): string {
+  const area = researchAreas.find((entry) => entry.slug === slug);
+  if (!area) return slug;
+  return lang === 'zh' ? area.shortZh : area.short;
 }
 
 export function subtopic(slug: SubtopicSlug): Subtopic | undefined {

@@ -23,9 +23,20 @@ test('every subtopic belongs to exactly one area', () => {
   }
 });
 
-test('every area has three subtopics except predictive analytics', () => {
+test('subtopic counts match the merged structure', () => {
   const counts = researchAreas.map((area) => area.subtopics.length);
-  assert.deepEqual(counts, [3, 3, 2]);
+  assert.deepEqual(counts, [3, 2, 1]);
+});
+
+test('merged subtopics are registered', () => {
+  assert.equal(
+    subtopicName('spatio-temporal-multiscale'),
+    'Spatio-Temporal Representation Learning and Multiscale Feature Fusion'
+  );
+  assert.equal(
+    subtopicName('predictive-data-driven'),
+    'Predictive Modeling and Data-Driven Decision Making'
+  );
 });
 
 test('subtopicName resolves known slugs and falls back to the slug', () => {

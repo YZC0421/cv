@@ -17,7 +17,7 @@ type: journal
 indexing: Q1
 role: first
 area: biomedical-signal
-topics: ["ecg-classification", "spatio-temporal", "multiscale-fusion"]
+topics: ["spatio-temporal-multiscale"]
 doi: "10.1038/s41598-024-71700-z"
 url: "https://www.nature.com/articles/s41598-024-71700-z"
 volume: "14"

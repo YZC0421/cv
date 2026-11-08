@@ -12,7 +12,7 @@ type: conference
 indexing: Q4
 role: first
 area: biomedical-signal
-topics: ["ecg-classification", "spatio-temporal", "multiscale-fusion"]
+topics: ["ecg-classification"]
 doi: "10.1007/978-3-031-57037-7_7"
 url: "https://doi.org/10.1007/978-3-031-57037-7_7"
 pages: "87--103"
