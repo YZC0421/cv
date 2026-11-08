@@ -2,6 +2,7 @@
 import { site } from '../lib/site';
 import { t } from '../i18n/ui';
 import { langFromPath, localeUrl } from '../i18n/utils';
+import { withBase } from '../lib/url';
 
 const lang = langFromPath(Astro.url.pathname);
 const copy = t(lang);
@@ -10,7 +11,7 @@ const year = new Date().getFullYear();
 <footer class="site-footer">
   <div class="inner">
     © {year} {site.name} · <a href={localeUrl('search', lang)}>{copy.footer.search}</a> ·
-    <a href={localeUrl('rss.xml', lang)}>{copy.footer.rss}</a> ·
+    <a href={withBase('rss.xml')}>{copy.footer.rss}</a> ·
     <a href={site.scholar}>Scholar</a> ·
     <a href={site.orcid}>ORCID</a>
     <div class="meta">{copy.footer.builtWith}</div>

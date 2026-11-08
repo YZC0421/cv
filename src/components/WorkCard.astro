@@ -9,10 +9,12 @@ interface Props {
 const { item } = Astro.props;
 const lang = langFromPath(Astro.url.pathname);
 const topics = item.data.topics ?? [];
+const copy = lang === 'zh' ? item.data.zh : undefined;
+const summary = copy?.summary ?? item.data.summary;
 ---
 <article class="work-card" data-topics={topics.join(' ')}>
   <h3><a href={localeUrl(`work/${item.id}`, lang)}>{item.data.title}</a></h3>
-  <p>{item.data.summary}</p>
+  <p>{summary}</p>
   <div class="stack">
     {topics.map((topic) => <span class="badge badge-topic">{subtopicName(topic, lang)}</span>)}
     {item.data.stack.map((tech) => <span>{tech}</span>)}

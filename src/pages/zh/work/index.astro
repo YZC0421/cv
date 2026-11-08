@@ -24,10 +24,14 @@ const projectTopics = subtopicSlugs.filter((slug) =>
       <ul class="timeline">
         {experience.map((job) => (
           <li>
-            <h3><a href={localeUrl(`work/${job.id}`, 'zh')}>{job.data.title}</a></h3>
+            <h3><a href={localeUrl(`work/${job.id}`, 'zh')}>{job.data.zh?.title ?? job.data.title}</a></h3>
             <div class="org">{job.data.org}</div>
             <div class="when">{job.data.start} – {job.data.end}</div>
-            <ul>{job.data.highlights.slice(0, 3).map((highlight) => <li>{highlight}</li>)}</ul>
+            <ul>
+              {(job.data.zh?.highlights ?? job.data.highlights)
+                .slice(0, 3)
+                .map((highlight) => <li>{highlight}</li>)}
+            </ul>
           </li>
         ))}
       </ul>

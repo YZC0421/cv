@@ -12,6 +12,7 @@ results: "MCM Meritorious Winner (top 7%)."
 featured: false
 order: 11
 zh:
+  body: "数学建模竞赛项目，分析 Wordle 难度因素与玩家趋势。"
   title: "纽约时报 Wordle 游戏分析"
   summary: "Wordle 难度建模与玩家趋势预测。"
   goal: "从单词结构解释 Wordle 难度，并预测玩家行为趋势。"

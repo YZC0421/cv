@@ -44,7 +44,11 @@ const copy = t('zh').projects;
     {d.role && <section class="work-block"><h2>{copy.role}</h2><p>{d.role}</p></section>}
     {d.results && <section class="work-block"><h2>{copy.results}</h2><p>{d.results}</p></section>}
 
-    <div class="prose"><Content /></div>
+    {d.body ? (
+      <div class="prose"><p>{d.body}</p></div>
+    ) : (
+      <div class="prose"><Content /></div>
+    )}
 
     {d.stack.length > 0 && (
       <section class="work-block">

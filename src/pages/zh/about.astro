@@ -45,7 +45,11 @@ const jobs = sortExperience(
             <h3>{job.data.title}</h3>
             <div class="org">{job.data.org}</div>
             <div class="when">{job.data.start} – {job.data.end}</div>
-            <ul>{job.data.highlights.slice(0, 2).map((entry) => <li>{entry}</li>)}</ul>
+            <ul>
+              {(job.data.zh?.highlights ?? job.data.highlights)
+                .slice(0, 2)
+                .map((entry) => <li>{entry}</li>)}
+            </ul>
           </li>
         ))}
       </ul>

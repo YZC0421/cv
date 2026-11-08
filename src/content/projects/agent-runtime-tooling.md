@@ -18,6 +18,7 @@ todo:
 featured: true
 order: 3
 zh:
+  body: "工具调用型 Agent 在工程落地中的运行时与管理机制研究，具体范围待补充。"
   title: "AI Agent Runtime 与工具管理机制研究"
   summary: "TODO：研究问题与范围，待补充。"
   goal: "TODO：研究目标，例如工具注册、调用约束或失败恢复。"

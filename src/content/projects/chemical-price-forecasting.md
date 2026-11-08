@@ -18,6 +18,7 @@ todo:
 featured: false
 order: 2
 zh:
+  body: "化工产品价格预测研究，数据来源与建模方案待补充。"
   title: "化工产品价格预测研究"
   summary: "TODO：预测对象、时间粒度与业务用途，待补充。"
   goal: "TODO：研究目标与评估口径。"

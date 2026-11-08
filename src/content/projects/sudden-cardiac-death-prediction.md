@@ -17,6 +17,7 @@ todo:
 featured: true
 order: 10
 zh:
+  body: "省级学生科研项目，研究基于多导联 ECG 的心源性猝死风险建模。"
   title: "心源性猝死预测模型"
   summary: "端到端 ECG 研究项目，产出两篇第一作者论文。"
   goal: "在噪声与跨导联时序建模受限的情况下，提升多导联 ECG 心律失常检测精度。"

@@ -22,6 +22,12 @@ links:
     url: "https://doi.org/10.1007/978-3-031-57037-7_7"
 relatedPublications: ["10.1038/s41598-024-71700-z"]
 order: 1
+zh:
+  summary: "端到端 ECG 研究项目，产出两篇第一作者论文。"
+  highlights:
+    - "负责申报、设计、实现、发表与结项。"
+    - "设计带协同通道-空间注意力与时间融合的 STFAC-ECGNet。"
+    - "发表两篇第一作者论文（JCR Q1、Q4）。"
 ---
 
 Led the project end-to-end and designed a multiscale spatio-temporal fusion network for

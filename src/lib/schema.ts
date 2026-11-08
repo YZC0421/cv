@@ -43,6 +43,13 @@ export const workSchema = z
       .array(z.object({ label: z.string().min(1), url: z.string().url() }))
       .default([]),
     topics: z.array(topic).default([]),
+    zh: z
+      .object({
+        title: z.string().min(1).max(80).optional(),
+        summary: z.string().min(1).max(200).optional(),
+        highlights: z.array(z.string().min(1)).optional(),
+      })
+      .optional(),
     problem: z.string().max(600).optional(),
     approach: z.string().max(600).optional(),
     results: z.string().max(600).optional(),
@@ -90,6 +97,7 @@ export const projectCategories = [
 
 export const projectZhSchema = z.object({
   title: z.string().min(1).optional(),
+  body: z.string().optional(),
   summary: z.string().min(1).max(220).optional(),
   goal: z.string().optional(),
   architecture: z.string().optional(),

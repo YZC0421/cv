@@ -22,7 +22,7 @@ const projects = sortProjects(await getCollection('projects')).filter(
 );
 const publications = sortPublications(await getCollection('publications'));
 ---
-<ResumeLayout>
+<ResumeLayout title="简历 · 杨梓聪" description="杨梓聪的简历：教育、工作经历、项目、技能与论文。">
   <header class="resume-head">
     <h1>{profile.nameZh}</h1>
     <p class="resume-role">{zh.headline}</p>
@@ -58,10 +58,12 @@ const publications = sortPublications(await getCollection('publications'));
     {fullTime.map((job) => (
       <div class="resume-item">
         <div class="resume-item-head">
-          <strong>{job.data.title} · {job.data.org}</strong>
+          <strong>{job.data.zh?.title ?? job.data.title} · {job.data.org}</strong>
           <span>{job.data.start} – {job.data.end}</span>
         </div>
-        <ul>{job.data.highlights.slice(0, 3).map((entry) => <li>{entry}</li>)}</ul>
+        <ul>
+          {(job.data.zh?.highlights ?? job.data.highlights).slice(0, 3).map((entry) => <li>{entry}</li>)}
+        </ul>
       </div>
     ))}
   </section>
@@ -71,10 +73,12 @@ const publications = sortPublications(await getCollection('publications'));
     {[...internships, ...startup].map((job) => (
       <div class="resume-item">
         <div class="resume-item-head">
-          <strong>{job.data.title} · {job.data.org}</strong>
+          <strong>{job.data.zh?.title ?? job.data.title} · {job.data.org}</strong>
           <span>{job.data.start} – {job.data.end}</span>
         </div>
-        <ul>{job.data.highlights.slice(0, 2).map((entry) => <li>{entry}</li>)}</ul>
+        <ul>
+          {(job.data.zh?.highlights ?? job.data.highlights).slice(0, 2).map((entry) => <li>{entry}</li>)}
+        </ul>
       </div>
     ))}
   </section>

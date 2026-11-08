@@ -8,10 +8,18 @@ import { t } from '../i18n/ui';
 
 const lang = langFromPath(Astro.url.pathname);
 const copy = t(lang).home;
-const [publications, work] = await Promise.all([
+const [publications, work, projects] = await Promise.all([
   getCollection('publications'),
   getCollection('work'),
+  getCollection('projects'),
 ]);
+
+const projectTitles: Record<string, string> = Object.fromEntries(
+  projects.map((project) => [
+    project.id,
+    lang === 'zh' ? (project.data.zh?.title ?? project.data.title) : project.data.title,
+  ])
+);
 
 const areas = researchAreas.map((area) => ({
   slug: area.slug,
@@ -23,11 +31,13 @@ const areas = researchAreas.map((area) => ({
     );
     const firstAuthor = papers.find((pub) => pub.data.role === 'first');
     const entries = sortWork(work.filter((item) => item.data.topics?.includes(sub.slug)));
+    const entry = entries[0];
     return {
       slug: sub.slug,
       name: subtopicName(sub.slug, lang),
       paper: firstAuthor ?? papers[0],
-      entry: entries[0],
+      entry,
+      entryTitle: entry ? (projectTitles[entry.id] ?? entry.data.title) : undefined,
     };
   }),
 }));
@@ -59,7 +69,7 @@ const areas = researchAreas.map((area) => ({
                   ))}
                 {!sub.paper && sub.entry && (
                   <a class="subtopic-paper" href={localeUrl(`work/${sub.entry.id}`, lang)}>
-                    {sub.entry.data.title}
+                    {sub.entryTitle}
                   </a>
                 )}
               </li>

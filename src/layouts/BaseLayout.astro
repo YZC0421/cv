@@ -62,9 +62,13 @@ const profile = {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="alternate" hreflang="en" href={enHref} />
-    <link rel="alternate" hreflang="zh-CN" href={zhHref} />
-    <link rel="alternate" hreflang="x-default" href={enHref} />
+    {!noindex && (
+      <>
+        <link rel="alternate" hreflang="en" href={enHref} />
+        <link rel="alternate" hreflang="zh-CN" href={zhHref} />
+        <link rel="alternate" hreflang="x-default" href={enHref} />
+      </>
+    )}
     {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
     <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
     <link rel="preload" href={fontUrl} as="font" type="font/woff2" crossorigin />
@@ -97,7 +101,7 @@ const profile = {
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
-    <Header />
+    <Header hideLangSwitch={noindex} />
     <main id="main" tabindex="-1"><slot /></main>
     <Footer />
     <PublicationScripts />

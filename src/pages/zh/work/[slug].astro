@@ -2,6 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { getCollection, render } from 'astro:content';
+import { localizedProject } from '../../../lib/projects';
 import { t } from '../../../i18n/ui';
 
 export async function getStaticPaths() {
@@ -21,26 +22,32 @@ const relatedPublications = publications.filter(
   (pub) => pub.data.doi && dois.includes(pub.data.doi)
 );
 const copy = t('zh').projects;
+const projectEntry = (await getCollection('projects')).find((project) => project.id === item.id);
+const localizedEntry = projectEntry ? localizedProject(projectEntry, 'zh') : undefined;
+const heading = d.zh?.title ?? localizedEntry?.title ?? d.title;
+const summary = d.zh?.summary ?? d.summary;
+const problem = localizedEntry?.goal ?? d.problem;
+const approach = localizedEntry?.architecture ?? d.approach;
+const results = localizedEntry?.results ?? d.results;
+const highlights = d.zh?.highlights ?? d.highlights;
 ---
-<BaseLayout title={`${d.title} · 杨梓聪`} description={d.summary} lang="zh">
+<BaseLayout title={`${heading} · 杨梓聪`} description={summary} lang="zh">
   <article class="container reading work-detail" style="padding-top:40px">
-    <h1>{d.title}</h1>
-    <p class="meta">{d.role} · {d.org} · {d.start} – {d.end}</p>
+    <h1>{heading}</h1>
+    <p class="meta">{heading} · {d.org} · {d.start} – {d.end}</p>
 
-    {d.problem && <section class="work-block"><h2>{copy.goal}</h2><p>{d.problem}</p></section>}
-    {d.approach && <section class="work-block"><h2>{copy.architecture}</h2><p>{d.approach}</p></section>}
-    {d.results && <section class="work-block"><h2>{copy.results}</h2><p>{d.results}</p></section>}
-
-    <div class="prose"><Content /></div>
+    {problem && <section class="work-block"><h2>{copy.goal}</h2><p>{problem}</p></section>}
+    {approach && <section class="work-block"><h2>{copy.architecture}</h2><p>{approach}</p></section>}
+    {results && <section class="work-block"><h2>{copy.results}</h2><p>{results}</p></section>}
 
     <section class="work-block">
       <h2>{copy.role}</h2>
-      <p>{d.role} · {d.org}</p>
+      <p>{heading} · {d.org}</p>
     </section>
 
     <section class="work-block">
       <h2>要点</h2>
-      <ul>{d.highlights.map((highlight) => <li>{highlight}</li>)}</ul>
+      <ul>{highlights.map((highlight) => <li>{highlight}</li>)}</ul>
     </section>
 
     {d.stack.length > 0 && (

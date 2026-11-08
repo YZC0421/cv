@@ -12,6 +12,7 @@ results: "Report recognized as a National Excellent Research Report; the accompa
 featured: false
 order: 13
 zh:
+  body: "调研区域乡村振兴路径研究项目。"
   title: "“农业 + 旅游”模式助推乡村振兴路径研究"
   summary: "基于问卷调研的农业与旅游融合路径研究。"
   goal: "为乡村规划提供茶叶产量、施肥量与机械总动力方面的数据。"

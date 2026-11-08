@@ -16,6 +16,12 @@ highlights:
   - "Applied BERT sentiment analysis to generate word clouds and user profiles."
   - "Won a National Third Prize in the CP Group Cup market research competition."
 order: 3
+zh:
+  summary: "基于 120,756 条京东评论与 BERT 情感分析的消费者需求分析。"
+  highlights:
+    - "用自动化爬虫采集 120,756 条可口可乐产品评论。"
+    - "应用 BERT 情感分析生成词云与用户画像。"
+    - "获正大杯市场调研大赛全国三等奖。"
 ---
 
 Led the data-mining work for a brand research project on Coca-Cola consumer demand.

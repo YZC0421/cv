@@ -18,6 +18,7 @@ todo:
 featured: true
 order: 1
 zh:
+  body: "面向供需健康诊断的 AI 系统，项目背景与业务细节待补充。"
   title: "AI 供需健康诊断系统"
   summary: "TODO：系统定位与要解决的核心问题，待补充。"
   goal: "TODO：项目目标与成功标准。"

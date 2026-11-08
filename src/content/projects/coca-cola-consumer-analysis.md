@@ -12,6 +12,7 @@ results: "National Third Prize in the CP Group Cup market research competition."
 featured: false
 order: 12
 zh:
+  body: "可口可乐中国市场消费者需求研究项目。"
   title: "消费者需求分析（可口可乐）"
   summary: "基于 120,756 条京东评论与 BERT 情感分析的消费者需求分析。"
   goal: "从大规模评论语料中建立可量化的消费者情感视图。"
