@@ -6,7 +6,7 @@ role: "Project Lead"
 start: "2023-03"
 end: "2024-06"
 summary: "End-to-end ECG research project that produced two first-author papers."
-topics: ["medical-signal"]
+topics: ["ecg-classification"]
 problem: "Multi-lead ECG arrhythmia detection is limited by noisy signals and weak cross-lead temporal modeling, which constrains classification accuracy on public datasets."
 approach: "Converted multi-lead ECG to 2D grayscale images, fused grayscale features, and designed STFAC-ECGNet with coordinated channel-spatial attention and temporal fusion."
 results: "Improved classification accuracy on PTB-XL and CPSC2018, producing two first-author papers (JCR Q1 and Q4)."

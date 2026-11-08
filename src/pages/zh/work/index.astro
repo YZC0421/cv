@@ -2,7 +2,7 @@
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import WorkCard from '../../../components/WorkCard.astro';
 import { getCollection } from 'astro:content';
-import { topics } from '../../../lib/topics';
+import { subtopicName, subtopicSlugs } from '../../../lib/topics';
 import { localeUrl } from '../../../i18n/utils';
 import { t } from '../../../i18n/ui';
 import { sortExperience, sortProjects } from '../../../lib/work';
@@ -11,8 +11,8 @@ const copy = t('zh').work;
 const all = await getCollection('work');
 const experience = sortExperience(all.filter((item) => item.data.kind === 'experience'));
 const projects = sortProjects(all.filter((item) => item.data.kind === 'project'));
-const projectTopics = topics.filter((topic) =>
-  projects.some((item) => (item.data.topics ?? []).includes(topic.slug))
+const projectTopics = subtopicSlugs.filter((slug) =>
+  projects.some((item) => (item.data.topics ?? []).includes(slug))
 );
 ---
 <BaseLayout title="工作与项目 · 杨梓聪" description="工程经历与研究项目。" lang="zh">
@@ -40,7 +40,9 @@ const projectTopics = topics.filter((topic) =>
           <span class="filter-label">主题</span>
           <button type="button" data-value="all" aria-pressed="true">{copy.all}</button>
           {projectTopics.map((topic) => (
-            <button type="button" data-value={topic.slug} aria-pressed="false">{topic.nameZh}</button>
+            <button type="button" data-value={topic} aria-pressed="false">
+              {subtopicName(topic, 'zh')}
+            </button>
           ))}
         </div>
       )}

@@ -13,7 +13,8 @@ year: 2024
 type: conference
 indexing: EI
 role: first
-topics: ["agricultural-environmental-vision"]
+area: ai-vision
+topics: ["agricultural-intelligence"]
 doi: "10.1109/cvidl62147.2024.10604082"
 url: "https://ieeexplore.ieee.org/abstract/document/10604082"
 pages: "339--343"

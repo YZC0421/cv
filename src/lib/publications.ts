@@ -4,9 +4,11 @@ type Pub = CollectionEntry<'publications'>;
 
 const roleRank: Record<string, number> = { first: 0, second: 1, third: 2, other: 3 };
 
+const dateOf = (pub: Pub) => pub.data.date ?? `${pub.data.year}-01-01`;
+
 export function sortPublications<T extends Pub>(items: T[]): T[] {
   return [...items].sort((a, b) => {
-    const byDate = b.data.date.localeCompare(a.data.date);
+    const byDate = dateOf(b).localeCompare(dateOf(a));
     if (byDate !== 0) return byDate;
     const byRole = (roleRank[a.data.role] ?? 3) - (roleRank[b.data.role] ?? 3);
     if (byRole !== 0) return byRole;

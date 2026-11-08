@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { topicName } from '../lib/topics';
+import { subtopicName } from '../lib/topics';
 import { langFromPath, localeUrl } from '../i18n/utils';
 
 interface Props {
@@ -14,7 +14,7 @@ const topics = item.data.topics ?? [];
   <h3><a href={localeUrl(`work/${item.id}`, lang)}>{item.data.title}</a></h3>
   <p>{item.data.summary}</p>
   <div class="stack">
-    {topics.map((topic) => <span class="badge badge-topic">{topicName(topic, lang)}</span>)}
+    {topics.map((topic) => <span class="badge badge-topic">{subtopicName(topic, lang)}</span>)}
     {item.data.stack.map((tech) => <span>{tech}</span>)}
   </div>
 </article>

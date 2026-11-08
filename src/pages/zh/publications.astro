@@ -3,7 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PublicationItem from '../../components/PublicationItem.astro';
 import { getCollection } from 'astro:content';
 import { sortPublications } from '../../lib/publications';
-import { topics } from '../../lib/topics';
+import { areaName, researchAreas } from '../../lib/topics';
 import { workTitleMap } from '../../lib/work';
 import { t } from '../../i18n/ui';
 
@@ -17,12 +17,12 @@ const workTitles = workTitleMap(await getCollection('work'));
     <h1>{copy.title}</h1>
     <p class="muted">{copy.intro} 共 {pubs.length} {copy.entries}。</p>
 
-    <div class="filters" role="group" aria-label="按主题筛选论文">
-      <span class="filter-label">{copy.topic}</span>
-      <button type="button" data-group="topic" data-value="all" aria-pressed="true">{copy.all}</button>
-      {topics.map((topic) => (
-        <button type="button" data-group="topic" data-value={topic.slug} aria-pressed="false">
-          {topic.nameZh}
+    <div class="filters" role="group" aria-label="按研究领域筛选论文">
+      <span class="filter-label">领域</span>
+      <button type="button" data-group="area" data-value="all" aria-pressed="true">{copy.all}</button>
+      {researchAreas.map((area) => (
+        <button type="button" data-group="area" data-value={area.slug} aria-pressed="false">
+          {area.nameZh}
         </button>
       ))}
     </div>
@@ -54,14 +54,13 @@ const workTitles = workTitleMap(await getCollection('work'));
       const buttons = document.querySelectorAll('.filters button');
       const rows = document.querySelectorAll('#pub-list .pub-item');
       const status = document.getElementById('pub-status');
-      const state = { topic: 'all', role: 'all', year: 'all' };
+      const state = { area: 'all', role: 'all', year: 'all' };
 
       const apply = () => {
         let visible = 0;
         rows.forEach((row) => {
-          const topics = (row.dataset.topics ?? '').split(' ').filter(Boolean);
           const match =
-            (state.topic === 'all' || topics.includes(state.topic)) &&
+            (state.area === 'all' || row.dataset.area === state.area) &&
             (state.role === 'all' || row.dataset.role === 'first') &&
             (state.year === 'all' || row.dataset.year === state.year);
           row.hidden = !match;
@@ -87,9 +86,9 @@ const workTitles = workTitleMap(await getCollection('work'));
         });
       });
 
-      const initial = new URLSearchParams(window.location.search).get('topic');
+      const initial = new URLSearchParams(window.location.search).get('area');
       if (initial) {
-        const target = [...document.querySelectorAll('.filters button[data-group="topic"]')].find(
+        const target = [...document.querySelectorAll('.filters button[data-group="area"]')].find(
           (btn) => btn.dataset.value === initial
         );
         target?.click();

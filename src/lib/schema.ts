@@ -1,9 +1,10 @@
 import { z } from 'zod';
-import { topicSlugs } from './topics';
+import { areaSlugs, subtopicSlugs } from './topics';
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date must be YYYY-MM-DD');
 const month = z.string().regex(/^\d{4}-\d{2}$/, 'month must be YYYY-MM');
-const topic = z.enum(topicSlugs);
+const topic = z.enum(subtopicSlugs);
+const area = z.enum(areaSlugs);
 
 export const publicationSchema = z.object({
   title: z.string().min(1),
@@ -15,14 +16,17 @@ export const publicationSchema = z.object({
   indexing: z.enum(['Q1', 'Q2', 'Q3', 'Q4', 'EI', 'none']).default('none'),
   role: z.enum(['first', 'second', 'third', 'other']),
   authorNote: z.string().max(40).optional(),
+  area: area,
   topics: z.array(topic).min(1),
-  doi: z.string().min(3),
+  doi: z.string().min(3).optional(),
   url: z.string().url().optional(),
   volume: z.string().optional(),
+  issue: z.string().optional(),
   pages: z.string().optional(),
+  articleNumber: z.string().optional(),
   relatedWork: z.array(z.string()).default([]),
   selected: z.boolean().default(false),
-  date: isoDate,
+  date: isoDate.optional(),
 });
 
 export const workSchema = z

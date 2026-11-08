@@ -4,6 +4,7 @@ import { getCollection } from 'astro:content';
 import { profile } from '../../data/profile';
 import { sortExperience } from '../../lib/work';
 import { localizedProject, sortProjects } from '../../lib/projects';
+import { sortPublications } from '../../lib/publications';
 import { t } from '../../i18n/ui';
 
 const copy = t('zh').resume;
@@ -19,9 +20,7 @@ const startup = jobs.filter((job) => job.id === 'campus-startup');
 const projects = sortProjects(await getCollection('projects')).filter(
   (item) => item.data.status === 'complete'
 );
-const publications = (await getCollection('publications')).sort((a, b) =>
-  b.data.date.localeCompare(a.data.date)
-);
+const publications = sortPublications(await getCollection('publications'));
 ---
 <ResumeLayout>
   <header class="resume-head">

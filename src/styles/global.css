@@ -269,6 +269,21 @@ h3 { font-size: 1.12rem; }
 .area-items li::before { content: ""; position: absolute; left: 0; top: 0.62em; width: 5px; height: 1px; background: var(--border); }
 .area-note { display: block; color: var(--muted); font-size: 0.75rem; margin-top: 2px; }
 .area-link { font-size: 0.84rem; }
+@media (min-width: 1024px) {
+  .area-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 44px; }
+}
+.subtopic-list { list-style: none; margin: 0 0 14px; padding: 0; }
+.subtopic-list li { margin-bottom: 14px; }
+.subtopic-name {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  margin-bottom: 3px;
+}
+.subtopic-paper { display: block; font-size: 0.79rem; color: var(--muted); line-height: 1.5; }
+a.subtopic-paper:hover { color: var(--accent); }
+.pub-subtopics { font-size: 0.78rem; }
 
 /* Badges: level (filled), role (outlined), topic (quiet) */
 .badge {

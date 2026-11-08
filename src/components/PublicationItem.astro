@@ -2,7 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import BibtexButton from './BibtexButton.astro';
 import { boldSelf, toBibtex } from '../lib/format';
-import { topicName } from '../lib/topics';
+import { areaShort, subtopicName } from '../lib/topics';
 import { langFromPath, localeUrl } from '../i18n/utils';
 import { t } from '../i18n/ui';
 
@@ -14,7 +14,8 @@ const { pub, workTitles = {} } = Astro.props;
 const lang = langFromPath(Astro.url.pathname);
 const copy = t(lang).publications;
 const d = pub.data;
-const href = d.url ?? `https://doi.org/${d.doi}`;
+const doiHref = d.doi ? `https://doi.org/${d.doi}` : undefined;
+const href = d.url ?? doiHref;
 const bibtex = toBibtex({
   title: d.title,
   authors: d.authors,
@@ -23,7 +24,9 @@ const bibtex = toBibtex({
   doi: d.doi,
   type: d.type,
   volume: d.volume,
+  issue: d.issue,
   pages: d.pages,
+  articleNumber: d.articleNumber,
 });
 const badgeClass =
   d.indexing === 'Q1'
@@ -36,20 +39,27 @@ const badgeClass =
 const indexingLabel = d.indexing === 'EI' ? 'EI indexed' : `JCR ${d.indexing}`;
 const roleLabel = d.role === 'first' ? copy.firstAuthor : (d.authorNote ?? copy.coAuthor);
 const relatedWork = d.relatedWork ?? [];
+const subtopics = d.topics.map((topic) => subtopicName(topic, lang)).join(' · ');
 ---
 <li
   class="pub-item"
   data-role={d.role}
+  data-area={d.area}
   data-year={d.year}
   data-topics={d.topics.join(' ')}
 >
   <div class="pub-main">
-    <a class="pub-title" href={href} target="_blank" rel="noopener">{d.title}</a>
+    {href ? (
+      <a class="pub-title" href={href} target="_blank" rel="noopener">{d.title}</a>
+    ) : (
+      <span class="pub-title">{d.title}</span>
+    )}
     <div class="pub-meta"><span set:html={boldSelf(d.authors)} /></div>
+    <div class="pub-meta pub-subtopics">{subtopics}</div>
     <div class="pub-meta">
       {d.indexing !== 'none' && <span class={`badge ${badgeClass}`}>{indexingLabel}</span>}
       <span class="badge badge-neutral">{roleLabel}</span>
-      {d.topics.map((topic) => <span class="badge badge-topic">{topicName(topic, lang)}</span>)}
+      <span class="badge badge-topic">{areaShort(d.area, lang)}</span>
     </div>
     {relatedWork.length > 0 && (
       <div class="pub-meta">
@@ -66,9 +76,13 @@ const relatedWork = d.relatedWork ?? [];
   <div class="pub-side">
     <div class="pub-meta pub-venue">
       {d.venueShort ?? d.venue} · {d.year}
+      {d.volume && <> · vol. {d.volume}</>}
+      {d.issue && <> ({d.issue})</>}
     </div>
     <div class="pub-actions">
-      <a href={`https://doi.org/${d.doi}`} target="_blank" rel="noopener" aria-label={`DOI for ${d.title}`}>DOI</a>
+      {doiHref && (
+        <a href={doiHref} target="_blank" rel="noopener" aria-label={`DOI for ${d.title}`}>DOI</a>
+      )}
       <BibtexButton bibtex={bibtex} />
     </div>
   </div>

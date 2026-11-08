@@ -66,7 +66,10 @@ const indexRoutes = [
 
 for (const route of indexRoutes) await must(route, route);
 
-const publicationFiles = await countFiles('src/content/publications', '.md');
+const publicationFilesList = (await readdir('src/content/publications')).filter((file) =>
+  file.endsWith('.md')
+);
+const publicationFiles = publicationFilesList.length;
 const workFiles = await countFiles('src/content/work', '.md');
 const workDetails = await countDirs('dist/work');
 const postDetails = await countDirs('dist/blog', ['tag']);
@@ -83,9 +86,13 @@ checks.push([
   'publications count matches content files',
   (publications.match(/class="pub-item"/g) ?? []).length === publicationFiles,
 ]);
+const doiSources = await Promise.all(
+  publicationFilesList.map((file) => readFile(`src/content/publications/${file}`, 'utf8'))
+);
+const doiCount = doiSources.filter((source) => /^doi:/m.test(source)).length;
 checks.push([
-  'every publication links a doi',
-  (publications.match(/doi\.org\//g) ?? []).length >= publicationFiles,
+  'publications with doi link doi.org',
+  (publications.match(/doi\.org\//g) ?? []).length >= doiCount,
 ]);
 
 const rss = await read('dist/rss.xml');
@@ -131,7 +138,7 @@ checks.push([
   ),
 ]);
 
-checks.push(['publications expose topic filters', publications.includes('data-group="topic"')]);
+checks.push(['publications expose area filters', publications.includes('data-group="area"')]);
 checks.push(['publications expose role filter', publications.includes('data-group="role"')]);
 checks.push([
   'publication topic badges match entries',
@@ -145,7 +152,7 @@ const cssText = (
 checks.push(['hidden attribute is enforced', cssText.includes('[hidden]{display:none!important}')]);
 
 const workIndex = await read('dist/work/index.html');
-checks.push(['work exposes topic filter', workIndex.includes('data-value="medical-signal"')]);
+checks.push(['work exposes topic filter', workIndex.includes('data-value="ecg-classification"')]);
 
 checks.push(['home has research areas', home.includes('Research Areas')]);
 checks.push(['home has og image', /property="og:image"/.test(home)]);

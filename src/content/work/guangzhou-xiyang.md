@@ -6,7 +6,7 @@ role: "Software Engineer"
 start: "2025-01"
 end: "2025-09"
 summary: "Cable surface defect detection and intelligent reporting, from model research to desktop delivery."
-topics: ["industrial-vision"]
+topics: ["industrial-defect"]
 stack: ["Python", "PyQt5", "YOLO", "OpenCV", "SQLAlchemy", "RAG"]
 highlights:
   - "Annotated 3,500 cable-defect images and co-built the CSDDdb dataset with a municipal key laboratory."

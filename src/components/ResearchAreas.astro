@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import { topicBlurb, topicName, topics } from '../lib/topics';
+import { areaBlurb, areaName, researchAreas, subtopicName } from '../lib/topics';
 import { sortPublications } from '../lib/publications';
 import { sortWork } from '../lib/work';
 import { langFromPath, localeUrl } from '../i18n/utils';
@@ -13,56 +13,63 @@ const [publications, work] = await Promise.all([
   getCollection('work'),
 ]);
 
-const areas = topics
-  .map((topic) => {
-    const topicPapers = sortPublications(
-      publications.filter((pub) => pub.data.topics.includes(topic.slug))
+const areas = researchAreas.map((area) => ({
+  slug: area.slug,
+  name: areaName(area.slug, lang),
+  blurb: areaBlurb(area.slug, lang),
+  subtopics: area.subtopics.map((sub) => {
+    const papers = sortPublications(
+      publications.filter((pub) => pub.data.topics.includes(sub.slug))
     );
-    const firstAuthorPaper = topicPapers.find((pub) => pub.data.role === 'first');
-    const entries = sortWork(work.filter((item) => item.data.topics?.includes(topic.slug)));
+    const firstAuthor = papers.find((pub) => pub.data.role === 'first');
+    const entries = sortWork(work.filter((item) => item.data.topics?.includes(sub.slug)));
     return {
-      slug: topic.slug,
-      name: topicName(topic.slug, lang),
-      blurb: topicBlurb(topic.slug, lang),
-      paper: firstAuthorPaper ?? topicPapers[0],
+      slug: sub.slug,
+      name: subtopicName(sub.slug, lang),
+      paper: firstAuthor ?? papers[0],
       entry: entries[0],
     };
-  })
-  .filter((area) => area.paper || area.entry);
+  }),
+}));
 ---
-{areas.length > 0 && (
-  <section class="band">
-    <div class="container">
-      <div class="section-head"><h2>{copy.researchAreas}</h2></div>
-      <div class="area-grid">
-        {areas.map((area) => (
-          <article class="area">
-            <h3>{area.name}</h3>
-            <p class="muted">{area.blurb}</p>
-            <ul class="area-items">
-              {area.paper && (
-                <li>
-                  <a href={`https://doi.org/${area.paper.data.doi}`} target="_blank" rel="noopener">
-                    {area.paper.data.title}
+<section class="band">
+  <div class="container">
+    <div class="section-head"><h2>{copy.researchAreas}</h2></div>
+    <div class="area-grid area-grid-3">
+      {areas.map((area) => (
+        <article class="area">
+          <h3>{area.name}</h3>
+          <p class="muted">{area.blurb}</p>
+          <ul class="subtopic-list">
+            {area.subtopics.map((sub) => (
+              <li>
+                <span class="subtopic-name">{sub.name}</span>
+                {sub.paper &&
+                  (sub.paper.data.doi ? (
+                    <a
+                      class="subtopic-paper"
+                      href={`https://doi.org/${sub.paper.data.doi}`}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      {sub.paper.data.title}
+                    </a>
+                  ) : (
+                    <span class="subtopic-paper">{sub.paper.data.title}</span>
+                  ))}
+                {!sub.paper && sub.entry && (
+                  <a class="subtopic-paper" href={localeUrl(`work/${sub.entry.id}`, lang)}>
+                    {sub.entry.data.title}
                   </a>
-                  <span class="area-note">
-                    {area.paper.data.venueShort ?? area.paper.data.venue} · {area.paper.data.year}
-                  </span>
-                </li>
-              )}
-              {area.entry && (
-                <li>
-                  <a href={localeUrl(`work/${area.entry.id}`, lang)}>{area.entry.data.title}</a>
-                  <span class="area-note">{area.entry.data.org}</span>
-                </li>
-              )}
-            </ul>
-            <a class="area-link" href={`${localeUrl('publications', lang)}?topic=${area.slug}`}>
-              {copy.viewAll} →
-            </a>
-          </article>
-        ))}
-      </div>
+                )}
+              </li>
+            ))}
+          </ul>
+          <a class="area-link" href={`${localeUrl('publications', lang)}?area=${area.slug}`}>
+            {copy.viewAll} →
+          </a>
+        </article>
+      ))}
     </div>
-  </section>
-)}
+  </div>
+</section>

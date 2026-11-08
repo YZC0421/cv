@@ -11,7 +11,8 @@ year: 2024
 type: conference
 indexing: Q4
 role: first
-topics: ["medical-signal"]
+area: biomedical-signal
+topics: ["ecg-classification", "spatio-temporal", "multiscale-fusion"]
 doi: "10.1007/978-3-031-57037-7_7"
 url: "https://doi.org/10.1007/978-3-031-57037-7_7"
 pages: "87--103"

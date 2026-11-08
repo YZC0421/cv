@@ -15,7 +15,8 @@ type: conference
 indexing: EI
 role: other
 authorNote: "Student 4th author"
-topics: ["agricultural-environmental-vision"]
+area: ai-vision
+topics: ["object-detection"]
 doi: "10.1145/3700906.3700946"
 url: "https://dl.acm.org/doi/abs/10.1145/3700906.3700946"
 pages: "245--250"

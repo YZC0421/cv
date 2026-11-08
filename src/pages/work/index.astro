@@ -2,15 +2,15 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import WorkCard from '../../components/WorkCard.astro';
 import { getCollection } from 'astro:content';
-import { topics } from '../../lib/topics';
+import { subtopicName, subtopicSlugs } from '../../lib/topics';
 import { withBase } from '../../lib/url';
 import { sortExperience, sortProjects } from '../../lib/work';
 
 const all = await getCollection('work');
 const experience = sortExperience(all.filter((item) => item.data.kind === 'experience'));
 const projects = sortProjects(all.filter((item) => item.data.kind === 'project'));
-const projectTopics = topics.filter((topic) =>
-  projects.some((item) => (item.data.topics ?? []).includes(topic.slug))
+const projectTopics = subtopicSlugs.filter((slug) =>
+  projects.some((item) => (item.data.topics ?? []).includes(slug))
 );
 ---
 <BaseLayout title="Work · Zicong Yang" description="Engineering experience and research projects.">
@@ -37,7 +37,9 @@ const projectTopics = topics.filter((topic) =>
         <div class="filters" role="group" aria-label="Filter projects by topic">
           <button type="button" data-value="all" aria-pressed="true">All topics</button>
           {projectTopics.map((topic) => (
-            <button type="button" data-value={topic.slug} aria-pressed="false">{topic.name}</button>
+            <button type="button" data-value={topic} aria-pressed="false">
+              {subtopicName(topic, 'en')}
+            </button>
           ))}
         </div>
       )}

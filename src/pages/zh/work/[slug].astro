@@ -17,7 +17,9 @@ const { Content } = await render(item);
 const d = item.data;
 const dois = d.relatedPublications ?? [];
 const publications = dois.length > 0 ? await getCollection('publications') : [];
-const relatedPublications = publications.filter((pub) => dois.includes(pub.data.doi));
+const relatedPublications = publications.filter(
+  (pub) => pub.data.doi && dois.includes(pub.data.doi)
+);
 const copy = t('zh').projects;
 ---
 <BaseLayout title={`${d.title} · 杨梓聪`} description={d.summary} lang="zh">

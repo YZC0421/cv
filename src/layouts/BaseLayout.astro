@@ -6,7 +6,7 @@ import PublicationScripts from '../components/PublicationScripts.astro';
 import CodeCopy from '../components/CodeCopy.astro';
 import fontUrl from '../assets/fonts/crimson-pro-latin.woff2?url';
 import { site } from '../lib/site';
-import { topics } from '../lib/topics';
+import { researchAreas } from '../lib/topics';
 import { withBase } from '../lib/url';
 import type { Lang } from '../i18n/ui';
 import { alternateUrl, langFromPath } from '../i18n/utils';
@@ -75,7 +75,7 @@ const profile = {
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content={`${site.name} — ${topics.map((topic) => topic.name).join(' · ')}`} />
+    <meta property="og:image:alt" content={`${site.name} — ${researchAreas.map((area) => area.name).join(' · ')}`} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content={ogImage} />
     <slot name="head" />

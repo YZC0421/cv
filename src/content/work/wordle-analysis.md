@@ -9,7 +9,7 @@ summary: "Difficulty modeling and player-trend prediction for the NYT Wordle gam
 problem: "Wordle difficulty is driven by word structure, but the game had no quantitative difficulty model to explain player behavior."
 approach: "Used Python corpora and machine-learning statistics on word frequency, syllables, and repeated letters, then trained a BiGRU model to predict player trends."
 results: "Won the MCM Meritorious Winner award (top 7%)."
-topics: ["data-intelligence"]
+topics: ["predictive-modeling"]
 stack: ["Python", "BiGRU", "Machine Learning"]
 highlights:
   - "Analyzed word frequency, syllables, and letter repetition to build difficulty metrics."

@@ -16,7 +16,9 @@ const { Content } = await render(item);
 const d = item.data;
 const dois = d.relatedPublications ?? [];
 const publications = dois.length > 0 ? await getCollection('publications') : [];
-const relatedPublications = publications.filter((pub) => dois.includes(pub.data.doi));
+const relatedPublications = publications.filter(
+  (pub) => pub.data.doi && dois.includes(pub.data.doi)
+);
 ---
 <BaseLayout title={`${d.title} · Zicong Yang`} description={d.summary}>
   <article class="container reading work-detail" style="padding-top:40px">

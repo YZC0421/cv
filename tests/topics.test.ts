@@ -1,17 +1,34 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { topicName, topicSlugs, topics } from '../src/lib/topics.ts';
+import {
+  areaOfSubtopic,
+  areaSlugs,
+  researchAreas,
+  subtopicName,
+  subtopicSlugs,
+} from '../src/lib/topics.ts';
 
-test('topic slugs are unique and non-empty', () => {
-  assert.equal(new Set(topicSlugs).size, topicSlugs.length);
-  assert.ok(topicSlugs.every((slug) => slug.length > 0));
+test('area and subtopic slugs are unique', () => {
+  assert.equal(new Set(areaSlugs).size, areaSlugs.length);
+  assert.equal(new Set(subtopicSlugs).size, subtopicSlugs.length);
 });
 
-test('every topic has a name and blurb', () => {
-  assert.ok(topics.every((topic) => topic.name.length > 0 && topic.blurb.length > 0));
+test('every subtopic belongs to exactly one area', () => {
+  for (const slug of subtopicSlugs) {
+    const owners = researchAreas.filter((area) =>
+      area.subtopics.some((sub) => sub.slug === slug)
+    );
+    assert.equal(owners.length, 1, slug);
+    assert.equal(areaOfSubtopic(slug), owners[0]!.slug);
+  }
 });
 
-test('topicName resolves known slugs and falls back to the slug', () => {
-  assert.equal(topicName('medical-signal'), 'Medical Signal Processing');
-  assert.equal(topicName('unknown' as never), 'unknown');
+test('every area has three subtopics except predictive analytics', () => {
+  const counts = researchAreas.map((area) => area.subtopics.length);
+  assert.deepEqual(counts, [3, 3, 2]);
+});
+
+test('subtopicName resolves known slugs and falls back to the slug', () => {
+  assert.equal(subtopicName('ecg-classification'), 'ECG Classification and Arrhythmia Detection');
+  assert.equal(subtopicName('unknown' as never), 'unknown');
 });
