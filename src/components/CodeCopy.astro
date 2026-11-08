@@ -1,0 +1,27 @@
+<script is:inline>
+  (() => {
+    document.querySelectorAll('.prose pre').forEach((pre) => {
+      if (pre.parentElement?.classList.contains('code-block')) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'code-block';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'code-copy';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(pre.textContent ?? '');
+          btn.textContent = 'Copied';
+          setTimeout(() => (btn.textContent = 'Copy'), 1500);
+        } catch {
+          btn.textContent = 'Failed';
+        }
+      });
+      wrapper.appendChild(btn);
+    });
+  })();
+</script>

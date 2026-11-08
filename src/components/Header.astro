@@ -10,10 +10,12 @@ interface Props {
 const { langLink } = Astro.props;
 
 const links = [
-  { path: 'publications', label: 'Publications' },
-  { path: 'work', label: 'Work' },
+  { path: 'projects', label: 'Projects' },
   { path: 'blog', label: 'Writing' },
+  { path: 'publications', label: 'Research' },
+  { path: 'resume', label: 'Resume' },
   { path: 'about', label: 'About' },
+  { path: 'contact', label: 'Contact' },
 ];
 const current = stripBase(Astro.url.pathname);
 const isHome = current === '/';
@@ -38,3 +40,15 @@ const isHome = current === '/';
     <ThemeToggle />
   </div>
 </header>
+<script is:inline>
+  (() => {
+    const details = document.querySelector('.nav-details');
+    if (!details) return;
+    document.addEventListener('click', (event) => {
+      if (details.open && !details.contains(event.target)) details.open = false;
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') details.open = false;
+    });
+  })();
+</script>

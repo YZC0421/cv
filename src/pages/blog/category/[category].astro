@@ -1,0 +1,39 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PostList from '../../../components/PostList.astro';
+import { getCollection } from 'astro:content';
+import { categoryLabel } from '../../../lib/blog';
+import { visiblePosts } from '../../../lib/posts';
+import { withBase } from '../../../lib/url';
+
+export async function getStaticPaths() {
+  const posts = visiblePosts(await getCollection('blog'));
+  const categories = [...new Set(posts.map((post) => post.data.category))];
+  return categories.map((category) => ({
+    params: { category },
+    props: {
+      category,
+      posts: posts.filter((post) => post.data.category === category),
+    },
+  }));
+}
+
+interface Props {
+  category: string;
+  posts: CollectionEntry<'blog'>[];
+}
+const { category, posts } = Astro.props;
+---
+<BaseLayout
+  title={`${categoryLabel(category)} · Writing`}
+  description={`Posts in ${categoryLabel(category)}.`}
+  lang="zh-CN"
+>
+  <div class="container" style="padding-top:48px">
+    <p class="eyebrow"><a href={withBase('blog')}>Writing</a> / Category</p>
+    <h1>{categoryLabel(category)}</h1>
+    <p class="muted">{posts.length} {posts.length === 1 ? 'post' : 'posts'}</p>
+    <PostList posts={posts} />
+  </div>
+</BaseLayout>

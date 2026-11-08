@@ -16,6 +16,7 @@ export async function GET(context: APIContext) {
       title: post.data.title,
       pubDate: new Date(post.data.date),
       description: post.data.summary,
+      content: post.body ?? post.data.summary,
       link: withBase(`blog/${post.id}`),
       categories: post.data.tags,
     })),

@@ -1,8 +1,9 @@
 # cv
 
-Personal academic site of Zicong Yang: publications, work, and writing.
+Personal site of Zicong Yang: projects, resume, publications, and technical writing.
 
-Built with Astro 5, statically generated, deployed to GitHub Pages.
+Built with Astro 5 (static output), MDX content, and Pagefind search. No runtime CDN, no
+external fonts, no client framework.
 
 ## Local
 
@@ -10,63 +11,75 @@ Built with Astro 5, statically generated, deployed to GitHub Pages.
 npm install
 npm run dev      # http://localhost:4321/cv/
 npm run preview  # preview the built site
-npm run check    # type + content schema check
-npm test         # unit tests for schema and ordering rules
-npm run build    # build to dist/
+npm run check    # Astro + TypeScript diagnostics
+npm test         # unit tests for schema, ordering, and URL helpers
+npm run build    # astro build + pagefind index
 npm run verify   # assert build output
 npm run og       # regenerate public/og.png (committed; manual only)
 ```
 
-## Add a publication
+## Structure
 
-1. Create `src/content/publications/<slug>.md` with the frontmatter defined in
-   `src/lib/schema.ts`.
-2. `doi` and `topics` (one or more of `medical-signal`, `industrial-vision`) are required.
-   `relatedWork` slugs must exist in `src/content/work/`. `volume`/`pages` only feed BibTeX.
-   `selected: true` pins an entry into the home page; the home page always shows three
-   entries, filling the remainder with first-author papers, then the newest.
-3. Run `npm run check`, `npm run build`, and `npm run verify`.
-
-## CV PDF
-
-Place the exported PDF at `public/cv.pdf`. The About pages and the home page will then show
-an additional direct download link; the print action is always available. Regenerate the PDF
-manually whenever the About content changes.
+```
+src/
+  data/profile.ts        # name, headline, links, education, skills, awards
+  content/
+    projects/*.md        # portfolio entries (category, status, TODO fields)
+    blog/*.{md,mdx}      # posts (category, tags, cover, draft)
+    work/*.md            # experience timeline
+    publications/*.md    # papers (DOI, topics, author note)
+  layouts/               # BaseLayout, PageLayout, PostLayout, ResumeLayout
+  components/            # Header, Hero, ProjectCard, PublicationItem, Toc, ...
+  pages/                 # index, projects, blog, publications, resume, about, contact, search
+  styles/global.css      # single stylesheet, tokens, light/dark, print
+```
 
 ## Add a post
 
-1. Create `src/content/blog/<slug>.md`; `lang` is `en` or `zh`, `tags` needs at least one
-   entry, `summary` at most 160 characters.
-2. `draft: true` keeps it out of the list, RSS, and sitemap.
-3. Entries dated after the build day are excluded; they appear on the first build after
-   that date (a push or a manual workflow run).
+1. Create `src/content/blog/<slug>.md` or `.mdx`.
+2. Required: `title`, `date`, `lang` (`en` | `zh`), `summary` (≤160), `tags` (kebab-case).
+3. Optional: `category` (defaults to `notes`), `cover`, `updated`, `draft`.
+4. Categories: `ai-agent`, `llm-engineering`, `ai-application`, `software-engineering`,
+   `data-science`, `time-series`, `paper-reading`, `notes`.
+5. Run `npm run check && npm run build && npm run verify`.
 
-## Add a project or experience
+## Add a project
 
-1. Create `src/content/work/<slug>.md`; `kind` is `experience` or `project`.
-2. `highlights` needs at least one factual bullet; do not add claims without a source.
-3. `topics` is optional, but project cards only filter on topics they declare.
-   `relatedPublications` must reference existing DOIs.
-4. Projects sort by `order`; experiences sort by `start`, newest first.
+1. Create `src/content/projects/<slug>.md`.
+2. Required: `title`, `category`, `summary`.
+3. Categories: `ai-agent`, `ai-application`, `enterprise-software`, `data-intelligence`,
+   `research`.
+4. Optional fields: `status` (`complete` | `ongoing` | `planned`), `period`, `stack`,
+   `links`, `cover`, `goal`, `architecture`, `role`, `results`, `featured`, `order`.
+5. Use `todo: []` for missing facts. Never invent metrics, roles, or outcomes.
+
+## Add a publication
+
+1. Create `src/content/publications/<slug>.md`.
+2. `doi` and `topics` are required. `relatedWork` slugs must exist in `src/content/work/`.
+3. `volume`/`pages` only feed BibTeX.
+
+## Resume
+
+`/resume` renders from `src/data/profile.ts`, the `work` collection, and the `projects`
+collection. The print action produces an A4 layout; no separate PDF is generated.
+
+Place an exported PDF at `public/cv.pdf` to additionally show a download link on the About
+pages and the home page.
+
+## Search
+
+`npm run build` runs `pagefind --site dist` after the static build. Search UI lives at
+`/search` and loads `/pagefind/pagefind-ui.js`; the index is not committed.
 
 ## Deploy
 
-Pushing to `main` triggers `.github/workflows/deploy.yml`. Pull requests run the same
-test/check/build/verify steps but skip the deploy job. The site is served from
-`https://yzc0421.github.io/cv/`. If a custom domain is added, update `site` and `base` in
-`astro.config.mjs`, add `public/CNAME`, update `public/robots.txt`, and update the RSS/base
-assertion in `scripts/verify-build.mjs`.
+Pushing to `main` triggers `.github/workflows/deploy.yml` (test → check → build → verify →
+Pages). Pull requests run the same checks but skip the deploy job.
 
-## Rollback
+## TODO
 
-Re-run the last successful `Deploy to GitHub Pages` workflow, or `git revert` the offending
-content commit. Build configuration changes revert the same way; no manual cleanup on Pages
-is required.
-
-## Notes
-
-- No runtime CDN dependencies and no external fonts.
-- Content is validated by Zod at build time; invalid frontmatter fails the build.
-- Paper metadata was cross-checked against Crossref and confirmed manually.
-- All internal links go through `withBase` in `src/lib/url.ts`; do not concatenate
-  `import.meta.env.BASE_URL` directly.
+- LinkedIn URL: `src/data/profile.ts`
+- Project details for the three planned AI projects: `src/content/projects/*.md`
+- Optional profile photo / project covers: `public/images/`
+- Confirm location string in `src/data/profile.ts`

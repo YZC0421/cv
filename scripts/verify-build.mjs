@@ -37,9 +37,15 @@ const indexRoutes = [
   'dist/index.html',
   'dist/publications/index.html',
   'dist/work/index.html',
+  'dist/projects/index.html',
+  'dist/projects/ai-supply-demand-diagnosis/index.html',
   'dist/blog/index.html',
+  'dist/blog/category/software-engineering/index.html',
   'dist/about/index.html',
   'dist/about/zh/index.html',
+  'dist/resume/index.html',
+  'dist/contact/index.html',
+  'dist/search/index.html',
   'dist/404.html',
   'dist/rss.xml',
   'dist/sitemap-index.xml',
@@ -47,6 +53,7 @@ const indexRoutes = [
   'dist/robots.txt',
   'dist/favicon.svg',
   'dist/CV.html',
+  'dist/pagefind/pagefind-ui.js',
 ];
 
 for (const route of indexRoutes) await must(route, route);
@@ -61,7 +68,7 @@ checks.push(['blog has at least one post page', postDetails >= 1]);
 
 const home = await read('dist/index.html');
 checks.push(['home shows 3 publications', (home.match(/class="pub-item"/g) ?? []).length === 3]);
-checks.push(['home shows 3 work cards', (home.match(/class="work-card"/g) ?? []).length === 3]);
+checks.push(['home shows 3 project cards', (home.match(/class="project-card"/g) ?? []).length === 3]);
 
 const publications = await read('dist/publications/index.html');
 checks.push([
@@ -144,6 +151,21 @@ const linkedTags = new Set(
 checks.push(['tag pages match linked tags', tagPages === linkedTags.size]);
 
 const aboutZh = await read('dist/about/zh/index.html');
+const projectsHtml = await read('dist/projects/index.html');
+checks.push(['projects list has cards', /class="project-card"/.test(projectsHtml)]);
+
+const resumeHtml = await read('dist/resume/index.html');
+checks.push([
+  'resume has core sections',
+  ['Education', 'Work Experience', 'Publications'].every((section) =>
+    resumeHtml.includes(`>${section}<`)
+  ),
+]);
+
+const searchHtml = await read('dist/search/index.html');
+checks.push(['search page wires Pagefind', searchHtml.includes('PagefindUI')]);
+await must('dist/pagefind/pagefind-entry.json', 'pagefind index');
+
 const cvExists = existsSync('public/cv.pdf');
 checks.push([
   'cv link matches pdf presence on home and about pages',

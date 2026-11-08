@@ -40,27 +40,33 @@ const relatedWork = d.relatedWork ?? [];
   data-year={d.year}
   data-topics={d.topics.join(' ')}
 >
-  <a class="pub-title" href={href} target="_blank" rel="noopener">{d.title}</a>
-  <div class="pub-meta"><span set:html={boldSelf(d.authors)} /></div>
-  <div class="pub-meta">
-    {d.indexing !== 'none' && <span class={`badge ${badgeClass}`}>{indexingLabel}</span>}
-    <span class="badge badge-neutral">{roleLabel}</span>
-    {d.topics.map((topic) => <span class="badge badge-topic">{topicName(topic)}</span>)}
-    <span>{d.venueShort ?? d.venue} · {d.year}</span>
-  </div>
-  {relatedWork.length > 0 && (
+  <div class="pub-main">
+    <a class="pub-title" href={href} target="_blank" rel="noopener">{d.title}</a>
+    <div class="pub-meta"><span set:html={boldSelf(d.authors)} /></div>
     <div class="pub-meta">
-      Related work:
-      {relatedWork.map((slug, index) => (
-        <span>
-          {index > 0 && ', '}
-          <a href={withBase(`work/${slug}`)}>{workTitles[slug] ?? slug}</a>
-        </span>
-      ))}
+      {d.indexing !== 'none' && <span class={`badge ${badgeClass}`}>{indexingLabel}</span>}
+      <span class="badge badge-neutral">{roleLabel}</span>
+      {d.topics.map((topic) => <span class="badge badge-topic">{topicName(topic)}</span>)}
     </div>
-  )}
-  <div class="pub-actions">
-    <a href={`https://doi.org/${d.doi}`} target="_blank" rel="noopener" aria-label={`DOI for ${d.title}`}>DOI</a>
-    <BibtexButton bibtex={bibtex} />
+    {relatedWork.length > 0 && (
+      <div class="pub-meta">
+        Related work:
+        {relatedWork.map((slug, index) => (
+          <span>
+            {index > 0 && ', '}
+            <a href={withBase(`work/${slug}`)}>{workTitles[slug] ?? slug}</a>
+          </span>
+        ))}
+      </div>
+    )}
+  </div>
+  <div class="pub-side">
+    <div class="pub-meta pub-venue">
+      {d.venueShort ?? d.venue} · {d.year}
+    </div>
+    <div class="pub-actions">
+      <a href={`https://doi.org/${d.doi}`} target="_blank" rel="noopener" aria-label={`DOI for ${d.title}`}>DOI</a>
+      <BibtexButton bibtex={bibtex} />
+    </div>
   </div>
 </li>

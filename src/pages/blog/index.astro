@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TagFilter from '../../components/TagFilter.astro';
 import { getCollection } from 'astro:content';
+import { categoryLabel } from '../../lib/blog';
 import { postTags, visiblePosts } from '../../lib/posts';
 import { withBase } from '../../lib/url';
 
@@ -13,11 +14,11 @@ const tags = postTags(posts);
   description="Notes on software engineering, computer vision, and research."
   lang="zh-CN"
 >
-  <div class="container measure" style="padding-top:40px">
+  <div class="container" style="padding-top:40px">
     <h1>Writing</h1>
     <p class="muted">
       Technical notes, mostly in Chinese. {posts.length} {posts.length === 1 ? 'post' : 'posts'}.
-      <a href={withBase('rss.xml')}>RSS</a>
+      <a href={withBase('search')}>Search</a> · <a href={withBase('rss.xml')}>RSS</a>
     </p>
     <TagFilter tags={tags} />
     <ul class="post-list" id="post-list">
@@ -25,9 +26,12 @@ const tags = postTags(posts);
         <li data-tags={post.data.tags.join('|')}>
           <time datetime={post.data.date}>{post.data.date}</time>
           <a href={withBase(`blog/${post.id}`)}>{post.data.title}</a>
+          <a class="category-badge" href={withBase(`blog/category/${post.data.category}`)}>
+            {categoryLabel(post.data.category)}
+          </a>
           <span class="lang-badge">{post.data.lang === 'zh' ? '中文' : 'EN'}</span>
           {post.data.tags.map((tag) => (
-            <a class="lang-badge" href={withBase(`blog/tag/${encodeURIComponent(tag)}`)}>{tag}</a>
+            <a class="tag-badge" href={withBase(`blog/tag/${encodeURIComponent(tag)}`)}>{tag}</a>
           ))}
         </li>
       ))}

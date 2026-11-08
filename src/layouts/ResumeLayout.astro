@@ -1,0 +1,14 @@
+---
+import BaseLayout from './BaseLayout.astro';
+---
+<BaseLayout
+  title="Resume · Zicong Yang"
+  description="Resume of Zicong Yang: education, experience, projects, skills, and publications."
+>
+  <div class="container medium resume" style="padding-top:40px">
+    <div class="resume-actions">
+      <button type="button" onclick="window.print()">Print / Save as PDF</button>
+    </div>
+    <slot />
+  </div>
+</BaseLayout>

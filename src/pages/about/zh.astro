@@ -1,26 +1,81 @@
 ---
-import PageLayout from '../../layouts/PageLayout.astro';
-import { getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { profile } from '../../data/profile';
+import { sortExperience } from '../../lib/work';
 import { withBase } from '../../lib/url';
 
-const entry = await getEntry('pages', 'about-zh');
-if (!entry) throw new Error('about-zh.md is missing');
-const { Content } = await render(entry);
-const enHref = new URL(withBase('about'), Astro.site);
-const zhHref = new URL(withBase('about/zh'), Astro.site);
+const jobs = sortExperience(
+  (await getCollection('work')).filter((item) => item.data.kind === 'experience')
+);
 ---
-<PageLayout
+<BaseLayout
   title="关于 · 杨梓聪"
-  description="教育经历、研究方向、技能与联系方式。"
+  description="个人背景、研究方向与技术理念。"
   lang="zh-CN"
   langLink={{ href: withBase('about'), label: 'English', lang: 'en' }}
-  heading={entry.data.title}
-  updated={entry.data.updated}
-  updatedLabel="更新于"
-  printLabel="打印 / 存为 PDF"
-  downloadLabel="下载 CV (PDF)"
-  enHref={enHref}
-  zhHref={zhHref}
+  profilePage
 >
-  <Content />
-</PageLayout>
+  <Fragment slot="head">
+    <link rel="alternate" hreflang="en" href={new URL(withBase('about'), Astro.site)} />
+    <link rel="alternate" hreflang="zh-CN" href={new URL(withBase('about/zh'), Astro.site)} />
+    <link rel="alternate" hreflang="x-default" href={new URL(withBase('about'), Astro.site)} />
+  </Fragment>
+  <div class="container medium" style="padding-top:48px">
+    <h1>关于</h1>
+    <p class="lede">
+      软件工程师与研究者，关注应用 AI、数据智能与生产系统 —— 从 ECG 信号模型、工业视觉，
+      到基于 LLM 的工具链。相比演示效果，更在意系统在半年后是否仍然可读、可测、可维护。
+    </p>
+
+    <section class="section">
+      <div class="section-head"><h2>关注方向</h2></div>
+      <ul class="focus-list">
+        {profile.focus.map((item) => (
+          <li>
+            <strong>{item.name}</strong>
+            <span class="muted">{item.detail}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>时间线</h2></div>
+      <ul class="timeline">
+        {profile.education.map((item) => (
+          <li>
+            <h3>{item.schoolZh ?? item.school}</h3>
+            <div class="org">{item.degree}</div>
+            <div class="when">{item.period}</div>
+            <ul><li>{item.detail}</li></ul>
+          </li>
+        ))}
+        {jobs.map((job) => (
+          <li>
+            <h3>{job.data.title}</h3>
+            <div class="org">{job.data.org}</div>
+            <div class="when">{job.data.start} – {job.data.end}</div>
+            <ul>{job.data.highlights.slice(0, 2).map((entry) => <li>{entry}</li>)}</ul>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>技术理念</h2></div>
+      <div class="prose">
+        <p>
+          我更在意系统在演示之后是否仍然成立：明确的数据模型、可复现的评估、能自我解释的接口。
+          我的工作大多位于研究原型与生产软件之间，因此会把精力放在交接上 —— 文档、测试，
+          以及那些让项目活下来的"无聊部分"。
+        </p>
+      </div>
+    </section>
+
+    <p class="links">
+      <a href={withBase('resume')}>完整简历 →</a>
+      <a href={withBase('contact')}>联系方式 →</a>
+    </p>
+  </div>
+</BaseLayout>

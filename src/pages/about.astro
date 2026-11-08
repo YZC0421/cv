@@ -1,25 +1,73 @@
 ---
-import PageLayout from '../layouts/PageLayout.astro';
-import { getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { profile } from '../data/profile';
+import { sortExperience } from '../lib/work';
 import { withBase } from '../lib/url';
 
-const entry = await getEntry('pages', 'about-en');
-if (!entry) throw new Error('about-en.md is missing');
-const { Content } = await render(entry);
-const enHref = new URL(withBase('about'), Astro.site);
-const zhHref = new URL(withBase('about/zh'), Astro.site);
+const jobs = sortExperience(
+  (await getCollection('work')).filter((item) => item.data.kind === 'experience')
+);
 ---
-<PageLayout
-  title="About · Zicong Yang"
-  description="Education, research, skills, and contact."
-  langLink={{ href: withBase('about/zh'), label: '中文', lang: 'zh-CN' }}
-  heading={entry.data.title}
-  updated={entry.data.updated}
-  updatedLabel="Updated"
-  printLabel="Print / Save as PDF"
-  downloadLabel="Download CV (PDF)"
-  enHref={enHref}
-  zhHref={zhHref}
->
-  <Content />
-</PageLayout>
+<BaseLayout title="About · Zicong Yang" description="Background, research interests, and technical philosophy." profilePage>
+  <Fragment slot="head">
+    <link rel="alternate" hreflang="en" href={new URL(withBase('about'), Astro.site)} />
+    <link rel="alternate" hreflang="zh-CN" href={new URL(withBase('about/zh'), Astro.site)} />
+    <link rel="alternate" hreflang="x-default" href={new URL(withBase('about'), Astro.site)} />
+  </Fragment>
+  <div class="container medium" style="padding-top:48px">
+    <h1>About</h1>
+    <p class="lede">{profile.summary}</p>
+
+    <section class="section">
+      <div class="section-head"><h2>Focus</h2></div>
+      <ul class="focus-list">
+        {profile.focus.map((item) => (
+          <li>
+            <strong>{item.name}</strong>
+            <span class="muted">{item.detail}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>Timeline</h2></div>
+      <ul class="timeline">
+        {profile.education.map((item) => (
+          <li>
+            <h3>{item.school}</h3>
+            <div class="org">{item.degree}</div>
+            <div class="when">{item.period}</div>
+            <ul><li>{item.detail}</li></ul>
+          </li>
+        ))}
+        {jobs.map((job) => (
+          <li>
+            <h3>{job.data.title}</h3>
+            <div class="org">{job.data.org}</div>
+            <div class="when">{job.data.start} – {job.data.end}</div>
+            <ul>{job.data.highlights.slice(0, 2).map((entry) => <li>{entry}</li>)}</ul>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>Philosophy</h2></div>
+      <div class="prose">
+        <p>
+          I care about systems that stay understandable after the demo: explicit data models,
+          reproducible evaluation, and interfaces that explain themselves. Most of my work sits
+          between research prototypes and production software, so I optimize for the handoff —
+          documentation, tests, and the boring parts that keep a project alive.
+        </p>
+      </div>
+    </section>
+
+    <p class="links">
+      <a href={withBase('resume')}>Full resume →</a>
+      <a href={withBase('contact')}>Contact →</a>
+    </p>
+  </div>
+</BaseLayout>

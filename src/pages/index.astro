@@ -3,15 +3,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import ResearchAreas from '../components/ResearchAreas.astro';
 import PublicationItem from '../components/PublicationItem.astro';
-import WorkCard from '../components/WorkCard.astro';
+import ProjectCard from '../components/ProjectCard.astro';
 import PostList from '../components/PostList.astro';
-import { getCollection, getEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
+import { profile } from '../data/profile';
 import { selectHomepage } from '../lib/publications';
 import { visiblePosts } from '../lib/posts';
 import { validateRelations } from '../lib/relations';
-import { hasCvPdf } from '../lib/site';
+import { featuredProjects } from '../lib/projects';
 import { withBase } from '../lib/url';
-import { sortProjects, workTitleMap } from '../lib/work';
+import { workTitleMap } from '../lib/work';
 
 const allPublications = await getCollection('publications');
 const allWork = await getCollection('work');
@@ -21,22 +22,32 @@ if (relationErrors.length > 0) {
 }
 
 const pubs = selectHomepage(allPublications);
-const work = sortProjects(allWork.filter((item) => item.data.kind === 'project')).slice(0, 3);
-const posts = visiblePosts(await getCollection('blog')).slice(0, 2);
-const about = await getEntry('pages', 'about-en');
+const projects = featuredProjects(await getCollection('projects'));
+const posts = visiblePosts(await getCollection('blog')).slice(0, 3);
 const workTitles = workTitleMap(allWork);
-const cvAvailable = hasCvPdf();
 ---
 <BaseLayout
-  title="Zicong Yang · Medical Signal Processing & Computer Vision"
-  description="Personal site of Zicong Yang: publications, engineering work, and technical writing."
+  title="Zicong Yang · AI Engineering, Agents, and Data Intelligence"
+  description="Personal site of Zicong Yang: AI engineering, agent systems, publications, projects, and technical writing."
   profilePage
 >
   <Hero />
 
+  {projects.length > 0 && (
+    <section class="section container">
+      <div class="section-head">
+        <h2>Selected Projects</h2>
+        <a href={withBase('projects')}>All projects →</a>
+      </div>
+      <div class="project-grid">
+        {projects.map((item) => <ProjectCard item={item} />)}
+      </div>
+    </section>
+  )}
+
   <ResearchAreas />
 
-  <section class="section container measure">
+  <section class="section container">
     <div class="section-head">
       <h2>Selected Publications</h2>
       <a href={withBase('publications')}>All publications →</a>
@@ -46,18 +57,8 @@ const cvAvailable = hasCvPdf();
     </ul>
   </section>
 
-  {work.length > 0 && (
-    <section class="section container measure">
-      <div class="section-head">
-        <h2>Selected Work</h2>
-        <a href={withBase('work')}>All work →</a>
-      </div>
-      <div class="work-grid">{work.map((item) => <WorkCard item={item} />)}</div>
-    </section>
-  )}
-
   {posts.length > 0 && (
-    <section class="section container measure">
+    <section class="section container">
       <div class="section-head">
         <h2>Latest Writing</h2>
         <a href={withBase('blog')}>All writing →</a>
@@ -66,16 +67,15 @@ const cvAvailable = hasCvPdf();
     </section>
   )}
 
-  <section class="section container measure">
-    <div class="section-head"><h2>About</h2></div>
-    <p class="muted">{about?.data.summary}</p>
+  <section class="section container">
+    <div class="section-head"><h2>Get in touch</h2></div>
+    <p class="muted">
+      {profile.location} · <a href={`mailto:${profile.email}`}>{profile.email}</a>
+    </p>
     <div class="links">
-      <a href={withBase('about')}>More about me →</a>
-      {cvAvailable ? (
-        <a href={withBase('cv.pdf')}>Download CV (PDF)</a>
-      ) : (
-        <a href={withBase('about')}>CV (print / PDF)</a>
-      )}
+      <a href={withBase('resume')}>Resume →</a>
+      <a href={withBase('about')}>About →</a>
+      <a href={withBase('contact')}>Contact →</a>
     </div>
   </section>
 </BaseLayout>

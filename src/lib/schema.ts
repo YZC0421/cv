@@ -51,15 +51,57 @@ export const workSchema = z
     path: ['end'],
   });
 
+export const blogCategories = [
+  'ai-agent',
+  'llm-engineering',
+  'ai-application',
+  'software-engineering',
+  'data-science',
+  'time-series',
+  'paper-reading',
+  'notes',
+] as const;
+
 export const blogSchema = z.object({
   title: z.string().min(1),
   date: isoDate,
+  updated: isoDate.optional(),
   lang: z.enum(['en', 'zh']),
+  category: z.enum(blogCategories).default('notes'),
   tags: z
     .array(z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'tag must be kebab-case'))
     .min(1),
   summary: z.string().min(1).max(160),
+  cover: z.string().optional(),
   draft: z.boolean().default(false),
+});
+
+export const projectCategories = [
+  'ai-agent',
+  'ai-application',
+  'enterprise-software',
+  'data-intelligence',
+  'research',
+] as const;
+
+export const projectSchema = z.object({
+  title: z.string().min(1),
+  category: z.enum(projectCategories),
+  summary: z.string().min(1).max(220),
+  status: z.enum(['complete', 'ongoing', 'planned']).default('complete'),
+  period: z.string().optional(),
+  stack: z.array(z.string()).default([]),
+  links: z
+    .array(z.object({ label: z.string().min(1), url: z.string().url() }))
+    .default([]),
+  cover: z.string().optional(),
+  goal: z.string().optional(),
+  architecture: z.string().optional(),
+  role: z.string().optional(),
+  results: z.string().optional(),
+  todo: z.array(z.string()).default([]),
+  featured: z.boolean().default(false),
+  order: z.number().int().default(0),
 });
 
 export const pageSchema = z.object({

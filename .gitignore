@@ -3,3 +3,4 @@ dist/
 .astro/
 scripts/out/
 .DS_Store
+.codebuddy/

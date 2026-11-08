@@ -23,9 +23,10 @@ const areas = topics
   .filter((area) => area.paper || area.entry);
 ---
 {areas.length > 0 && (
-  <section class="section container measure">
-    <div class="section-head"><h2>Research Areas</h2></div>
-    <div class="area-grid">
+  <section class="band">
+    <div class="container">
+      <div class="section-head"><h2>Research Areas</h2></div>
+      <div class="area-grid">
       {areas.map((area) => (
         <article class="area">
           <h3>{area.name}</h3>
@@ -57,6 +58,7 @@ const areas = topics
           </a>
         </article>
       ))}
+      </div>
     </div>
   </section>
 )}

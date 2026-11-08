@@ -1,6 +1,12 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
-import { publicationSchema, workSchema, blogSchema, pageSchema } from './lib/schema';
+import {
+  publicationSchema,
+  workSchema,
+  blogSchema,
+  pageSchema,
+  projectSchema,
+} from './lib/schema';
 
 const publications = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/publications' }),
@@ -13,7 +19,7 @@ const work = defineCollection({
 });
 
 const blog = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/blog' }),
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/blog' }),
   schema: blogSchema,
 });
 
@@ -22,4 +28,9 @@ const pages = defineCollection({
   schema: pageSchema,
 });
 
-export const collections = { publications, work, blog, pages };
+const projects = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/projects' }),
+  schema: projectSchema,
+});
+
+export const collections = { publications, work, blog, pages, projects };

@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../lib/url';
+---
+<BaseLayout title="Search · Zicong Yang" description="Search posts and pages.">
+  <Fragment slot="head">
+    <link rel="stylesheet" href={withBase('pagefind/pagefind-ui.css')} />
+    <script is:inline src={withBase('pagefind/pagefind-ui.js')}></script>
+  </Fragment>
+  <div class="container medium" style="padding-top:48px">
+    <h1>Search</h1>
+    <p class="muted">Search posts, projects, and pages. The index is generated at build time.</p>
+    <div id="search"></div>
+    <noscript>
+      <p class="muted">
+        Search requires JavaScript. Browse the <a href={withBase('blog')}>post list</a> instead.
+      </p>
+    </noscript>
+  </div>
+  <script is:inline define:vars={{ bundlePath: withBase('pagefind/') }}>
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.PagefindUI) {
+        new window.PagefindUI({
+          element: '#search',
+          showSubResults: true,
+          bundlePath,
+        });
+      }
+    });
+  </script>
+</BaseLayout>

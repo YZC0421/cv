@@ -1,0 +1,25 @@
+---
+import type { Project } from '../lib/projects';
+import { categoryLabel, statusLabel } from '../lib/projects';
+import { withBase } from '../lib/url';
+
+interface Props {
+  item: Project;
+}
+const { item } = Astro.props;
+---
+<article class="project-card" data-category={item.data.category}>
+  <div class="project-card-head">
+    <span class="project-category">{categoryLabel(item.data.category)}</span>
+    {item.data.status !== 'complete' && (
+      <span class="status-badge">{statusLabel(item.data.status)}</span>
+    )}
+  </div>
+  <h3><a href={withBase(`projects/${item.id}`)}>{item.data.title}</a></h3>
+  <p>{item.data.summary}</p>
+  {item.data.stack.length > 0 && (
+    <div class="stack">
+      {item.data.stack.map((tech) => <span>{tech}</span>)}
+    </div>
+  )}
+</article>

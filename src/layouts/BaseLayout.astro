@@ -3,6 +3,8 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import PublicationScripts from '../components/PublicationScripts.astro';
+import CodeCopy from '../components/CodeCopy.astro';
+import fontUrl from '../assets/fonts/crimson-pro-latin.woff2?url';
 import { site } from '../lib/site';
 import { topics } from '../lib/topics';
 import { withBase } from '../lib/url';
@@ -51,6 +53,7 @@ const profile = {
     <meta name="description" content={description} />
     {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
     <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
+    <link rel="preload" href={fontUrl} as="font" type="font/woff2" crossorigin />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content={type} />
@@ -84,5 +87,6 @@ const profile = {
     <main id="main" tabindex="-1"><slot /></main>
     <Footer />
     <PublicationScripts />
+    <CodeCopy />
   </body>
 </html>

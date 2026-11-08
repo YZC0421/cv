@@ -14,12 +14,13 @@ const workTitles = workTitleMap(await getCollection('work'));
   title="Publications · Zicong Yang"
   description="Peer-reviewed publications on medical signal processing and computer vision."
 >
-  <div class="container measure" style="padding-top:40px">
+  <div class="container" style="padding-top:40px">
     <h1>Publications</h1>
     <p class="muted">Peer-reviewed journal and conference papers. {pubs.length} entries.</p>
 
     <div class="filters" role="group" aria-label="Filter publications by topic">
-      <button type="button" data-group="topic" data-value="all" aria-pressed="true">All topics</button>
+      <span class="filter-label">Topic</span>
+      <button type="button" data-group="topic" data-value="all" aria-pressed="true">All</button>
       {topics.map((topic) => (
         <button type="button" data-group="topic" data-value={topic.slug} aria-pressed="false">
           {topic.name}
@@ -28,12 +29,14 @@ const workTitles = workTitleMap(await getCollection('work'));
     </div>
 
     <div class="filters" role="group" aria-label="Filter publications by author role">
-      <button type="button" data-group="role" data-value="all" aria-pressed="true">All roles</button>
+      <span class="filter-label">Role</span>
+      <button type="button" data-group="role" data-value="all" aria-pressed="true">All</button>
       <button type="button" data-group="role" data-value="first" aria-pressed="false">First author</button>
     </div>
 
     <div class="filters" role="group" aria-label="Filter publications by year">
-      <button type="button" data-group="year" data-value="all" aria-pressed="true">All years</button>
+      <span class="filter-label">Year</span>
+      <button type="button" data-group="year" data-value="all" aria-pressed="true">All</button>
       {years.map((year) => (
         <button type="button" data-group="year" data-value={String(year)} aria-pressed="false">
           {year}

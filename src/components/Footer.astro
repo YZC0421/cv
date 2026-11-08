@@ -5,9 +5,10 @@ import { withBase } from '../lib/url';
 const year = new Date().getFullYear();
 ---
 <footer class="site-footer">
-  <div class="container">
-    © {year} {site.name} · <a href={withBase('rss.xml')}>RSS</a> ·
-    <a href={site.scholar}>Scholar</a> ·
+  <div class="inner">
+    © {year} {site.name} · <a href={withBase('search')}>Search</a> ·
+    <a href={withBase('rss.xml')}>RSS</a> · <a href={site.scholar}>Scholar</a> ·
     <a href={site.orcid}>ORCID</a>
+    <div class="meta">Built with Astro · no trackers, no CDN</div>
   </div>
 </footer>

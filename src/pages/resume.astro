@@ -1,0 +1,125 @@
+---
+import ResumeLayout from '../layouts/ResumeLayout.astro';
+import { getCollection } from 'astro:content';
+import { profile } from '../data/profile';
+import { sortExperience } from '../lib/work';
+import { sortProjects } from '../lib/projects';
+
+const jobs = sortExperience(
+  (await getCollection('work')).filter((item) => item.data.kind === 'experience')
+);
+const fullTime = jobs.filter((job) => job.id === 'guangzhou-xiyang');
+const internships = jobs.filter(
+  (job) => job.id !== 'guangzhou-xiyang' && job.id !== 'campus-startup'
+);
+const startup = jobs.filter((job) => job.id === 'campus-startup');
+const projects = sortProjects(await getCollection('projects')).filter(
+  (item) => item.data.status === 'complete'
+);
+const publications = (await getCollection('publications')).sort((a, b) =>
+  b.data.date.localeCompare(a.data.date)
+);
+---
+<ResumeLayout>
+  <header class="resume-head">
+    <h1>{profile.name}</h1>
+    <p class="resume-role">{profile.headline}</p>
+    <p class="resume-contact">
+      {profile.email} · {profile.location} ·
+      <a href={profile.links.github}>GitHub</a> ·
+      <a href={profile.links.scholar}>Google Scholar</a> ·
+      <a href={profile.links.orcid}>ORCID</a>
+    </p>
+  </header>
+
+  <section class="resume-section">
+    <h2>Profile</h2>
+    <p>{profile.summary}</p>
+  </section>
+
+  <section class="resume-section">
+    <h2>Education</h2>
+    {profile.education.map((item) => (
+      <div class="resume-item">
+        <div class="resume-item-head">
+          <strong>{item.school}</strong>
+          <span>{item.period}</span>
+        </div>
+        <p class="resume-sub">{item.degree}</p>
+        <p class="resume-note">{item.detail}</p>
+      </div>
+    ))}
+  </section>
+
+  <section class="resume-section">
+    <h2>Work Experience</h2>
+    {fullTime.map((job) => (
+      <div class="resume-item">
+        <div class="resume-item-head">
+          <strong>{job.data.title} · {job.data.org}</strong>
+          <span>{job.data.start} – {job.data.end}</span>
+        </div>
+        <ul>{job.data.highlights.slice(0, 3).map((entry) => <li>{entry}</li>)}</ul>
+      </div>
+    ))}
+  </section>
+
+  <section class="resume-section">
+    <h2>Internship Experience</h2>
+    {internships.map((job) => (
+      <div class="resume-item">
+        <div class="resume-item-head">
+          <strong>{job.data.title} · {job.data.org}</strong>
+          <span>{job.data.start} – {job.data.end}</span>
+        </div>
+        <ul>{job.data.highlights.slice(0, 2).map((entry) => <li>{entry}</li>)}</ul>
+      </div>
+    ))}
+    {startup.map((job) => (
+      <div class="resume-item">
+        <div class="resume-item-head">
+          <strong>{job.data.title} · {job.data.org}</strong>
+          <span>{job.data.start} – {job.data.end}</span>
+        </div>
+        <ul>{job.data.highlights.map((entry) => <li>{entry}</li>)}</ul>
+      </div>
+    ))}
+  </section>
+
+  <section class="resume-section">
+    <h2>Project Experience</h2>
+    {projects.map((item) => (
+      <div class="resume-item">
+        <div class="resume-item-head">
+          <strong>{item.data.title}</strong>
+          <span>{item.data.period ?? ''}</span>
+        </div>
+        {item.data.role && <p class="resume-sub">{item.data.role}</p>}
+        {item.data.results && <p class="resume-note">{item.data.results}</p>}
+      </div>
+    ))}
+  </section>
+
+  <section class="resume-section">
+    <h2>Technical Skills</h2>
+    {profile.skillGroups.map((group) => (
+      <p class="resume-skill"><strong>{group.name}:</strong> {group.items.join(' · ')}</p>
+    ))}
+  </section>
+
+  <section class="resume-section">
+    <h2>Publications</h2>
+    <ol class="resume-pubs">
+      {publications.map((pub) => (
+        <li>
+          {pub.data.authors.join(', ')}. <em>{pub.data.title}</em>. {pub.data.venue}, {pub.data.year}.
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="resume-section">
+    <h2>Awards</h2>
+    <ul>{profile.awards.map((award) => <li>{award}</li>)}</ul>
+  </section>
+</ResumeLayout>

@@ -1,4 +1,5 @@
 import { defineConfig } from 'astro/config';
+import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
@@ -6,6 +7,7 @@ export default defineConfig({
   base: '/cv',
   output: 'static',
   integrations: [
+    mdx(),
     sitemap({
       filter: (page) => !page.includes('/404'),
     }),

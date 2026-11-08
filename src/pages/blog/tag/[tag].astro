@@ -21,7 +21,7 @@ interface Props {
 const { tag, posts } = Astro.props;
 ---
 <BaseLayout title={`#${tag} · Writing`} description={`Posts tagged ${tag}.`} lang="zh-CN">
-  <div class="container measure" style="padding-top:40px">
+  <div class="container" style="padding-top:40px">
     <h1>#{tag}</h1>
     <p class="muted"><a href={withBase('blog')}>← All writing</a></p>
     <PostList posts={posts} />

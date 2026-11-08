@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { profile } from '../data/profile';
+---
+<BaseLayout title="Contact · Zicong Yang" description="Contact details and profiles of Zicong Yang.">
+  <div class="container medium" style="padding-top:48px">
+    <h1>Contact</h1>
+    <p class="muted">The fastest way to reach me is email.</p>
+
+    <ul class="contact-list">
+      <li>
+        <span class="contact-label">Email</span>
+        <a href={`mailto:${profile.email}`}>{profile.email}</a>
+      </li>
+      <li>
+        <span class="contact-label">GitHub</span>
+        <a href={profile.links.github} target="_blank" rel="noopener">{profile.links.github}</a>
+      </li>
+      <li>
+        <span class="contact-label">Google Scholar</span>
+        <a href={profile.links.scholar} target="_blank" rel="noopener">{profile.links.scholar}</a>
+      </li>
+      <li>
+        <span class="contact-label">ORCID</span>
+        <a href={profile.links.orcid} target="_blank" rel="noopener">{profile.links.orcid}</a>
+      </li>
+      <li>
+        <span class="contact-label">LinkedIn</span>
+        <span class="muted">TODO — add your LinkedIn profile URL in src/data/profile.ts</span>
+      </li>
+    </ul>
+  </div>
+</BaseLayout>

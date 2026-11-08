@@ -2,6 +2,7 @@
 title: "从一份 55KB 的单页简历到 Astro 站点"
 date: "2026-11-07"
 lang: "zh"
+category: "software-engineering"
 tags: ["astro", "typescript", "static-site"]
 summary: "记录把单文件双语简历迁移为内容驱动的静态站的过程与取舍。"
 draft: false

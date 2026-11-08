@@ -2,6 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import PostLayout from '../../layouts/PostLayout.astro';
 import { getCollection, render } from 'astro:content';
+import { relatedPosts } from '../../lib/blog';
 import { readingMinutes } from '../../lib/format';
 import { visiblePosts } from '../../lib/posts';
 import { withBase } from '../../lib/url';
@@ -10,7 +11,12 @@ export async function getStaticPaths() {
   const posts = visiblePosts(await getCollection('blog'));
   return posts.map((post, index) => ({
     params: { slug: post.id },
-    props: { post, prev: posts[index + 1], next: posts[index - 1] },
+    props: {
+      post,
+      prev: posts[index + 1],
+      next: posts[index - 1],
+      related: relatedPosts(posts, post),
+    },
   }));
 }
 
@@ -18,8 +24,9 @@ interface Props {
   post: CollectionEntry<'blog'>;
   prev?: CollectionEntry<'blog'>;
   next?: CollectionEntry<'blog'>;
+  related: CollectionEntry<'blog'>[];
 }
-const { post, prev, next } = Astro.props;
+const { post, prev, next, related } = Astro.props;
 const { Content, headings } = await render(post);
 const readingTime = readingMinutes(post.body ?? '');
 ---
@@ -31,8 +38,21 @@ const readingTime = readingMinutes(post.body ?? '');
   tags={post.data.tags}
   headings={headings}
   readingTime={readingTime}
+  cover={post.data.cover}
 >
   <Content />
+
+  {related.length > 0 && (
+    <aside class="related">
+      <h2>Related posts</h2>
+      <ul>
+        {related.map((item) => (
+          <li><a href={withBase(`blog/${item.id}`)}>{item.data.title}</a></li>
+        ))}
+      </ul>
+    </aside>
+  )}
+
   {(prev || next) && (
     <div class="next-prev" slot="footer">
       <span>{prev ? <a href={withBase(`blog/${prev.id}`)}>← {prev.data.title}</a> : null}</span>

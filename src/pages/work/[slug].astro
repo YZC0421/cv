@@ -19,7 +19,7 @@ const publications = dois.length > 0 ? await getCollection('publications') : [];
 const relatedPublications = publications.filter((pub) => dois.includes(pub.data.doi));
 ---
 <BaseLayout title={`${d.title} · Zicong Yang`} description={d.summary}>
-  <article class="container measure work-detail" style="padding-top:40px">
+  <article class="container reading work-detail" style="padding-top:40px">
     <h1>{d.title}</h1>
     <p class="meta">{d.role} · {d.org} · {d.start} – {d.end}</p>
 
