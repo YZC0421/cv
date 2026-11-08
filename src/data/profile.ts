@@ -8,15 +8,15 @@ export const profile = {
     orcid: 'https://orcid.org/0009-0001-0948-3606',
     linkedin: 'TODO',
   },
-  headline: 'AI Engineering · Agent Development · Software Engineering · Data Intelligence',
+  headline: 'Applied AI · Computer Vision · Biomedical Signal Processing',
   summary:
-    'Software engineer and researcher working across applied AI, data intelligence, and production systems — from ECG signal models and industrial vision to LLM-backed tooling.',
+    'Software engineer and researcher applying deep learning to biomedical signals and computer vision — from multi-lead ECG arrhythmia detection and crop disease or industrial defect recognition to data-driven predictive analytics, extending into LLM and agent tooling.',
   location: 'Zhuhai / Guangzhou, China',
   focus: [
-    { name: 'AI Agents', detail: 'Agent runtime, tool management, and reliability of tool-using systems.' },
-    { name: 'LLM Engineering', detail: 'RAG pipelines, retrieval quality, and LLM-backed report generation.' },
-    { name: 'Applied Machine Learning', detail: 'ECG signal models, defect detection, and lightweight deployment.' },
-    { name: 'Data Intelligence', detail: 'Large-scale review mining, forecasting, and decision support.' },
+    { name: 'Computer Vision', detail: 'Agricultural diagnosis, object detection, and industrial defect inspection.' },
+    { name: 'Biomedical Signals', detail: 'ECG classification, spatio-temporal modelling, and multiscale fusion.' },
+    { name: 'Applied Machine Learning', detail: 'Predictive modelling and data-driven decision support.' },
+    { name: 'LLM & Agent Tooling', detail: 'Retrieval pipelines and tool-using agent systems.' },
   ],
   education: [
     {
@@ -40,15 +40,15 @@ export const profile = {
     'National Excellent Research Report (CNKI-indexed paper, second author)',
   ],
   zh: {
-    headline: 'AI 工程 · Agent 开发 · 软件工程 · 数据智能',
+    headline: '应用 AI · 计算机视觉 · 生物医学信号处理',
     summary:
-      '软件工程师与研究者，关注应用 AI、数据智能与生产系统 —— 从 ECG 信号模型、工业视觉，到基于 LLM 的工具链。',
+      '软件工程师与研究者，把深度学习用于生物医学信号与计算机视觉 —— 从多导联 ECG 心律失常检测、作物病害与工业缺陷识别，到数据驱动的预测分析，并延伸到 LLM 与 Agent 工具链。',
     location: '珠海 / 广州，中国',
     focus: [
-      { name: 'AI Agent', detail: 'Agent 运行时、工具管理与工具调用系统的可靠性。' },
-      { name: 'LLM 工程', detail: 'RAG 管线、检索质量与基于 LLM 的报告生成。' },
-      { name: '应用机器学习', detail: 'ECG 信号模型、缺陷检测与轻量化部署。' },
-      { name: '数据智能', detail: '大规模评论挖掘、预测与决策支持。' },
+      { name: '计算机视觉', detail: '农业诊断、目标检测与工业缺陷检测。' },
+      { name: '生物医学信号', detail: 'ECG 分类、时空建模与多尺度融合。' },
+      { name: '应用机器学习', detail: '预测建模与数据驱动决策支持。' },
+      { name: 'LLM 与 Agent 工具链', detail: '检索管线与工具调用型 Agent 系统。' },
     ],
     education: [
       {

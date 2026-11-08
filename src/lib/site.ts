@@ -8,7 +8,7 @@ const CV_FILE = fileURLToPath(new URL('../../public/cv.pdf', import.meta.url));
 export const site = {
   name: 'Zicong Yang',
   tagline:
-    'Software engineer and researcher working on medical signal processing and computer vision — ECG arrhythmia detection, industrial defect inspection, and applied deep learning.',
+    'Applied AI, computer vision, and biomedical signal processing — from ECG models to industrial inspection.',
   email: '402641915@qq.com',
   github: 'https://github.com/YZC0421',
   scholar: 'https://scholar.google.com/citations?user=0Ynn-awAAAAJ',
