@@ -16,17 +16,24 @@ export function sortPublications<T extends Pub>(items: T[]): T[] {
   });
 }
 
-export function selectHomepage<T extends Pub>(items: T[], limit = 3): T[] {
-  const chosen: T[] = [];
-  const take = (list: T[]) => {
-    for (const item of list) {
-      if (chosen.length >= limit) break;
-      if (!chosen.some((c) => c.id === item.id)) chosen.push(item);
-    }
-  };
-  const sorted = sortPublications(items);
-  take(sorted.filter((p) => p.data.selected));
-  take(sorted.filter((p) => p.data.role === 'first'));
-  take(sorted);
-  return chosen.slice(0, limit);
+const quartileRank: Record<string, number> = { Q1: 0, Q2: 1, Q3: 2, Q4: 3 };
+
+export function selectHomepage<T extends Pub>(items: T[], limit?: number): T[] {
+  const jcr = items
+    .filter((pub) => pub.data.indexing in quartileRank)
+    .sort((a, b) => {
+      const byQuartile =
+        (quartileRank[a.data.indexing] ?? 9) - (quartileRank[b.data.indexing] ?? 9);
+      if (byQuartile !== 0) return byQuartile;
+      const byRole = (roleRank[a.data.role] ?? 3) - (roleRank[b.data.role] ?? 3);
+      if (byRole !== 0) return byRole;
+      return dateOf(b).localeCompare(dateOf(a));
+    });
+
+  const firstAuthorEI = sortPublications(
+    items.filter((pub) => pub.data.indexing === 'EI' && pub.data.role === 'first')
+  );
+
+  const all = [...jcr, ...firstAuthorEI];
+  return limit ? all.slice(0, limit) : all;
 }

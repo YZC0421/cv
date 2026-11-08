@@ -78,7 +78,22 @@ checks.push(['work detail pages match content files', workDetails === workFiles]
 checks.push(['blog has at least one post page', postDetails >= 1]);
 
 const home = await read('dist/index.html');
-checks.push(['home shows 3 publications', (home.match(/class="pub-item"/g) ?? []).length === 3]);
+let expectedHomePubs = 0;
+for (const file of publicationFilesList) {
+  const source = await readFile(`src/content/publications/${file}`, 'utf8');
+  const indexing = source.match(/^indexing:\s*(\w+)/m)?.[1];
+  const role = source.match(/^role:\s*(\w+)/m)?.[1];
+  if (
+    ['Q1', 'Q2', 'Q3', 'Q4'].includes(indexing ?? '') ||
+    (indexing === 'EI' && role === 'first')
+  ) {
+    expectedHomePubs += 1;
+  }
+}
+checks.push([
+  'home shows JCR and first-author EI papers',
+  (home.match(/class="pub-item"/g) ?? []).length === expectedHomePubs,
+]);
 checks.push(['home shows 3 project cards', (home.match(/class="project-card"/g) ?? []).length === 3]);
 
 const publications = await read('dist/publications/index.html');

@@ -27,13 +27,30 @@ test('sortPublications orders by date desc, then role rank', () => {
   assert.deepEqual(sortPublications([a, b, c]).map((p: any) => p.id), ['c', 'b', 'a']);
 });
 
-test('selectHomepage prefers selected, then first author, then newest', () => {
-  const selected = make({ id: 'sel', selected: true, date: '2020-01-01' });
-  const first = make({ id: 'first', role: 'first', date: '2025-01-01' });
-  const newestOther = make({ id: 'new', date: '2025-06-01' });
-  const old = make({ id: 'old', date: '2019-01-01' });
-  const result = selectHomepage([selected, first, newestOther, old]);
-  assert.deepEqual(result.map((p: any) => p.id), ['sel', 'first', 'new']);
+test('selectHomepage lists JCR papers first, then first-author EI', () => {
+  const q1Third = make({ id: 'q1-third', indexing: 'Q1', role: 'third', date: '2025-01-01' });
+  const q4First = make({ id: 'q4-first', indexing: 'Q4', role: 'first', date: '2024-01-01' });
+  const eiFirst = make({ id: 'ei-first', indexing: 'EI', role: 'first', date: '2024-06-01' });
+  const eiSecond = make({ id: 'ei-second', indexing: 'EI', role: 'second', date: '2025-01-01' });
+  const noneFirst = make({ id: 'none-first', indexing: 'none', role: 'first', date: '2025-01-01' });
+
+  const result = selectHomepage([q4First, q1Third, eiFirst, eiSecond, noneFirst]);
+  assert.deepEqual(
+    result.map((pub: any) => pub.id),
+    ['q1-third', 'q4-first', 'ei-first']
+  );
+});
+
+test('selectHomepage orders JCR by quartile, then author role, then date', () => {
+  const q1Other = make({ id: 'q1-other', indexing: 'Q1', role: 'other', date: '2025-01-01' });
+  const q1First = make({ id: 'q1-first', indexing: 'Q1', role: 'first', date: '2023-01-01' });
+  const q2First = make({ id: 'q2-first', indexing: 'Q2', role: 'first', date: '2026-01-01' });
+
+  const result = selectHomepage([q1Other, q1First, q2First]);
+  assert.deepEqual(
+    result.map((pub: any) => pub.id),
+    ['q1-first', 'q1-other', 'q2-first']
+  );
 });
 
 test('sortPublications falls back to id for identical date and role', () => {
@@ -45,16 +62,11 @@ test('sortPublications falls back to id for identical date and role', () => {
   );
 });
 
-test('selectHomepage returns all entries when fewer than three', () => {
-  const one = make({ id: 'one' });
-  assert.equal(selectHomepage([one]).length, 1);
-});
-
-test('selectHomepage deduplicates an entry that is both selected and first-authored', () => {
-  const both = make({ id: 'both', selected: true, role: 'first', date: '2025-01-01' });
-  const other = make({ id: 'other', date: '2024-01-01' });
-  const third = make({ id: 'third', date: '2023-01-01' });
-  const result = selectHomepage([both, other, third]);
-  assert.deepEqual(result.map((p: any) => p.id), ['both', 'other', 'third']);
-  assert.equal(new Set(result.map((p: any) => p.id)).size, 3);
+test('selectHomepage returns only JCR and first-author EI entries', () => {
+  const one = make({ id: 'one', indexing: 'EI', role: 'first' });
+  const other = make({ id: 'other', indexing: 'EI', role: 'second' });
+  assert.deepEqual(
+    selectHomepage([one, other]).map((pub: any) => pub.id),
+    ['one']
+  );
 });
