@@ -1,0 +1,84 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import ResearchAreas from '../../components/ResearchAreas.astro';
+import PublicationItem from '../../components/PublicationItem.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import PostList from '../../components/PostList.astro';
+import { getCollection } from 'astro:content';
+import { profile } from '../../data/profile';
+import { selectHomepage } from '../../lib/publications';
+import { visiblePosts } from '../../lib/posts';
+import { validateRelations } from '../../lib/relations';
+import { featuredProjects } from '../../lib/projects';
+import { localeUrl } from '../../i18n/utils';
+import { t } from '../../i18n/ui';
+import { workTitleMap } from '../../lib/work';
+
+const copy = t('zh').home;
+const allPublications = await getCollection('publications');
+const allWork = await getCollection('work');
+const relationErrors = validateRelations(allPublications, allWork);
+if (relationErrors.length > 0) {
+  throw new Error(`Content relations are invalid:\n${relationErrors.join('\n')}`);
+}
+
+const pubs = selectHomepage(allPublications);
+const projects = featuredProjects(await getCollection('projects'));
+const posts = visiblePosts(await getCollection('blog')).slice(0, 3);
+const workTitles = workTitleMap(allWork);
+---
+<BaseLayout
+  title="杨梓聪 · AI 工程、Agent 与数据智能"
+  description="杨梓聪的个人网站：AI 工程、Agent 系统、论文、项目与技术写作。"
+  lang="zh"
+  profilePage
+>
+  <Hero />
+
+  {projects.length > 0 && (
+    <section class="section container">
+      <div class="section-head">
+        <h2>{copy.selectedProjects}</h2>
+        <a href={localeUrl('projects', 'zh')}>{copy.allProjects} →</a>
+      </div>
+      <div class="project-grid">
+        {projects.map((item) => <ProjectCard item={item} />)}
+      </div>
+    </section>
+  )}
+
+  <ResearchAreas />
+
+  <section class="section container">
+    <div class="section-head">
+      <h2>{copy.selectedPublications}</h2>
+      <a href={localeUrl('publications', 'zh')}>{copy.allPublications} →</a>
+    </div>
+    <ul class="pub-list">
+      {pubs.map((pub) => <PublicationItem pub={pub} workTitles={workTitles} />)}
+    </ul>
+  </section>
+
+  {posts.length > 0 && (
+    <section class="section container">
+      <div class="section-head">
+        <h2>{copy.latestWriting}</h2>
+        <a href={localeUrl('blog', 'zh')}>{copy.allWriting} →</a>
+      </div>
+      <PostList posts={posts} />
+    </section>
+  )}
+
+  <section class="section container">
+    <div class="section-head"><h2>{copy.getInTouch}</h2></div>
+    <p class="muted">
+      {profile.zh.location} · <a href={`mailto:${profile.email}`}>{profile.email}</a>
+    </p>
+    <div class="links">
+      <a href={localeUrl('resume', 'zh')}>简历 →</a>
+      <a href={localeUrl('about', 'zh')}>关于 →</a>
+      <a href={localeUrl('contact', 'zh')}>联系 →</a>
+    </div>
+  </section>
+</BaseLayout>

@@ -10,11 +10,6 @@ const jobs = sortExperience(
 );
 ---
 <BaseLayout title="About · Zicong Yang" description="Background, research interests, and technical philosophy." profilePage>
-  <Fragment slot="head">
-    <link rel="alternate" hreflang="en" href={new URL(withBase('about'), Astro.site)} />
-    <link rel="alternate" hreflang="zh-CN" href={new URL(withBase('about/zh'), Astro.site)} />
-    <link rel="alternate" hreflang="x-default" href={new URL(withBase('about'), Astro.site)} />
-  </Fragment>
   <div class="container medium" style="padding-top:48px">
     <h1>About</h1>
     <p class="lede">{profile.summary}</p>

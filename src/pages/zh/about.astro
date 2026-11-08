@@ -1,0 +1,70 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { profile } from '../../data/profile';
+import { sortExperience } from '../../lib/work';
+import { localeUrl } from '../../i18n/utils';
+import { t } from '../../i18n/ui';
+
+const copy = t('zh').about;
+const zh = profile.zh;
+const jobs = sortExperience(
+  (await getCollection('work')).filter((item) => item.data.kind === 'experience')
+);
+---
+<BaseLayout title="关于 · 杨梓聪" description="个人背景、研究方向与技术理念。" lang="zh" profilePage>
+  <div class="container medium" style="padding-top:48px">
+    <h1>{copy.title}</h1>
+    <p class="lede">{zh.summary}</p>
+
+    <section class="section">
+      <div class="section-head"><h2>{copy.focus}</h2></div>
+      <ul class="focus-list">
+        {zh.focus.map((item) => (
+          <li>
+            <strong>{item.name}</strong>
+            <span class="muted">{item.detail}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>{copy.timeline}</h2></div>
+      <ul class="timeline">
+        {zh.education.map((item) => (
+          <li>
+            <h3>{item.school}</h3>
+            <div class="org">{item.degree}</div>
+            <div class="when">{item.period}</div>
+            <ul><li>{item.detail}</li></ul>
+          </li>
+        ))}
+        {jobs.map((job) => (
+          <li>
+            <h3>{job.data.title}</h3>
+            <div class="org">{job.data.org}</div>
+            <div class="when">{job.data.start} – {job.data.end}</div>
+            <ul>{job.data.highlights.slice(0, 2).map((entry) => <li>{entry}</li>)}</ul>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>{copy.philosophy}</h2></div>
+      <div class="prose">
+        <p>
+          我更在意系统在演示之后是否仍然成立：明确的数据模型、可复现的评估、能自我解释的接口。
+          我的工作大多位于研究原型与生产软件之间，因此会把精力放在交接上 —— 文档、测试，
+          以及那些让项目活下来的“无聊部分”。
+        </p>
+      </div>
+    </section>
+
+    <p class="links">
+      <a href={localeUrl('resume', 'zh')}>{copy.resume} →</a>
+      <a href={localeUrl('contact', 'zh')}>{copy.contact} →</a>
+    </p>
+  </div>
+</BaseLayout>

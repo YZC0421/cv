@@ -1,0 +1,74 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getCollection, render } from 'astro:content';
+import { t } from '../../../i18n/ui';
+
+export async function getStaticPaths() {
+  const items = await getCollection('work');
+  return items.map((item) => ({ params: { slug: item.id }, props: { item } }));
+}
+
+interface Props {
+  item: CollectionEntry<'work'>;
+}
+const { item } = Astro.props;
+const { Content } = await render(item);
+const d = item.data;
+const dois = d.relatedPublications ?? [];
+const publications = dois.length > 0 ? await getCollection('publications') : [];
+const relatedPublications = publications.filter((pub) => dois.includes(pub.data.doi));
+const copy = t('zh').projects;
+---
+<BaseLayout title={`${d.title} · 杨梓聪`} description={d.summary} lang="zh">
+  <article class="container reading work-detail" style="padding-top:40px">
+    <h1>{d.title}</h1>
+    <p class="meta">{d.role} · {d.org} · {d.start} – {d.end}</p>
+
+    {d.problem && <section class="work-block"><h2>{copy.goal}</h2><p>{d.problem}</p></section>}
+    {d.approach && <section class="work-block"><h2>{copy.architecture}</h2><p>{d.approach}</p></section>}
+    {d.results && <section class="work-block"><h2>{copy.results}</h2><p>{d.results}</p></section>}
+
+    <div class="prose"><Content /></div>
+
+    <section class="work-block">
+      <h2>{copy.role}</h2>
+      <p>{d.role} · {d.org}</p>
+    </section>
+
+    <section class="work-block">
+      <h2>要点</h2>
+      <ul>{d.highlights.map((highlight) => <li>{highlight}</li>)}</ul>
+    </section>
+
+    {d.stack.length > 0 && (
+      <section class="work-block">
+        <h2>{copy.stack}</h2>
+        <div class="stack">{d.stack.map((tech) => <span>{tech}</span>)}</div>
+      </section>
+    )}
+
+    {d.links.length > 0 && (
+      <section class="work-block">
+        <h2>{copy.links}</h2>
+        <div class="links">
+          {d.links.map((link) => <a href={link.url} target="_blank" rel="noopener">{link.label}</a>)}
+        </div>
+      </section>
+    )}
+
+    {relatedPublications.length > 0 && (
+      <section class="work-block">
+        <h2>关联论文</h2>
+        {relatedPublications.map((pub) => (
+          <p>
+            <a href={`https://doi.org/${pub.data.doi}`} target="_blank" rel="noopener">
+              {pub.data.title}
+            </a>
+            <span class="muted"> · {pub.data.venue} · {pub.data.year}</span>
+          </p>
+        ))}
+      </section>
+    )}
+  </article>
+</BaseLayout>

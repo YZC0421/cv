@@ -2,41 +2,54 @@
 import ThemeToggle from './ThemeToggle.astro';
 import NavLinks from './NavLinks.astro';
 import { site } from '../lib/site';
-import { stripBase, withBase } from '../lib/url';
+import { t } from '../i18n/ui';
+import { alternateUrl, contentPath, langFromPath, localeUrl } from '../i18n/utils';
 
-interface Props {
-  langLink?: { href: string; label: string; lang: string };
-}
-const { langLink } = Astro.props;
+const lang = langFromPath(Astro.url.pathname);
+const copy = t(lang);
+const path = contentPath(Astro.url.pathname);
 
-const links = [
-  { path: 'projects', label: 'Projects' },
-  { path: 'blog', label: 'Writing' },
-  { path: 'publications', label: 'Research' },
-  { path: 'resume', label: 'Resume' },
-  { path: 'about', label: 'About' },
-  { path: 'contact', label: 'Contact' },
+const items = [
+  { path: 'projects', label: copy.nav.projects },
+  { path: 'blog', label: copy.nav.writing },
+  { path: 'publications', label: copy.nav.research },
+  { path: 'resume', label: copy.nav.resume },
+  { path: 'about', label: copy.nav.about },
+  { path: 'contact', label: copy.nav.contact },
 ];
-const current = stripBase(Astro.url.pathname);
-const isHome = current === '/';
+
+const links = items.map((item) => ({
+  href: localeUrl(item.path, lang),
+  label: item.label,
+  current: path === `/${item.path}/` || path.startsWith(`/${item.path}/`),
+}));
+
+const otherLang = lang === 'zh' ? 'en' : 'zh';
+const switchHref = alternateUrl(Astro.url.pathname, otherLang);
+const switchLabel = copy.common.switchTo;
+const isHome = path === '/';
 ---
 <header class="site-header">
   <div class="inner">
-    <a class="brand" href={withBase()} aria-current={isHome ? 'page' : undefined}>{site.name}</a>
+    <a class="brand" href={localeUrl('', lang)} aria-current={isHome ? 'page' : undefined}>{site.name}</a>
     <nav class="nav desktop-nav" aria-label="Primary">
-      <NavLinks links={links} current={current} />
+      <NavLinks links={links} />
     </nav>
     <details class="nav-details">
-      <summary class="nav-toggle">Menu</summary>
+      <summary class="nav-toggle">{copy.nav.menu}</summary>
       <nav class="nav" aria-label="Primary mobile">
-        <NavLinks links={links} current={current} />
+        <NavLinks links={links} />
       </nav>
     </details>
-    {langLink && (
-      <a class="lang-link" href={langLink.href} hreflang={langLink.lang} lang={langLink.lang}>
-        {langLink.label}
-      </a>
-    )}
+    <a
+      class="lang-link"
+      href={switchHref}
+      hreflang={otherLang === 'zh' ? 'zh-CN' : 'en'}
+      lang={otherLang === 'zh' ? 'zh-CN' : 'en'}
+      aria-label={copy.common.switchLabel}
+    >
+      {switchLabel}
+    </a>
     <ThemeToggle />
   </div>
 </header>

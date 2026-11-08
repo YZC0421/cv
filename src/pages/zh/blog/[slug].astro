@@ -1,0 +1,64 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import PostLayout from '../../../layouts/PostLayout.astro';
+import { getCollection, render } from 'astro:content';
+import { relatedPosts } from '../../../lib/blog';
+import { readingMinutes } from '../../../lib/format';
+import { visiblePosts } from '../../../lib/posts';
+import { localeUrl } from '../../../i18n/utils';
+import { t } from '../../../i18n/ui';
+
+export async function getStaticPaths() {
+  const posts = visiblePosts(await getCollection('blog'));
+  return posts.map((post, index) => ({
+    params: { slug: post.id },
+    props: {
+      post,
+      prev: posts[index + 1],
+      next: posts[index - 1],
+      related: relatedPosts(posts, post),
+    },
+  }));
+}
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+  prev?: CollectionEntry<'blog'>;
+  next?: CollectionEntry<'blog'>;
+  related: CollectionEntry<'blog'>[];
+}
+const { post, prev, next, related } = Astro.props;
+const { Content, headings } = await render(post);
+const readingTime = readingMinutes(post.body ?? '');
+const copy = t('zh').blog;
+---
+<PostLayout
+  title={post.data.title}
+  description={post.data.summary}
+  date={post.data.date}
+  lang={post.data.lang}
+  tags={post.data.tags}
+  headings={headings}
+  readingTime={readingTime}
+  cover={post.data.cover}
+>
+  <Content />
+
+  {related.length > 0 && (
+    <aside class="related">
+      <h2>{copy.related}</h2>
+      <ul>
+        {related.map((item) => (
+          <li><a href={localeUrl(`blog/${item.id}`, 'zh')}>{item.data.title}</a></li>
+        ))}
+      </ul>
+    </aside>
+  )}
+
+  {(prev || next) && (
+    <div class="next-prev" slot="footer">
+      <span>{prev ? <a href={localeUrl(`blog/${prev.id}`, 'zh')}>← {prev.data.title}</a> : null}</span>
+      <span>{next ? <a href={localeUrl(`blog/${next.id}`, 'zh')}>{next.data.title} →</a> : null}</span>
+    </div>
+  )}
+</PostLayout>

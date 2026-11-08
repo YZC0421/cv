@@ -13,7 +13,19 @@ export const categoryLabels: Record<string, string> = {
   notes: 'Technical Notes',
 };
 
-export function categoryLabel(slug: string): string {
+export const categoryLabelsZh: Record<string, string> = {
+  'ai-agent': 'AI Agent',
+  'llm-engineering': 'LLM 工程',
+  'ai-application': 'AI 应用开发',
+  'software-engineering': '软件工程',
+  'data-science': '数据科学',
+  'time-series': '时间序列预测',
+  'paper-reading': '研究与论文阅读',
+  notes: '技术笔记',
+};
+
+export function categoryLabel(slug: string, lang: 'en' | 'zh' = 'en'): string {
+  if (lang === 'zh') return categoryLabelsZh[slug] ?? slug;
   return categoryLabels[slug] ?? slug;
 }
 

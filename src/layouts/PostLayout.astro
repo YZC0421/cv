@@ -15,6 +15,7 @@ interface Props {
 }
 const { title, description, date, lang, tags, headings, readingTime, cover } = Astro.props;
 const readingLabel = lang === 'zh' ? `约 ${readingTime} 分钟` : `${readingTime} min read`;
+const tocLabel = lang === 'zh' ? '目录' : 'Table of contents';
 const hasToc = headings.some(
   (heading) => (heading.depth === 2 || heading.depth === 3) && heading.slug !== 'footnote-label'
 );
@@ -56,7 +57,7 @@ const article = {
       {cover && <img class="post-cover" src={withBase(cover)} alt="" loading="lazy" />}
       {hasToc && (
         <details class="toc-mobile">
-          <summary>Table of contents</summary>
+          <summary>{tocLabel}</summary>
           <Toc headings={headings} />
         </details>
       )}

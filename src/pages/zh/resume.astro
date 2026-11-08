@@ -1,0 +1,122 @@
+---
+import ResumeLayout from '../../layouts/ResumeLayout.astro';
+import { getCollection } from 'astro:content';
+import { profile } from '../../data/profile';
+import { sortExperience } from '../../lib/work';
+import { localizedProject, sortProjects } from '../../lib/projects';
+import { t } from '../../i18n/ui';
+
+const copy = t('zh').resume;
+const zh = profile.zh;
+const jobs = sortExperience(
+  (await getCollection('work')).filter((item) => item.data.kind === 'experience')
+);
+const fullTime = jobs.filter((job) => job.id === 'guangzhou-xiyang');
+const internships = jobs.filter(
+  (job) => job.id !== 'guangzhou-xiyang' && job.id !== 'campus-startup'
+);
+const startup = jobs.filter((job) => job.id === 'campus-startup');
+const projects = sortProjects(await getCollection('projects')).filter(
+  (item) => item.data.status === 'complete'
+);
+const publications = (await getCollection('publications')).sort((a, b) =>
+  b.data.date.localeCompare(a.data.date)
+);
+---
+<ResumeLayout>
+  <header class="resume-head">
+    <h1>{profile.nameZh}</h1>
+    <p class="resume-role">{zh.headline}</p>
+    <p class="resume-contact">
+      {profile.email} · {zh.location} ·
+      <a href={profile.links.github}>GitHub</a> ·
+      <a href={profile.links.scholar}>Google Scholar</a> ·
+      <a href={profile.links.orcid}>ORCID</a>
+    </p>
+  </header>
+
+  <section class="resume-section">
+    <h2>{copy.profile}</h2>
+    <p>{zh.summary}</p>
+  </section>
+
+  <section class="resume-section">
+    <h2>{copy.education}</h2>
+    {zh.education.map((item) => (
+      <div class="resume-item">
+        <div class="resume-item-head">
+          <strong>{item.school}</strong>
+          <span>{item.period}</span>
+        </div>
+        <p class="resume-sub">{item.degree}</p>
+        <p class="resume-note">{item.detail}</p>
+      </div>
+    ))}
+  </section>
+
+  <section class="resume-section">
+    <h2>{copy.work}</h2>
+    {fullTime.map((job) => (
+      <div class="resume-item">
+        <div class="resume-item-head">
+          <strong>{job.data.title} · {job.data.org}</strong>
+          <span>{job.data.start} – {job.data.end}</span>
+        </div>
+        <ul>{job.data.highlights.slice(0, 3).map((entry) => <li>{entry}</li>)}</ul>
+      </div>
+    ))}
+  </section>
+
+  <section class="resume-section">
+    <h2>{copy.internship}</h2>
+    {[...internships, ...startup].map((job) => (
+      <div class="resume-item">
+        <div class="resume-item-head">
+          <strong>{job.data.title} · {job.data.org}</strong>
+          <span>{job.data.start} – {job.data.end}</span>
+        </div>
+        <ul>{job.data.highlights.slice(0, 2).map((entry) => <li>{entry}</li>)}</ul>
+      </div>
+    ))}
+  </section>
+
+  <section class="resume-section">
+    <h2>{copy.projects}</h2>
+    {projects.map((item) => {
+      const d = localizedProject(item, 'zh');
+      return (
+        <div class="resume-item">
+          <div class="resume-item-head">
+            <strong>{d.title}</strong>
+            <span>{d.period ?? ''}</span>
+          </div>
+          {d.role && <p class="resume-sub">{d.role}</p>}
+          {d.results && <p class="resume-note">{d.results}</p>}
+        </div>
+      );
+    })}
+  </section>
+
+  <section class="resume-section">
+    <h2>{copy.skills}</h2>
+    {zh.skillGroups.map((group) => (
+      <p class="resume-skill"><strong>{group.name}：</strong>{group.items.join(' · ')}</p>
+    ))}
+  </section>
+
+  <section class="resume-section">
+    <h2>{copy.publications}</h2>
+    <ol class="resume-pubs">
+      {publications.map((pub) => (
+        <li>
+          {pub.data.authors.join(', ')}. <em>{pub.data.title}</em>. {pub.data.venue}, {pub.data.year}.
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="resume-section">
+    <h2>{copy.awards}</h2>
+    <ul>{zh.awards.map((award) => <li>{award}</li>)}</ul>
+  </section>
+</ResumeLayout>

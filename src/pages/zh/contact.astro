@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { profile } from '../../data/profile';
+import { t } from '../../i18n/ui';
+
+const copy = t('zh').contact;
+---
+<BaseLayout title="联系 · 杨梓聪" description="杨梓聪的联系方式与个人主页。" lang="zh">
+  <div class="container medium" style="padding-top:48px">
+    <h1>{copy.title}</h1>
+    <p class="muted">{copy.intro}</p>
+
+    <ul class="contact-list">
+      <li>
+        <span class="contact-label">{copy.email}</span>
+        <a href={`mailto:${profile.email}`}>{profile.email}</a>
+      </li>
+      <li>
+        <span class="contact-label">{copy.github}</span>
+        <a href={profile.links.github} target="_blank" rel="noopener">{profile.links.github}</a>
+      </li>
+      <li>
+        <span class="contact-label">{copy.scholar}</span>
+        <a href={profile.links.scholar} target="_blank" rel="noopener">{profile.links.scholar}</a>
+      </li>
+      <li>
+        <span class="contact-label">{copy.orcid}</span>
+        <a href={profile.links.orcid} target="_blank" rel="noopener">{profile.links.orcid}</a>
+      </li>
+      <li>
+        <span class="contact-label">{copy.linkedin}</span>
+        <span class="muted">{copy.todo}</span>
+      </li>
+    </ul>
+  </div>
+</BaseLayout>

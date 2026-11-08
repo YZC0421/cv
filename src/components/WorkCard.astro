@@ -1,19 +1,20 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import { topicName } from '../lib/topics';
-import { withBase } from '../lib/url';
+import { langFromPath, localeUrl } from '../i18n/utils';
 
 interface Props {
   item: CollectionEntry<'work'>;
 }
 const { item } = Astro.props;
+const lang = langFromPath(Astro.url.pathname);
 const topics = item.data.topics ?? [];
 ---
 <article class="work-card" data-topics={topics.join(' ')}>
-  <h3><a href={withBase(`work/${item.id}`)}>{item.data.title}</a></h3>
+  <h3><a href={localeUrl(`work/${item.id}`, lang)}>{item.data.title}</a></h3>
   <p>{item.data.summary}</p>
   <div class="stack">
-    {topics.map((topic) => <span class="badge badge-topic">{topicName(topic)}</span>)}
+    {topics.map((topic) => <span class="badge badge-topic">{topicName(topic, lang)}</span>)}
     {item.data.stack.map((tech) => <span>{tech}</span>)}
   </div>
 </article>

@@ -28,7 +28,6 @@ const { category, posts } = Astro.props;
 <BaseLayout
   title={`${categoryLabel(category)} · Writing`}
   description={`Posts in ${categoryLabel(category)}.`}
-  lang="zh-CN"
 >
   <div class="container" style="padding-top:48px">
     <p class="eyebrow"><a href={withBase('blog')}>Writing</a> / Category</p>

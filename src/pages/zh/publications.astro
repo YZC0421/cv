@@ -1,0 +1,99 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PublicationItem from '../../components/PublicationItem.astro';
+import { getCollection } from 'astro:content';
+import { sortPublications } from '../../lib/publications';
+import { topics } from '../../lib/topics';
+import { workTitleMap } from '../../lib/work';
+import { t } from '../../i18n/ui';
+
+const copy = t('zh').publications;
+const pubs = sortPublications(await getCollection('publications'));
+const years = [...new Set(pubs.map((pub) => pub.data.year))].sort((a, b) => b - a);
+const workTitles = workTitleMap(await getCollection('work'));
+---
+<BaseLayout title="论文 · 杨梓聪" description="医学信号处理与计算机视觉方向的同行评议论文。" lang="zh">
+  <div class="container" style="padding-top:40px">
+    <h1>{copy.title}</h1>
+    <p class="muted">{copy.intro} 共 {pubs.length} {copy.entries}。</p>
+
+    <div class="filters" role="group" aria-label="按主题筛选论文">
+      <span class="filter-label">{copy.topic}</span>
+      <button type="button" data-group="topic" data-value="all" aria-pressed="true">{copy.all}</button>
+      {topics.map((topic) => (
+        <button type="button" data-group="topic" data-value={topic.slug} aria-pressed="false">
+          {topic.nameZh}
+        </button>
+      ))}
+    </div>
+
+    <div class="filters" role="group" aria-label="按位次筛选论文">
+      <span class="filter-label">{copy.role}</span>
+      <button type="button" data-group="role" data-value="all" aria-pressed="true">{copy.all}</button>
+      <button type="button" data-group="role" data-value="first" aria-pressed="false">{copy.firstAuthor}</button>
+    </div>
+
+    <div class="filters" role="group" aria-label="按年份筛选论文">
+      <span class="filter-label">{copy.year}</span>
+      <button type="button" data-group="year" data-value="all" aria-pressed="true">{copy.all}</button>
+      {years.map((year) => (
+        <button type="button" data-group="year" data-value={String(year)} aria-pressed="false">
+          {year}
+        </button>
+      ))}
+    </div>
+
+    <ul class="pub-list" id="pub-list">
+      {pubs.map((pub) => <PublicationItem pub={pub} workTitles={workTitles} />)}
+    </ul>
+    <p id="pub-status" class="muted" role="status" aria-live="polite"></p>
+  </div>
+
+  <script is:inline define:vars={{ emptyText: copy.empty, template: '显示 {v} / {t} 篇论文。' }}>
+    (() => {
+      const buttons = document.querySelectorAll('.filters button');
+      const rows = document.querySelectorAll('#pub-list .pub-item');
+      const status = document.getElementById('pub-status');
+      const state = { topic: 'all', role: 'all', year: 'all' };
+
+      const apply = () => {
+        let visible = 0;
+        rows.forEach((row) => {
+          const topics = (row.dataset.topics ?? '').split(' ').filter(Boolean);
+          const match =
+            (state.topic === 'all' || topics.includes(state.topic)) &&
+            (state.role === 'all' || row.dataset.role === 'first') &&
+            (state.year === 'all' || row.dataset.year === state.year);
+          row.hidden = !match;
+          if (match) visible += 1;
+        });
+        if (status) {
+          status.textContent =
+            visible === 0
+              ? emptyText
+              : template.replace('{v}', visible).replace('{t}', rows.length);
+        }
+      };
+
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const group = btn.dataset.group;
+          if (!group) return;
+          state[group] = btn.dataset.value;
+          document
+            .querySelectorAll(`.filters button[data-group="${group}"]`)
+            .forEach((other) => other.setAttribute('aria-pressed', String(other === btn)));
+          apply();
+        });
+      });
+
+      const initial = new URLSearchParams(window.location.search).get('topic');
+      if (initial) {
+        const target = [...document.querySelectorAll('.filters button[data-group="topic"]')].find(
+          (btn) => btn.dataset.value === initial
+        );
+        target?.click();
+      }
+    })();
+  </script>
+</BaseLayout>

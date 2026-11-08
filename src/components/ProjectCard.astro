@@ -1,25 +1,30 @@
 ---
 import type { Project } from '../lib/projects';
-import { categoryLabel, statusLabel } from '../lib/projects';
-import { withBase } from '../lib/url';
+import { categoryLabel, localizedProject, statusLabel } from '../lib/projects';
+import { langFromPath, localeUrl } from '../i18n/utils';
+import { t } from '../i18n/ui';
 
 interface Props {
   item: Project;
 }
 const { item } = Astro.props;
+const lang = langFromPath(Astro.url.pathname);
+const d = localizedProject(item, lang);
+const copy = t(lang).projects;
 ---
 <article class="project-card" data-category={item.data.category}>
   <div class="project-card-head">
-    <span class="project-category">{categoryLabel(item.data.category)}</span>
+    <span class="project-category">{categoryLabel(item.data.category, lang)}</span>
     {item.data.status !== 'complete' && (
-      <span class="status-badge">{statusLabel(item.data.status)}</span>
+      <span class="status-badge">{statusLabel(item.data.status, lang)}</span>
     )}
   </div>
-  <h3><a href={withBase(`projects/${item.id}`)}>{item.data.title}</a></h3>
-  <p>{item.data.summary}</p>
-  {item.data.stack.length > 0 && (
+  <h3><a href={localeUrl(`projects/${item.id}`, lang)}>{d.title}</a></h3>
+  <p>{d.summary}</p>
+  {d.stack.length > 0 && (
     <div class="stack">
-      {item.data.stack.map((tech) => <span>{tech}</span>)}
+      {d.stack.map((tech) => <span>{tech}</span>)}
     </div>
   )}
+  {d.todo && d.todo.length > 0 && <span class="sr-only">{copy.todo}</span>}
 </article>

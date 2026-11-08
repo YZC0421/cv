@@ -54,6 +54,14 @@ const indexRoutes = [
   'dist/favicon.svg',
   'dist/CV.html',
   'dist/pagefind/pagefind-ui.js',
+  'dist/zh/index.html',
+  'dist/zh/projects/index.html',
+  'dist/zh/resume/index.html',
+  'dist/zh/about/index.html',
+  'dist/zh/contact/index.html',
+  'dist/zh/blog/index.html',
+  'dist/zh/publications/index.html',
+  'dist/zh/search/index.html',
 ];
 
 for (const route of indexRoutes) await must(route, route);
@@ -165,6 +173,15 @@ checks.push([
 const searchHtml = await read('dist/search/index.html');
 checks.push(['search page wires Pagefind', searchHtml.includes('PagefindUI')]);
 await must('dist/pagefind/pagefind-entry.json', 'pagefind index');
+
+const zhHome = await read('dist/zh/index.html');
+checks.push(['zh home is localized', zhHome.includes('精选项目') && zhHome.includes('研究方向')]);
+checks.push(['zh home sets lang', /<html lang="zh-CN"/.test(zhHome)]);
+checks.push(['en home declares zh alternate', /hreflang="zh-CN"/.test(home)]);
+checks.push([
+  'language switch points to zh',
+  /href="\/cv\/zh\//.test(home),
+]);
 
 const cvExists = existsSync('public/cv.pdf');
 checks.push([

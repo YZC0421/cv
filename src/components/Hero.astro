@@ -1,16 +1,21 @@
 ---
 import { profile } from '../data/profile';
+import { langFromPath } from '../i18n/utils';
+
+const lang = langFromPath(Astro.url.pathname);
+const data = lang === 'zh' ? profile.zh : profile;
+const name = lang === 'zh' ? profile.nameZh : profile.name;
 ---
 <section class="hero container">
-  <p class="eyebrow">{profile.headline}</p>
-  <h1>{profile.name}</h1>
+  <p class="eyebrow">{data.headline}</p>
+  <h1>{name}</h1>
   <div class="hero-grid">
     <div>
-      <p>{profile.summary}</p>
+      <p>{data.summary}</p>
     </div>
     <div class="hero-side">
       <ul class="focus-inline">
-        {profile.focus.map((item) => <li>{item.name}</li>)}
+        {data.focus.map((item) => <li>{item.name}</li>)}
       </ul>
       <div class="social">
         <a href={profile.links.github} target="_blank" rel="noopener">

@@ -1,10 +1,13 @@
 ---
 import { getCollection } from 'astro:content';
-import { topics } from '../lib/topics';
+import { topicBlurb, topicName, topics } from '../lib/topics';
 import { sortPublications } from '../lib/publications';
 import { sortWork } from '../lib/work';
-import { withBase } from '../lib/url';
+import { langFromPath, localeUrl } from '../i18n/utils';
+import { t } from '../i18n/ui';
 
+const lang = langFromPath(Astro.url.pathname);
+const copy = t(lang).home;
 const [publications, work] = await Promise.all([
   getCollection('publications'),
   getCollection('work'),
@@ -18,46 +21,48 @@ const areas = topics
       )
     );
     const entries = sortWork(work.filter((item) => item.data.topics?.includes(topic.slug)));
-    return { ...topic, paper: papers[0], entry: entries[0] };
+    return {
+      slug: topic.slug,
+      name: topicName(topic.slug, lang),
+      blurb: topicBlurb(topic.slug, lang),
+      paper: papers[0],
+      entry: entries[0],
+    };
   })
   .filter((area) => area.paper || area.entry);
 ---
 {areas.length > 0 && (
   <section class="band">
     <div class="container">
-      <div class="section-head"><h2>Research Areas</h2></div>
+      <div class="section-head"><h2>{copy.researchAreas}</h2></div>
       <div class="area-grid">
-      {areas.map((area) => (
-        <article class="area">
-          <h3>{area.name}</h3>
-          <p class="muted">{area.blurb}</p>
-          <ul class="area-items">
-            {area.paper && (
-              <li>
-                <a href={`https://doi.org/${area.paper.data.doi}`} target="_blank" rel="noopener">
-                  {area.paper.data.title}
-                </a>
-                <span class="area-note">
-                  {area.paper.data.venueShort ?? area.paper.data.venue} · {area.paper.data.year}
-                </span>
-              </li>
-            )}
-            {area.entry && (
-              <li>
-                <a href={withBase(`work/${area.entry.id}`)}>{area.entry.data.title}</a>
-                <span class="area-note">{area.entry.data.org}</span>
-              </li>
-            )}
-          </ul>
-          <a
-            class="area-link"
-            href={`${withBase('publications')}?topic=${area.slug}`}
-            aria-label={`View all publications on ${area.name}`}
-          >
-            View all →
-          </a>
-        </article>
-      ))}
+        {areas.map((area) => (
+          <article class="area">
+            <h3>{area.name}</h3>
+            <p class="muted">{area.blurb}</p>
+            <ul class="area-items">
+              {area.paper && (
+                <li>
+                  <a href={`https://doi.org/${area.paper.data.doi}`} target="_blank" rel="noopener">
+                    {area.paper.data.title}
+                  </a>
+                  <span class="area-note">
+                    {area.paper.data.venueShort ?? area.paper.data.venue} · {area.paper.data.year}
+                  </span>
+                </li>
+              )}
+              {area.entry && (
+                <li>
+                  <a href={localeUrl(`work/${area.entry.id}`, lang)}>{area.entry.data.title}</a>
+                  <span class="area-note">{area.entry.data.org}</span>
+                </li>
+              )}
+            </ul>
+            <a class="area-link" href={`${localeUrl('publications', lang)}?topic=${area.slug}`}>
+              {copy.viewAll} →
+            </a>
+          </article>
+        ))}
       </div>
     </div>
   </section>

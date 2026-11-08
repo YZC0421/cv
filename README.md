@@ -18,6 +18,18 @@ npm run verify   # assert build output
 npm run og       # regenerate public/og.png (committed; manual only)
 ```
 
+## Languages
+
+English lives at the root (`/projects/`), Chinese under `/zh/` (`/zh/projects/`). The switch
+in the header keeps you on the same page.
+
+- UI copy: `src/i18n/ui.ts`
+- Locale helpers: `src/i18n/utils.ts`
+- Profile copy: `profile.zh` in `src/data/profile.ts`
+- Project copy: optional `zh:` block in project frontmatter
+- Posts: `lang` field; posts are not auto-translated
+- `/about/zh` redirects to `/zh/about`
+
 ## Structure
 
 ```

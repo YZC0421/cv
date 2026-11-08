@@ -3,13 +3,16 @@ import type { CollectionEntry } from 'astro:content';
 import BibtexButton from './BibtexButton.astro';
 import { boldSelf, toBibtex } from '../lib/format';
 import { topicName } from '../lib/topics';
-import { withBase } from '../lib/url';
+import { langFromPath, localeUrl } from '../i18n/utils';
+import { t } from '../i18n/ui';
 
 interface Props {
   pub: CollectionEntry<'publications'>;
   workTitles?: Record<string, string>;
 }
 const { pub, workTitles = {} } = Astro.props;
+const lang = langFromPath(Astro.url.pathname);
+const copy = t(lang).publications;
 const d = pub.data;
 const href = d.url ?? `https://doi.org/${d.doi}`;
 const bibtex = toBibtex({
@@ -31,7 +34,7 @@ const badgeClass =
         ? 'badge-ei'
         : 'badge-neutral';
 const indexingLabel = d.indexing === 'EI' ? 'EI indexed' : `JCR ${d.indexing}`;
-const roleLabel = d.role === 'first' ? 'First author' : (d.authorNote ?? 'Co-author');
+const roleLabel = d.role === 'first' ? copy.firstAuthor : (d.authorNote ?? copy.coAuthor);
 const relatedWork = d.relatedWork ?? [];
 ---
 <li
@@ -46,15 +49,15 @@ const relatedWork = d.relatedWork ?? [];
     <div class="pub-meta">
       {d.indexing !== 'none' && <span class={`badge ${badgeClass}`}>{indexingLabel}</span>}
       <span class="badge badge-neutral">{roleLabel}</span>
-      {d.topics.map((topic) => <span class="badge badge-topic">{topicName(topic)}</span>)}
+      {d.topics.map((topic) => <span class="badge badge-topic">{topicName(topic, lang)}</span>)}
     </div>
     {relatedWork.length > 0 && (
       <div class="pub-meta">
-        Related work:
+        {copy.relatedWork}:
         {relatedWork.map((slug, index) => (
           <span>
             {index > 0 && ', '}
-            <a href={withBase(`work/${slug}`)}>{workTitles[slug] ?? slug}</a>
+            <a href={localeUrl(`work/${slug}`, lang)}>{workTitles[slug] ?? slug}</a>
           </span>
         ))}
       </div>

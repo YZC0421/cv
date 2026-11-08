@@ -11,12 +11,38 @@ export const projectCategories: { slug: ProjectCategory; label: string }[] = [
   { slug: 'research', label: 'Research' },
 ];
 
-export function categoryLabel(slug: ProjectCategory): string {
+const categoryLabelsZh: Record<ProjectCategory, string> = {
+  'ai-agent': 'AI Agent',
+  'ai-application': 'AI 应用',
+  'enterprise-software': '企业软件',
+  'data-intelligence': '数据智能',
+  research: '研究项目',
+};
+
+export function categoryLabel(slug: ProjectCategory, lang: 'en' | 'zh' = 'en'): string {
+  if (lang === 'zh') return categoryLabelsZh[slug] ?? slug;
   return projectCategories.find((item) => item.slug === slug)?.label ?? slug;
 }
 
-export function statusLabel(status: Project['data']['status']): string {
+export function statusLabel(
+  status: Project['data']['status'],
+  lang: 'en' | 'zh' = 'en'
+): string {
+  if (lang === 'zh') {
+    return status === 'complete' ? '已完成' : status === 'ongoing' ? '进行中' : '计划中';
+  }
   return status === 'complete' ? 'Completed' : status === 'ongoing' ? 'Ongoing' : 'Planned';
+}
+
+export function localizedProject(item: Project, lang: 'en' | 'zh') {
+  const data = item.data;
+  if (lang !== 'zh' || !data.zh) return data;
+  return {
+    ...data,
+    ...Object.fromEntries(
+      Object.entries(data.zh).filter(([, value]) => value !== undefined)
+    ),
+  } as typeof data;
 }
 
 export function sortProjects(items: Project[]): Project[] {

@@ -1,13 +1,20 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+import { langFromPath } from '../i18n/utils';
+import { t } from '../i18n/ui';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const { title = 'Resume · Zicong Yang', description = 'Resume of Zicong Yang: education, experience, projects, skills, and publications.' } = Astro.props;
+const lang = langFromPath(Astro.url.pathname);
+const copy = t(lang).resume;
 ---
-<BaseLayout
-  title="Resume · Zicong Yang"
-  description="Resume of Zicong Yang: education, experience, projects, skills, and publications."
->
+<BaseLayout title={title} description={description}>
   <div class="container medium resume" style="padding-top:40px">
     <div class="resume-actions">
-      <button type="button" onclick="window.print()">Print / Save as PDF</button>
+      <button type="button" onclick="window.print()">{copy.print}</button>
     </div>
     <slot />
   </div>

@@ -1,0 +1,65 @@
+---
+import type { Project } from '../../../lib/projects';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getCollection, render } from 'astro:content';
+import { categoryLabel, localizedProject, statusLabel } from '../../../lib/projects';
+import { localeUrl } from '../../../i18n/utils';
+import { t } from '../../../i18n/ui';
+
+export async function getStaticPaths() {
+  const items = await getCollection('projects');
+  return items.map((item) => ({ params: { slug: item.id }, props: { item } }));
+}
+
+interface Props {
+  item: Project;
+}
+const { item } = Astro.props;
+const { Content } = await render(item);
+const d = localizedProject(item, 'zh');
+const copy = t('zh').projects;
+---
+<BaseLayout title={`${d.title} · 杨梓聪`} description={d.summary} lang="zh">
+  <article class="container reading work-detail" style="padding-top:48px">
+    <p class="eyebrow">
+      <a href={localeUrl('projects', 'zh')}>{copy.back}</a> / {categoryLabel(item.data.category, 'zh')}
+    </p>
+    <h1>{d.title}</h1>
+    <p class="meta">
+      {statusLabel(item.data.status, 'zh')}
+      {d.period && ` · ${d.period}`}
+      {d.role && ` · ${d.role}`}
+    </p>
+    <p class="lede">{d.summary}</p>
+
+    {d.todo && d.todo.length > 0 && (
+      <aside class="todo-card">
+        <h2>{copy.todo}</h2>
+        <ul>{d.todo.map((entry) => <li>{entry}</li>)}</ul>
+      </aside>
+    )}
+
+    {d.goal && <section class="work-block"><h2>{copy.goal}</h2><p>{d.goal}</p></section>}
+    {d.architecture && <section class="work-block"><h2>{copy.architecture}</h2><p>{d.architecture}</p></section>}
+    {d.role && <section class="work-block"><h2>{copy.role}</h2><p>{d.role}</p></section>}
+    {d.results && <section class="work-block"><h2>{copy.results}</h2><p>{d.results}</p></section>}
+
+    <div class="prose"><Content /></div>
+
+    {d.stack.length > 0 && (
+      <section class="work-block">
+        <h2>{copy.stack}</h2>
+        <div class="stack">{d.stack.map((tech) => <span>{tech}</span>)}</div>
+      </section>
+    )}
+
+    {d.links.length > 0 && (
+      <section class="work-block">
+        <h2>{copy.links}</h2>
+        <div class="links">
+          {d.links.map((link) => <a href={link.url} target="_blank" rel="noopener">{link.label}</a>)}
+        </div>
+      </section>
+    )}
+  </article>
+</BaseLayout>

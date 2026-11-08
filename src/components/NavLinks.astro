@@ -1,15 +1,9 @@
 ---
-import { withBase } from '../lib/url';
-
 interface Props {
-  links: { path: string; label: string }[];
-  current: string;
+  links: { href: string; label: string; current: boolean }[];
 }
-const { links, current } = Astro.props;
-const isCurrent = (path: string) => current.startsWith(`/${path}/`);
+const { links } = Astro.props;
 ---
 {links.map((link) => (
-  <a href={withBase(link.path)} aria-current={isCurrent(link.path) ? 'page' : undefined}>
-    {link.label}
-  </a>
+  <a href={link.href} aria-current={link.current ? 'page' : undefined}>{link.label}</a>
 ))}

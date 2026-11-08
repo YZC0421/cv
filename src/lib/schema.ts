@@ -84,10 +84,21 @@ export const projectCategories = [
   'research',
 ] as const;
 
+export const projectZhSchema = z.object({
+  title: z.string().min(1).optional(),
+  summary: z.string().min(1).max(220).optional(),
+  goal: z.string().optional(),
+  architecture: z.string().optional(),
+  role: z.string().optional(),
+  results: z.string().optional(),
+  todo: z.array(z.string()).optional(),
+});
+
 export const projectSchema = z.object({
   title: z.string().min(1),
   category: z.enum(projectCategories),
   summary: z.string().min(1).max(220),
+  zh: projectZhSchema.optional(),
   status: z.enum(['complete', 'ongoing', 'planned']).default('complete'),
   period: z.string().optional(),
   stack: z.array(z.string()).default([]),

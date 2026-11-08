@@ -1,0 +1,62 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ProjectCard from '../../../components/ProjectCard.astro';
+import { getCollection } from 'astro:content';
+import { categoryLabel, sortProjects } from '../../../lib/projects';
+import { projectCategories } from '../../../lib/projects';
+import { t } from '../../../i18n/ui';
+
+const copy = t('zh').projects;
+const projects = sortProjects(await getCollection('projects'));
+const usedCategories = projectCategories.filter((category) =>
+  projects.some((item) => item.data.category === category.slug)
+);
+---
+<BaseLayout title="项目 · 杨梓聪" description="AI、数据与研究方向的项目作品集。" lang="zh">
+  <div class="container" style="padding-top:48px">
+    <h1>{copy.title}</h1>
+    <p class="muted">{copy.intro}</p>
+
+    {usedCategories.length > 1 && (
+      <div class="filters" role="group" aria-label="按分类筛选项目">
+        <span class="filter-label">{copy.category}</span>
+        <button type="button" data-category="all" aria-pressed="true">{copy.all}</button>
+        {usedCategories.map((category) => (
+          <button type="button" data-category={category.slug} aria-pressed="false">
+            {categoryLabel(category.slug, 'zh')}
+          </button>
+        ))}
+      </div>
+    )}
+
+    <div class="project-grid">
+      {projects.map((item) => <ProjectCard item={item} />)}
+    </div>
+    <p id="project-status" class="muted" role="status" aria-live="polite"></p>
+  </div>
+
+  <script is:inline define:vars={{ emptyText: copy.empty, template: '显示 {v} / {t} 个项目。' }}>
+    (() => {
+      const buttons = document.querySelectorAll('.filters button');
+      const cards = document.querySelectorAll('.project-card');
+      const status = document.getElementById('project-status');
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const value = btn.dataset.category;
+          buttons.forEach((other) => other.setAttribute('aria-pressed', String(other === btn)));
+          let visible = 0;
+          cards.forEach((card) => {
+            card.hidden = value !== 'all' && card.dataset.category !== value;
+            if (!card.hidden) visible += 1;
+          });
+          if (status) {
+            status.textContent =
+              visible === 0
+                ? emptyText
+                : template.replace('{v}', visible).replace('{t}', cards.length);
+          }
+        });
+      });
+    })();
+  </script>
+</BaseLayout>
