@@ -719,7 +719,7 @@ h3 { font-size: 1.12rem; }
 .todo-card ul { margin: 0; padding-left: 18px; font-size: 0.87rem; color: var(--muted); }
 .todo-card li { margin-bottom: 4px; }
 
-.post-list li[hidden] { display: none; }
+[hidden] { display: none !important; }
 .astro-code { background-color: var(--shiki-light-bg); border-radius: 10px; }
 .astro-code span { color: var(--shiki-light); }
 [data-theme='dark'] .astro-code { background-color: var(--shiki-dark-bg); }

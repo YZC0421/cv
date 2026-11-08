@@ -138,6 +138,12 @@ checks.push([
   (publications.match(/class="badge badge-topic"/g) ?? []).length >= publicationFiles,
 ]);
 
+const cssFiles = (await readdir('dist/_astro')).filter((file) => file.endsWith('.css'));
+const cssText = (
+  await Promise.all(cssFiles.map((file) => readFile(`dist/_astro/${file}`, 'utf8')))
+).join('\n');
+checks.push(['hidden attribute is enforced', cssText.includes('[hidden]{display:none!important}')]);
+
 const workIndex = await read('dist/work/index.html');
 checks.push(['work exposes topic filter', workIndex.includes('data-value="medical-signal"')]);
 
