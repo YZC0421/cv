@@ -29,7 +29,10 @@ export function contentPath(pathname: string): string {
 export function localeUrl(path: string, lang: Lang): string {
   const clean = path.replace(/^\/+/, '');
   const prefixed = lang === 'zh' ? (clean ? `zh/${clean}` : 'zh/') : clean;
-  return `${BASE}/${prefixed}`;
+  if (!prefixed) return `${BASE}/`;
+  const isFile = /\.[a-z0-9]+$/i.test(prefixed);
+  const suffix = isFile || prefixed.endsWith('/') ? prefixed : `${prefixed}/`;
+  return `${BASE}/${suffix}`;
 }
 
 /** URL of the same page in the other language, preserving the path. */

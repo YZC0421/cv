@@ -9,6 +9,7 @@ summary: "Consumer demand analysis over 120,756 JD.com reviews with BERT sentime
 problem: "Brand teams lacked a quantitative view of consumer sentiment across a very large review corpus."
 approach: "Crawled 120,756 JD.com reviews and applied BERT sentiment analysis to build word clouds and user profiles."
 results: "National Third Prize in the CP Group Cup market research competition."
+topics: ["data-intelligence"]
 stack: ["BERT", "Python", "Crawlers"]
 highlights:
   - "Collected 120,756 Coca-Cola product reviews from JD.com with automated crawlers."

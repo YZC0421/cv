@@ -1,4 +1,9 @@
-export const topicSlugs = ['medical-signal', 'industrial-vision'] as const;
+export const topicSlugs = [
+  'medical-signal',
+  'industrial-vision',
+  'agricultural-environmental-vision',
+  'data-intelligence',
+] as const;
 
 export type TopicSlug = (typeof topicSlugs)[number];
 
@@ -13,15 +18,33 @@ export const topics: {
     slug: 'medical-signal',
     name: 'Medical Signal Processing',
     nameZh: '医学信号处理',
-    blurb: 'ECG arrhythmia detection and cardiac risk modelling with multiscale deep networks.',
-    blurbZh: '基于多尺度深度网络的心电心律失常检测与心源性风险建模。',
+    blurb:
+      'Multi-lead ECG arrhythmia detection and cardiac risk modelling with multiscale spatio-temporal networks.',
+    blurbZh: '基于多尺度时空网络的多导联心电心律失常检测与心源性风险建模。',
   },
   {
     slug: 'industrial-vision',
     name: 'Industrial Visual Inspection',
     nameZh: '工业视觉检测',
-    blurb: 'Defect detection and lightweight deployment for manufacturing and agriculture.',
-    blurbZh: '面向制造与农业场景的缺陷检测与轻量化部署。',
+    blurb:
+      'Defect detection under limited data, diffusion-based synthesis, and lightweight deployment on production lines.',
+    blurbZh: '小样本缺陷检测、扩散模型数据合成与产线端轻量化部署。',
+  },
+  {
+    slug: 'agricultural-environmental-vision',
+    name: 'Agricultural & Environmental Vision',
+    nameZh: '农业与环境视觉',
+    blurb:
+      'Crop disease recognition, waste sorting, and surface litter detection with improved YOLO families.',
+    blurbZh: '农作物病害识别、垃圾分类与地表废弃物检测，基于改进的 YOLO 系列模型。',
+  },
+  {
+    slug: 'data-intelligence',
+    name: 'Applied Data Intelligence',
+    nameZh: '应用数据智能',
+    blurb:
+      'Survey modelling, large-scale review analytics, and forecasting for operational decisions.',
+    blurbZh: '问卷建模、大规模评论分析与面向运营决策的预测。',
   },
 ];
 

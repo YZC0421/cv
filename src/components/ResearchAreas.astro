@@ -15,17 +15,16 @@ const [publications, work] = await Promise.all([
 
 const areas = topics
   .map((topic) => {
-    const papers = sortPublications(
-      publications.filter(
-        (pub) => pub.data.topics.includes(topic.slug) && pub.data.role === 'first'
-      )
+    const topicPapers = sortPublications(
+      publications.filter((pub) => pub.data.topics.includes(topic.slug))
     );
+    const firstAuthorPaper = topicPapers.find((pub) => pub.data.role === 'first');
     const entries = sortWork(work.filter((item) => item.data.topics?.includes(topic.slug)));
     return {
       slug: topic.slug,
       name: topicName(topic.slug, lang),
       blurb: topicBlurb(topic.slug, lang),
-      paper: papers[0],
+      paper: firstAuthorPaper ?? topicPapers[0],
       entry: entries[0],
     };
   })
