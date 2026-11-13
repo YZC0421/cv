@@ -1,7 +1,9 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import BibtexButton from './BibtexButton.astro';
-import { boldSelf, toBibtex } from '../lib/format';
+import { boldSelf } from '../lib/format';
+import { publicationBibtex } from '../lib/publications';
+import { canonicalPostUrl } from '../lib/posts';
 import { areaShort, subtopicName } from '../lib/topics';
 import { langFromPath, localeUrl } from '../i18n/utils';
 import { t } from '../i18n/ui';
@@ -9,25 +11,15 @@ import { t } from '../i18n/ui';
 interface Props {
   pub: CollectionEntry<'publications'>;
   workTitles?: Record<string, string>;
+  notes?: CollectionEntry<'blog'>[];
 }
-const { pub, workTitles = {} } = Astro.props;
+const { pub, workTitles = {}, notes = [] } = Astro.props;
 const lang = langFromPath(Astro.url.pathname);
 const copy = t(lang).publications;
 const d = pub.data;
 const doiHref = d.doi ? `https://doi.org/${d.doi}` : undefined;
 const href = d.url ?? doiHref;
-const bibtex = toBibtex({
-  title: d.title,
-  authors: d.authors,
-  venue: d.venue,
-  year: d.year,
-  doi: d.doi,
-  type: d.type,
-  volume: d.volume,
-  issue: d.issue,
-  pages: d.pages,
-  articleNumber: d.articleNumber,
-});
+const bibtex = publicationBibtex(pub);
 const badgeClass =
   d.indexing === 'Q1'
     ? 'badge-q1'
@@ -84,6 +76,9 @@ const subtopics = d.topics.map((topic) => subtopicName(topic, lang)).join(' · '
         <a href={doiHref} target="_blank" rel="noopener" aria-label={`DOI for ${d.title}`}>DOI</a>
       )}
       <BibtexButton bibtex={bibtex} />
+      {notes.map((note) => (
+        <a class="note-link" href={canonicalPostUrl(note)}>{copy.note}</a>
+      ))}
     </div>
   </div>
 </li>

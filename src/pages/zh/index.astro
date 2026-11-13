@@ -7,9 +7,9 @@ import ProjectCard from '../../components/ProjectCard.astro';
 import PostList from '../../components/PostList.astro';
 import { getCollection } from 'astro:content';
 import { profile } from '../../data/profile';
-import { selectHomepage } from '../../lib/publications';
-import { visiblePosts } from '../../lib/posts';
-import { validateRelations } from '../../lib/relations';
+import { notesByPublication, selectHomepage } from '../../lib/publications';
+import { postsByLang, visiblePosts } from '../../lib/posts';
+import { validateBlogPapers, validateRelations } from '../../lib/relations';
 import { featuredProjects } from '../../lib/projects';
 import { localeUrl } from '../../i18n/utils';
 import { t } from '../../i18n/ui';
@@ -23,9 +23,16 @@ if (relationErrors.length > 0) {
   throw new Error(`Content relations are invalid:\n${relationErrors.join('\n')}`);
 }
 
+const allPosts = await getCollection('blog');
+const blogErrors = validateBlogPapers(allPosts, allPublications);
+if (blogErrors.length > 0) {
+  throw new Error(`Blog relations are invalid:\n${blogErrors.join('\n')}`);
+}
+
 const pubs = selectHomepage(allPublications);
 const projects = featuredProjects(await getCollection('projects'));
-const posts = visiblePosts(await getCollection('blog')).slice(0, 3);
+const posts = postsByLang(visiblePosts(allPosts), 'zh').slice(0, 3);
+const publicationNotes = notesByPublication(postsByLang(allPosts, 'zh'), pubs);
 const workTitles = workTitleMap(allWork);
 ---
 <BaseLayout
@@ -56,7 +63,9 @@ const workTitles = workTitleMap(allWork);
       <a href={localeUrl('publications', 'zh')}>{copy.allPublications} →</a>
     </div>
     <ul class="pub-list">
-      {pubs.map((pub) => <PublicationItem pub={pub} workTitles={workTitles} />)}
+      {pubs.map((pub) => (
+        <PublicationItem pub={pub} workTitles={workTitles} notes={publicationNotes.get(pub.id)} />
+      ))}
     </ul>
   </section>
 

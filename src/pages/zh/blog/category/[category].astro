@@ -4,28 +4,43 @@ import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import PostList from '../../../../components/PostList.astro';
 import { getCollection } from 'astro:content';
 import { categoryLabel } from '../../../../lib/blog';
-import { visiblePosts } from '../../../../lib/posts';
+import { sortPaperReading } from '../../../../lib/publications';
+import { postsByLang, visiblePosts } from '../../../../lib/posts';
 import { localeUrl } from '../../../../i18n/utils';
 
 export async function getStaticPaths() {
-  const posts = visiblePosts(await getCollection('blog'));
+  const all = visiblePosts(await getCollection('blog'));
+  const posts = postsByLang(all, 'zh');
+  const publications = await getCollection('publications');
+  const enCategories = new Set(postsByLang(all, 'en').map((post) => post.data.category));
   const categories = [...new Set(posts.map((post) => post.data.category))];
-  return categories.map((category) => ({
-    params: { category },
-    props: {
-      category,
-      posts: posts.filter((post) => post.data.category === category),
-    },
-  }));
+  return categories.map((category) => {
+    const filtered = posts.filter((post) => post.data.category === category);
+    return {
+      params: { category },
+      props: {
+        category,
+        posts: category === 'paper-reading' ? sortPaperReading(filtered, publications) : filtered,
+        hasEn: enCategories.has(category),
+      },
+    };
+  });
 }
 
 interface Props {
   category: string;
   posts: CollectionEntry<'blog'>[];
+  hasEn: boolean;
 }
-const { category, posts } = Astro.props;
+const { category, posts, hasEn } = Astro.props;
+const categoryPath = `blog/category/${encodeURIComponent(category)}`;
 ---
-<BaseLayout title={`${categoryLabel(category, 'zh')} · 博客`} description={`${categoryLabel(category, 'zh')} 分类下的文章。`} lang="zh">
+<BaseLayout
+  title={`${categoryLabel(category, 'zh')} · 博客`}
+  description={`${categoryLabel(category, 'zh')} 分类下的文章。`}
+  lang="zh"
+  langSwitchHref={hasEn ? localeUrl(categoryPath, 'en') : null}
+>
   <div class="container" style="padding-top:48px">
     <p class="eyebrow"><a href={localeUrl('blog', 'zh')}>博客</a> / 分类</p>
     <h1>{categoryLabel(category, 'zh')}</h1>
