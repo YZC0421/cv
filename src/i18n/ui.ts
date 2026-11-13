@@ -68,6 +68,7 @@ export const ui = {
       rss: 'RSS',
       allWriting: 'All writing',
       category: 'Category',
+      paperNote: 'Paper',
     },
     publications: {
       title: 'Publications',
@@ -80,6 +81,7 @@ export const ui = {
       firstAuthor: 'First author',
       coAuthor: 'Co-author',
       relatedWork: 'Related work',
+      note: 'Notes',
       showing: (visible: number, total: number) => `Showing ${visible} of ${total} publications.`,
       empty: 'No publications match these filters.',
     },
@@ -195,6 +197,7 @@ export const ui = {
       rss: 'RSS',
       allWriting: '全部文章',
       category: '分类',
+      paperNote: '对应论文',
     },
     publications: {
       title: '论文',
@@ -207,6 +210,7 @@ export const ui = {
       firstAuthor: '第一作者',
       coAuthor: '合作作者',
       relatedWork: '关联项目',
+      note: '笔记',
       showing: (visible: number, total: number) => `显示 ${visible} / ${total} 篇论文。`,
       empty: '没有符合筛选条件的论文。',
     },

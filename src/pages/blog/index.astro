@@ -3,10 +3,10 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import TagFilter from '../../components/TagFilter.astro';
 import { getCollection } from 'astro:content';
 import { categoryLabel } from '../../lib/blog';
-import { postTags, visiblePosts } from '../../lib/posts';
+import { postTags, postsByLang, visiblePosts } from '../../lib/posts';
 import { withBase } from '../../lib/url';
 
-const posts = visiblePosts(await getCollection('blog'));
+const posts = postsByLang(visiblePosts(await getCollection('blog')), 'en');
 const tags = postTags(posts);
 ---
 <BaseLayout

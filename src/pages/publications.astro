@@ -2,11 +2,13 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PublicationItem from '../components/PublicationItem.astro';
 import { getCollection } from 'astro:content';
-import { sortPublications } from '../lib/publications';
+import { notesByPublication, sortPublications } from '../lib/publications';
+import { postsByLang } from '../lib/posts';
 import { areaName, researchAreas } from '../lib/topics';
 import { workTitleMap } from '../lib/work';
 
 const pubs = sortPublications(await getCollection('publications'));
+const notes = notesByPublication(postsByLang(await getCollection('blog'), 'en'), pubs);
 const years = [...new Set(pubs.map((pub) => pub.data.year))].sort((a, b) => b - a);
 const workTitles = workTitleMap(await getCollection('work'));
 ---
@@ -45,7 +47,9 @@ const workTitles = workTitleMap(await getCollection('work'));
     </div>
 
     <ul class="pub-list" id="pub-list">
-      {pubs.map((pub) => <PublicationItem pub={pub} workTitles={workTitles} />)}
+      {pubs.map((pub) => (
+        <PublicationItem pub={pub} workTitles={workTitles} notes={notes.get(pub.id)} />
+      ))}
     </ul>
     <p id="pub-status" class="muted" role="status" aria-live="polite"></p>
   </div>

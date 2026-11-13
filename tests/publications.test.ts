@@ -1,6 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { sortPublications, selectHomepage } from '../src/lib/publications.ts';
+import {
+  findPublication,
+  notesByPublication,
+  selectHomepage,
+  sortPaperReading,
+  sortPublications,
+} from '../src/lib/publications.ts';
 
 const make = (over: Record<string, unknown>) =>
   ({
@@ -68,5 +74,43 @@ test('selectHomepage returns only JCR and first-author EI entries', () => {
   assert.deepEqual(
     selectHomepage([one, other]).map((pub: any) => pub.id),
     ['one']
+  );
+});
+
+test('findPublication resolves by id, doi and doi URL', () => {
+  const pubs = [make({ id: 'jpcs-2026-csddnet', doi: '10.1/x' })];
+  assert.equal(findPublication(pubs, 'jpcs-2026-csddnet')?.id, 'jpcs-2026-csddnet');
+  assert.equal(findPublication(pubs, '10.1/x')?.id, 'jpcs-2026-csddnet');
+  assert.equal(findPublication(pubs, 'https://doi.org/10.1/x')?.id, 'jpcs-2026-csddnet');
+  assert.equal(findPublication(pubs, 'missing'), undefined);
+});
+
+test('notesByPublication groups notes under their resolved paper', () => {
+  const pubs = [make({ id: 'p1', doi: '10.1/x' }), make({ id: 'p2', doi: '10.2/y' })];
+  const posts = [
+    { id: 'n1', data: { paper: '10.1/x' } },
+    { id: 'n2', data: { paper: 'p2' } },
+    { id: 'n3', data: { paper: 'missing' } },
+    { id: 'n4', data: {} },
+  ] as any;
+  const notes = notesByPublication(posts, pubs);
+  assert.deepEqual(notes.get('p1')?.map((post: any) => post.id), ['n1']);
+  assert.deepEqual(notes.get('p2')?.map((post: any) => post.id), ['n2']);
+  assert.equal(notes.size, 2);
+});
+
+test('sortPaperReading orders by publication year, then post date', () => {
+  const pubs = [
+    make({ id: 'old', year: 2023 }),
+    make({ id: 'new', year: 2026 }),
+  ];
+  const posts = [
+    { id: 'a', data: { paper: 'old', date: '2026-01-01' } },
+    { id: 'b', data: { paper: 'new', date: '2026-01-01' } },
+    { id: 'c', data: { date: '2026-02-01' } },
+  ] as any;
+  assert.deepEqual(
+    sortPaperReading(posts, pubs).map((post: any) => post.id),
+    ['b', 'a', 'c']
   );
 });

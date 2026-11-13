@@ -3,24 +3,37 @@ import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import PostList from '../../../../components/PostList.astro';
 import { getCollection } from 'astro:content';
-import { postTags, visiblePosts } from '../../../../lib/posts';
+import { postTags, postsByLang, visiblePosts } from '../../../../lib/posts';
 import { localeUrl } from '../../../../i18n/utils';
 
 export async function getStaticPaths() {
-  const posts = visiblePosts(await getCollection('blog'));
+  const all = visiblePosts(await getCollection('blog'));
+  const posts = postsByLang(all, 'zh');
+  const enTags = new Set(postsByLang(all, 'en').flatMap((post) => post.data.tags));
   return postTags(posts).map((tag) => ({
     params: { tag },
-    props: { tag, posts: posts.filter((post) => post.data.tags.includes(tag)) },
+    props: {
+      tag,
+      posts: posts.filter((post) => post.data.tags.includes(tag)),
+      hasEn: enTags.has(tag),
+    },
   }));
 }
 
 interface Props {
   tag: string;
   posts: CollectionEntry<'blog'>[];
+  hasEn: boolean;
 }
-const { tag, posts } = Astro.props;
+const { tag, posts, hasEn } = Astro.props;
+const tagPath = `blog/tag/${encodeURIComponent(tag)}`;
 ---
-<BaseLayout title={`#${tag} · 博客`} description={`标签 ${tag} 下的文章。`} lang="zh">
+<BaseLayout
+  title={`#${tag} · 博客`}
+  description={`标签 ${tag} 下的文章。`}
+  lang="zh"
+  langSwitchHref={hasEn ? localeUrl(tagPath, 'en') : null}
+>
   <div class="container" style="padding-top:48px">
     <h1>#{tag}</h1>
     <p class="muted"><a href={localeUrl('blog', 'zh')}>← 全部文章</a></p>

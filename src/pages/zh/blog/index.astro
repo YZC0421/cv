@@ -3,13 +3,12 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import TagFilter from '../../../components/TagFilter.astro';
 import { getCollection } from 'astro:content';
 import { categoryLabel } from '../../../lib/blog';
-import { postTags, visiblePosts } from '../../../lib/posts';
+import { postTags, postsByLang, visiblePosts } from '../../../lib/posts';
 import { localeUrl } from '../../../i18n/utils';
-import { withBase } from '../../../lib/url';
 import { t } from '../../../i18n/ui';
 
 const copy = t('zh').blog;
-const posts = visiblePosts(await getCollection('blog'));
+const posts = postsByLang(visiblePosts(await getCollection('blog')), 'zh');
 const tags = postTags(posts);
 ---
 <BaseLayout title="博客 · 杨梓聪" description="关于 AI、软件工程与研究的技术笔记。" lang="zh">
@@ -18,7 +17,7 @@ const tags = postTags(posts);
     <p class="muted">
       {copy.intro} 共 {posts.length} 篇。
       <a href={localeUrl('search', 'zh')}>{copy.search}</a> ·
-      <a href={withBase('rss.xml')}>{copy.rss}</a>
+      <a href={localeUrl('rss.xml', 'zh')}>{copy.rss}</a>
     </p>
 
     <TagFilter tags={tags} allLabel="全部" />

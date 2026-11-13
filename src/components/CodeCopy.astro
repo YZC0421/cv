@@ -1,5 +1,14 @@
 <script is:inline>
   (() => {
+    const zh = (document.documentElement.lang || '').toLowerCase().startsWith('zh');
+    const labels = {
+      copy: zh ? '复制' : 'Copy',
+      copied: zh ? '已复制' : 'Copied',
+      failed: zh ? '复制失败' : 'Failed',
+      expand: (count) => (zh ? `展开（共 ${count} 行）` : `Expand (${count} lines)`),
+      collapse: zh ? '收起' : 'Collapse',
+    };
+
     document.querySelectorAll('.prose pre').forEach((pre) => {
       if (pre.parentElement?.classList.contains('code-block')) return;
 
@@ -11,17 +20,33 @@
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'code-copy';
-      btn.textContent = 'Copy';
+      btn.textContent = labels.copy;
       btn.addEventListener('click', async () => {
         try {
           await navigator.clipboard.writeText(pre.textContent ?? '');
-          btn.textContent = 'Copied';
-          setTimeout(() => (btn.textContent = 'Copy'), 1500);
+          btn.textContent = labels.copied;
+          setTimeout(() => (btn.textContent = labels.copy), 1500);
         } catch {
-          btn.textContent = 'Failed';
+          btn.textContent = labels.failed;
         }
       });
       wrapper.appendChild(btn);
+
+      const lineCount = pre.querySelectorAll('.line').length;
+      if (lineCount <= 40) return;
+
+      wrapper.classList.add('is-collapsed');
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'code-toggle';
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.textContent = labels.expand(lineCount);
+      toggle.addEventListener('click', () => {
+        const collapsed = wrapper.classList.toggle('is-collapsed');
+        toggle.setAttribute('aria-expanded', String(!collapsed));
+        toggle.textContent = collapsed ? labels.expand(lineCount) : labels.collapse;
+      });
+      wrapper.appendChild(toggle);
     });
   })();
 </script>

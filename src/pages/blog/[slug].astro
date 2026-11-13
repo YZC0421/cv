@@ -1,11 +1,20 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import PostLayout from '../../layouts/PostLayout.astro';
+import BibtexButton from '../../components/BibtexButton.astro';
 import { getCollection, render } from 'astro:content';
 import { relatedPosts } from '../../lib/blog';
 import { readingMinutes } from '../../lib/format';
-import { visiblePosts } from '../../lib/posts';
-import { withBase } from '../../lib/url';
+import { hasMermaid } from '../../lib/markdown';
+import { findPublication, publicationBibtex } from '../../lib/publications';
+import { t } from '../../i18n/ui';
+import {
+  canonicalPostPath,
+  canonicalPostUrl,
+  isCanonicalPath,
+  translationFor,
+  visiblePosts,
+} from '../../lib/posts';
 
 export async function getStaticPaths() {
   const posts = visiblePosts(await getCollection('blog'));
@@ -29,6 +38,28 @@ interface Props {
 const { post, prev, next, related } = Astro.props;
 const { Content, headings } = await render(post);
 const readingTime = readingMinutes(post.body ?? '');
+const allPosts = visiblePosts(await getCollection('blog'));
+const counterpart = translationFor(allPosts, post);
+const canonical = canonicalPostUrl(post);
+const alternates: { lang: 'en' | 'zh'; href: string }[] = [
+  { lang: post.data.lang, href: new URL(canonical, Astro.site).href },
+  ...(counterpart
+    ? [
+        {
+          lang: counterpart.data.lang,
+          href: new URL(canonicalPostUrl(counterpart), Astro.site).href,
+        },
+      ]
+    : []),
+];
+const noindex = !isCanonicalPath(post, Astro.url.pathname);
+const langSwitchHref = counterpart
+  ? new URL(canonicalPostUrl(counterpart), Astro.site).pathname
+  : null;
+const copy = t(post.data.lang).blog;
+const paperRef = post.data.paper
+  ? findPublication(await getCollection('publications'), post.data.paper)
+  : undefined;
 ---
 <PostLayout
   title={post.data.title}
@@ -39,15 +70,42 @@ const readingTime = readingMinutes(post.body ?? '');
   headings={headings}
   readingTime={readingTime}
   cover={post.data.cover}
+  draft={post.data.draft}
+  noindex={noindex}
+  alternates={alternates}
+  langSwitchHref={langSwitchHref}
+  canonicalPath={canonicalPostPath(post)}
+  hasMermaid={hasMermaid(post.body ?? '')}
 >
   <Content />
+
+  {paperRef && (
+    <aside class="paper-ref">
+      <p class="paper-ref-label">{copy.paperNote}</p>
+      <p class="paper-ref-title">
+        {paperRef.data.url || paperRef.data.doi ? (
+          <a
+            href={paperRef.data.url ?? `https://doi.org/${paperRef.data.doi}`}
+            target="_blank"
+            rel="noopener"
+          >
+            {paperRef.data.title}
+          </a>
+        ) : (
+          paperRef.data.title
+        )}
+      </p>
+      <p class="muted">{paperRef.data.venueShort ?? paperRef.data.venue} · {paperRef.data.year}</p>
+      <BibtexButton bibtex={publicationBibtex(paperRef)} />
+    </aside>
+  )}
 
   {related.length > 0 && (
     <aside class="related">
       <h2>Related posts</h2>
       <ul>
         {related.map((item) => (
-          <li><a href={withBase(`blog/${item.id}`)}>{item.data.title}</a></li>
+          <li><a href={canonicalPostUrl(item)}>{item.data.title}</a></li>
         ))}
       </ul>
     </aside>
@@ -55,8 +113,8 @@ const readingTime = readingMinutes(post.body ?? '');
 
   {(prev || next) && (
     <div class="next-prev" slot="footer">
-      <span>{prev ? <a href={withBase(`blog/${prev.id}`)}>← {prev.data.title}</a> : null}</span>
-      <span>{next ? <a href={withBase(`blog/${next.id}`)}>{next.data.title} →</a> : null}</span>
+      <span>{prev ? <a href={canonicalPostUrl(prev)}>← {prev.data.title}</a> : null}</span>
+      <span>{next ? <a href={canonicalPostUrl(next)}>{next.data.title} →</a> : null}</span>
     </div>
   )}
 </PostLayout>

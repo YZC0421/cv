@@ -85,6 +85,13 @@ export const blogSchema = z.object({
   summary: z.string().min(1).max(160),
   cover: z.string().optional(),
   draft: z.boolean().default(false),
+  /** Publication id or DOI this note is about. Validated at build time. */
+  paper: z.string().min(3).optional(),
+  /** Slug of the post this one translates, in the other language. */
+  translationOf: z
+    .string()
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'translationOf must be a kebab-case slug')
+    .optional(),
 });
 
 export const projectCategories = [

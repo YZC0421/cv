@@ -19,6 +19,12 @@ interface Props {
   langLink?: { href: string; label: string; lang: string };
   profilePage?: boolean;
   noindex?: boolean;
+  /** Only declare translations that actually exist. */
+  alternates?: { lang: 'en' | 'zh'; href: string }[];
+  /** `null` means no translation exists; renders a note instead of a dead link. */
+  langSwitchHref?: string | null;
+  /** Content-relative canonical path, e.g. "zh/blog/some-post". */
+  canonicalPath?: string;
 }
 const {
   title,
@@ -27,6 +33,9 @@ const {
   type = 'website',
   profilePage = false,
   noindex = false,
+  alternates,
+  langSwitchHref,
+  canonicalPath,
 } = Astro.props;
 
 const lang: Lang =
@@ -38,7 +47,23 @@ const lang: Lang =
 const htmlLang = lang === 'zh' ? 'zh-CN' : 'en';
 const enHref = new URL(alternateUrl(Astro.url.pathname, 'en'), Astro.site);
 const zhHref = new URL(alternateUrl(Astro.url.pathname, 'zh'), Astro.site);
-const canonical = new URL(Astro.url.pathname.replace(/\/?$/, '/'), Astro.site);
+const canonical = canonicalPath
+  ? new URL(withBase(canonicalPath), Astro.site)
+  : new URL(Astro.url.pathname.replace(/\/?$/, '/'), Astro.site);
+const alternateLinks = alternates
+  ? [
+      ...alternates.map((item) => ({
+        hreflang: item.lang === 'zh' ? 'zh-CN' : 'en',
+        href: item.href,
+        key: item.lang,
+      })),
+      { hreflang: 'x-default', href: canonical.href, key: 'x-default' },
+    ]
+  : [
+      { hreflang: 'en', href: enHref.href, key: 'en' },
+      { hreflang: 'zh-CN', href: zhHref.href, key: 'zh' },
+      { hreflang: 'x-default', href: enHref.href, key: 'x-default' },
+    ];
 const ogImage = new URL(withBase('og.png'), Astro.site);
 const personId = `${new URL(withBase(), Astro.site).href}#person`;
 const profile = {
@@ -62,14 +87,12 @@ const profile = {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    {!noindex && (
-      <>
-        <link rel="alternate" hreflang="en" href={enHref} />
-        <link rel="alternate" hreflang="zh-CN" href={zhHref} />
-        <link rel="alternate" hreflang="x-default" href={enHref} />
-      </>
-    )}
-    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+    {!noindex &&
+      alternateLinks.map((link) => (
+        <link rel="alternate" hreflang={link.hreflang} href={link.href} />
+      ))}
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
     <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
     <link rel="preload" href={fontUrl} as="font" type="font/woff2" crossorigin />
     <meta property="og:title" content={title} />
@@ -99,9 +122,9 @@ const profile = {
       })();
     </script>
   </head>
-  <body>
+  <body data-pagefind-ignore={noindex ? '' : undefined}>
     <a class="skip" href="#main">Skip to content</a>
-    <Header hideLangSwitch={noindex} />
+    <Header hideLangSwitch={noindex} langSwitchHref={langSwitchHref} />
     <main id="main" tabindex="-1"><slot /></main>
     <Footer />
     <PublicationScripts />

@@ -7,8 +7,10 @@ import { alternateUrl, contentPath, langFromPath, localeUrl } from '../i18n/util
 
 interface Props {
   hideLangSwitch?: boolean;
+  /** `null` means the translation does not exist; show a note instead of a dead link. */
+  langSwitchHref?: string | null;
 }
-const { hideLangSwitch = false } = Astro.props;
+const { hideLangSwitch = false, langSwitchHref } = Astro.props;
 const lang = langFromPath(Astro.url.pathname);
 const copy = t(lang);
 const path = contentPath(Astro.url.pathname);
@@ -29,8 +31,10 @@ const links = items.map((item) => ({
 }));
 
 const otherLang = lang === 'zh' ? 'en' : 'zh';
-const switchHref = alternateUrl(Astro.url.pathname, otherLang);
+const switchHref =
+  langSwitchHref === undefined ? alternateUrl(Astro.url.pathname, otherLang) : langSwitchHref;
 const switchLabel = copy.common.switchTo;
+const langNote = lang === 'zh' ? '暂无英文版' : 'No Chinese version';
 const isHome = path === '/';
 ---
 <header class="site-header">
@@ -45,17 +49,22 @@ const isHome = path === '/';
         <NavLinks links={links} />
       </nav>
     </details>
-    {!hideLangSwitch && (
-      <a
-        class="lang-link"
-        href={switchHref}
-        hreflang={otherLang === 'zh' ? 'zh-CN' : 'en'}
-        lang={otherLang === 'zh' ? 'zh-CN' : 'en'}
-        aria-label={copy.common.switchLabel}
-      >
-        {switchLabel}
-      </a>
-    )}
+    {!hideLangSwitch &&
+      (switchHref ? (
+        <a
+          class="lang-link"
+          href={switchHref}
+          hreflang={otherLang === 'zh' ? 'zh-CN' : 'en'}
+          lang={otherLang === 'zh' ? 'zh-CN' : 'en'}
+          aria-label={copy.common.switchLabel}
+        >
+          {switchLabel}
+        </a>
+      ) : (
+        <span class="lang-note" lang={otherLang === 'zh' ? 'zh-CN' : 'en'}>
+          {langNote}
+        </span>
+      ))}
     <ThemeToggle />
   </div>
 </header>

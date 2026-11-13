@@ -1,5 +1,6 @@
 import { readFile, access, readdir } from 'node:fs/promises';
 import { constants, existsSync } from 'node:fs';
+import { checkLinks } from './check-links.mjs';
 
 const checks = [];
 
@@ -40,7 +41,7 @@ const indexRoutes = [
   'dist/projects/index.html',
   'dist/projects/ai-supply-demand-diagnosis/index.html',
   'dist/blog/index.html',
-  'dist/blog/category/software-engineering/index.html',
+  'dist/zh/blog/category/software-engineering/index.html',
   'dist/about/index.html',
   'dist/about/zh/index.html',
   'dist/resume/index.html',
@@ -62,6 +63,7 @@ const indexRoutes = [
   'dist/zh/blog/index.html',
   'dist/zh/publications/index.html',
   'dist/zh/search/index.html',
+  'dist/zh/rss.xml',
 ];
 
 for (const route of indexRoutes) await must(route, route);
@@ -111,7 +113,7 @@ checks.push([
 ]);
 
 const rss = await read('dist/rss.xml');
-checks.push(['rss has items', rss.includes('<item>')]);
+checks.push(['rss is a valid channel', rss.includes('<channel>') && rss.includes('<language>en</language>')]);
 checks.push(['rss channel link includes base', /<link>[^<]*\/cv\/<\/link>/.test(rss)]);
 
 const about = await read('dist/about/index.html');
@@ -127,7 +129,8 @@ const sitemap = await read('dist/sitemap-0.xml');
 checks.push(['sitemap excludes 404', !sitemap.includes('/404')]);
 
 const blogList = await read('dist/blog/index.html');
-const blogFiles = (await readdir('src/content/blog')).filter((file) => file.endsWith('.md'));
+const zhBlogList = await read('dist/zh/blog/index.html');
+const blogFiles = (await readdir('src/content/blog')).filter((file) => /\.mdx?$/.test(file));
 const today = new Intl.DateTimeFormat('en-CA', {
   timeZone: 'Asia/Shanghai',
   year: 'numeric',
@@ -135,12 +138,19 @@ const today = new Intl.DateTimeFormat('en-CA', {
   day: '2-digit',
 }).format(new Date());
 const hiddenPosts = [];
+const visibleByLang = { en: [], zh: [] };
 
 for (const file of blogFiles) {
   const source = await readFile(`src/content/blog/${file}`, 'utf8');
   const draft = /^draft:\s*true\s*$/m.test(source);
-  const date = source.match(/^date:\s*"(\d{4}-\d{2}-\d{2})"/m)?.[1];
-  if (draft || (date && date > today)) hiddenPosts.push(file.replace(/\.md$/, ''));
+  const date = source.match(/^date:\s*"?(\d{4}-\d{2}-\d{2})"?/m)?.[1];
+  const lang = source.match(/^lang:\s*"?(en|zh)"?/m)?.[1];
+  const slug = file.replace(/\.mdx?$/, '');
+  if (draft || (date && date > today)) {
+    hiddenPosts.push(slug);
+  } else if (date && lang) {
+    visibleByLang[lang].push(slug);
+  }
 }
 
 checks.push([
@@ -152,6 +162,48 @@ checks.push([
       !sitemap.includes(`/blog/${slug}/`)
   ),
 ]);
+
+const badgeCount = (html) => (html.match(/class="lang-badge"/g) ?? []).length;
+checks.push([
+  'blog lists are language-scoped',
+  badgeCount(blogList) === visibleByLang.en.length &&
+    badgeCount(zhBlogList) === visibleByLang.zh.length,
+]);
+
+checks.push([
+  'only canonical post urls reach the sitemap',
+  [...visibleByLang.en, ...visibleByLang.zh].every((slug) => {
+    const enPath = `/cv/blog/${slug}/`;
+    const zhPath = `/cv/zh/blog/${slug}/`;
+    const canonical = visibleByLang.en.includes(slug) ? enPath : zhPath;
+    const duplicate = canonical === enPath ? zhPath : enPath;
+    return sitemap.includes(canonical) && !sitemap.includes(duplicate);
+  }),
+]);
+
+const zhRss = await read('dist/zh/rss.xml');
+checks.push([
+  'rss feeds are language-scoped',
+  rss.includes('<language>en</language>') &&
+    !rss.includes('/cv/zh/blog/') &&
+    zhRss.includes('<language>zh-CN</language>') &&
+    !zhRss.includes('/cv/blog/') &&
+    (visibleByLang.en.length === 0 || rss.includes('<item>')) &&
+    (visibleByLang.zh.length === 0 || zhRss.includes('<item>')),
+]);
+
+const duplicatedPosts = [
+  ...visibleByLang.zh.map((slug) => ({ file: `dist/blog/${slug}/index.html`, canonical: `/cv/zh/blog/${slug}/` })),
+  ...visibleByLang.en.map((slug) => ({ file: `dist/zh/blog/${slug}/index.html`, canonical: `/cv/blog/${slug}/` })),
+];
+for (const duplicate of duplicatedPosts) {
+  const html = await read(duplicate.file);
+  checks.push([
+    `${duplicate.file} is a noindex duplicate`,
+    /name="robots"[^>]*noindex/.test(html) &&
+      new RegExp(`rel="canonical" href="[^"]*${duplicate.canonical.replace(/\//g, '\\/')}"`).test(html),
+  ]);
+}
 
 checks.push(['publications expose area filters', publications.includes('data-group="area"')]);
 checks.push(['publications expose role filter', publications.includes('data-group="role"')]);
@@ -180,11 +232,18 @@ checks.push([
   ogPng.length > 24 && ogPng.readUInt32BE(16) === 1200 && ogPng.readUInt32BE(20) === 630,
 ]);
 
-const tagPages = await countDirs('dist/blog/tag');
-const linkedTags = new Set(
-  [...blogList.matchAll(/blog\/tag\/([^/"#?]+)\//g)].map((match) => decodeURIComponent(match[1]))
-);
-checks.push(['tag pages match linked tags', tagPages === linkedTags.size]);
+const tagLinks = [
+  ...[...blogList.matchAll(/href="([^"]*blog\/tag\/[^"]+)"/g)].map((match) => match[1]),
+  ...[...zhBlogList.matchAll(/href="([^"]*blog\/tag\/[^"]+)"/g)].map((match) => match[1]),
+];
+checks.push([
+  'tag pages exist for every linked tag',
+  [...new Set(tagLinks)].every((href) => {
+    const pathname = href.replace('https://yzc0421.github.io', '');
+    const relative = pathname.replace(/^\/cv\//, '').replace(/\/$/, '');
+    return existsSync(`dist/${relative}/index.html`);
+  }),
+]);
 
 const aboutZh = await read('dist/about/zh/index.html');
 const projectsHtml = await read('dist/projects/index.html');
@@ -222,6 +281,16 @@ checks.push([
       !about.includes('/cv/cv.pdf') &&
       !aboutZh.includes('/cv/cv.pdf'),
 ]);
+
+const linkResult = await checkLinks({ distDir: 'dist', base: '/cv', srcDir: 'src' });
+checks.push([
+  `internal links resolve (${linkResult.checked} checked)`,
+  linkResult.errors.length === 0,
+]);
+if (linkResult.errors.length > 0) {
+  console.log('\nbroken links:');
+  for (const error of linkResult.errors.slice(0, 30)) console.log(`  ${error}`);
+}
 
 const failed = checks.filter(([, ok]) => !ok);
 for (const [label, ok] of checks) console.log(`${ok ? 'ok  ' : 'FAIL'} ${label}`);
