@@ -1,22 +1,19 @@
 ---
 import { profile } from '../data/profile';
 import { langFromPath } from '../i18n/utils';
+import { withBase } from '../lib/url';
 
 const lang = langFromPath(Astro.url.pathname);
 const data = lang === 'zh' ? profile.zh : profile;
 const name = lang === 'zh' ? profile.nameZh : profile.name;
+const portraitAlt = lang === 'zh' ? `${name}的肖像照` : `Portrait of ${name}`;
 ---
 <section class="hero container">
-  <p class="eyebrow">{data.headline}</p>
-  <h1>{name}</h1>
   <div class="hero-grid">
-    <div>
-      <p>{data.summary}</p>
-    </div>
-    <div class="hero-side">
-      <ul class="focus-inline">
-        {data.focus.map((item) => <li>{item.name}</li>)}
-      </ul>
+    <div class="hero-main">
+      <p class="eyebrow">{data.headline}</p>
+      <h1>{name}</h1>
+      <p class="hero-bio">{data.summary}</p>
       <div class="social">
         <a href={profile.links.github} target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -49,5 +46,27 @@ const name = lang === 'zh' ? profile.nameZh : profile.name;
         </a>
       </div>
     </div>
+
+    <figure class="hero-portrait">
+      <img
+        src={withBase(profile.photo)}
+        alt={portraitAlt}
+        width="720"
+        height="1080"
+        decoding="async"
+        fetchpriority="high"
+      />
+      <figcaption>{data.location}</figcaption>
+    </figure>
+
+    <ol class="hero-index">
+      {data.focus.map((item, index) => (
+        <li>
+          <span class="hero-index-number">{String(index + 1).padStart(2, '0')}</span>
+          <span class="hero-index-name">{item.name}</span>
+          <span class="hero-index-detail">{item.detail}</span>
+        </li>
+      ))}
+    </ol>
   </div>
 </section>

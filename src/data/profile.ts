@@ -1,6 +1,7 @@
 export const profile = {
   name: 'Zicong Yang',
   nameZh: '杨梓聪',
+  photo: 'images/portrait.webp',
   email: '402641915@qq.com',
   links: {
     github: 'https://github.com/YZC0421',
@@ -72,5 +73,5 @@ export const profile = {
       '国家级优秀调研报告（二作论文，知网检索）',
     ],
   },
-  // TODO: 补充 LinkedIn、个人照片、所在城市确认，以及 AI 方向项目的真实细节。
+  // TODO: 补充 LinkedIn、所在城市确认，以及 AI 方向项目的真实细节。
 } as const;

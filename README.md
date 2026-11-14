@@ -166,5 +166,5 @@ Ubuntu. Pull requests run the same checks but skip the deploy job.
 
 - LinkedIn URL: `src/data/profile.ts`
 - Project details for the three planned AI projects: `src/content/projects/*.md`
-- Optional profile photo / project covers: `public/images/`
+- Optional project covers: `public/images/` (the profile portrait lives at `public/images/portrait.webp`)
 - Confirm location string in `src/data/profile.ts`
