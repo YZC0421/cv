@@ -8,6 +8,7 @@ const bundle: PrivateBundle = {
     summary: 'Internal enterprise project.',
     stack: ['TypeScript'],
     links: [{ label: 'Contact', url: 'https://example.com' }],
+    images: [{ alt: 'Architecture', type: 'image/png', data: 'iVBORw0KGgo=' }],
   },
   zh: { summary: '企业内部项目。' },
 };

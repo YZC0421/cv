@@ -13,6 +13,13 @@ export interface PrivateLink {
   url: string;
 }
 
+export interface PrivateImage {
+  alt: string;
+  type: string;
+  /** Base64-encoded bytes; encrypted together with the rest of the bundle. */
+  data: string;
+}
+
 export interface PrivateContent {
   summary?: string;
   goal?: string;
@@ -21,6 +28,7 @@ export interface PrivateContent {
   results?: string;
   stack?: string[];
   links?: PrivateLink[];
+  images?: PrivateImage[];
   body?: string;
 }
 

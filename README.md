@@ -92,7 +92,10 @@ A static site cannot check a password on a server, so private details are encryp
 time rather than hidden with CSS.
 
 1. Write the content in `private/<slug>.json` (git-ignored). Keys: `en` and/or `zh`; fields:
-   `summary`, `goal`, `architecture`, `role`, `results`, `stack`, `links`, `body`.
+   `summary`, `goal`, `architecture`, `role`, `results`, `stack`, `links`, `images`, `body`.
+   Images use `"images": [{ "alt": "Architecture", "file": "architecture.png" }]` with the
+   files in `private/media/` (png/jpg/webp/gif, ≤2 MB each, ≤6 MB total); they are encrypted
+   together with the text.
 2. Encrypt it with the access password:
    `PRIVATE_PASSWORD='<password>' npm run private:encrypt -- <slug>`
    Without the variable the script prompts with a silent input.

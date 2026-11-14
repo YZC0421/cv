@@ -830,6 +830,9 @@ a.subtopic-paper:hover { color: var(--accent); }
 .private-status { min-height: 1.2em; margin: 10px 0 0; font-size: 0.85rem; color: var(--muted); }
 .private-status[data-state='error'] { color: var(--q1-fg); }
 .private-content { margin-top: 8px; outline: none; }
+.private-content figure { margin: 20px 0; }
+.private-content figure img { display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 10px; }
+.private-content figcaption { margin-top: 8px; font-size: 0.8rem; color: var(--muted); }
 .project-card h3 { font-size: 1.08rem; line-height: 1.35; }
 .project-card h3 a { color: var(--fg); }
 .project-card h3 a:hover { color: var(--accent); text-decoration: none; }

@@ -58,6 +58,7 @@ const ready = existsSync(`public/private/${slug}.json`);
     const lang = root.dataset.lang === 'zh' ? 'zh' : 'en';
     const copy = t(lang).privateProject;
     const labels = t(lang).projects;
+    const imageTypes = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif']);
     const payloadUrl = root.dataset.payload ?? '';
     const form = root.querySelector('form');
     const input = root.querySelector<HTMLInputElement>('input[type="password"]');
@@ -118,6 +119,19 @@ const ready = existsSync(`public/private/${slug}.json`);
       ];
       for (const [label, text] of fields) {
         if (text) panel.append(block(label, text));
+      }
+
+      for (const image of content.images ?? []) {
+        if (!image.alt || !image.data || !imageTypes.has(image.type)) continue;
+        const figure = document.createElement('figure');
+        const element = document.createElement('img');
+        element.src = `data:${image.type};base64,${image.data}`;
+        element.alt = image.alt;
+        element.loading = 'lazy';
+        const caption = document.createElement('figcaption');
+        caption.textContent = image.alt;
+        figure.append(element, caption);
+        panel.append(figure);
       }
 
       if (content.stack && content.stack.length > 0) {
