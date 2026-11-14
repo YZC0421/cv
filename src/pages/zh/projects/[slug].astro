@@ -21,7 +21,10 @@ const d = localizedProject(item, 'zh');
 const copy = t('zh').projects;
 ---
 <BaseLayout title={`${d.title} · 杨梓聪`} description={d.summary} lang="zh">
-  <article class="container reading work-detail" style="padding-top:48px">
+  <article
+    class={`container reading work-detail${d.private ? ' private-detail' : ''}`}
+    style="padding-top:48px"
+  >
     <p class="eyebrow">
       <a href={localeUrl('projects', 'zh')}>{copy.back}</a> / {categoryLabel(item.data.category, 'zh')}
     </p>

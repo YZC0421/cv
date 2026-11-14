@@ -21,7 +21,10 @@ const d = item.data;
 const copy = t('en').projects;
 ---
 <BaseLayout title={`${d.title} · Zicong Yang`} description={d.summary}>
-  <article class="container reading work-detail" style="padding-top:48px">
+  <article
+    class={`container reading work-detail${d.private ? ' private-detail' : ''}`}
+    style="padding-top:48px"
+  >
     <p class="eyebrow">
       <a href={withBase('projects')}>Projects</a> / {categoryLabel(d.category)}
     </p>

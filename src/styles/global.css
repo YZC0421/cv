@@ -818,7 +818,13 @@ a.subtopic-paper:hover { color: var(--accent); }
 .private-card { border: 1px dashed var(--border); border-radius: 10px; padding: 16px 20px; margin: 24px 0; background: var(--bg-soft); }
 .private-card h2 { font-family: var(--font-sans); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
 .private-card p { margin: 0; font-size: 0.9rem; color: var(--muted); }
+.private-detail { max-width: var(--wide); }
+.private-detail .lede,
+.private-detail .private-doc p,
+.private-detail .private-doc li { max-width: 78ch; }
+.private-detail .private-doc p:has(> img) { max-width: none; }
 .private-gate { border: 1px dashed var(--border); border-radius: 10px; padding: 20px; margin: 24px 0; background: var(--bg-soft); }
+.private-lock { max-width: 640px; }
 .private-lock h2 { font-size: 1rem; margin-bottom: 8px; }
 .private-doc { margin-top: 8px; }
 .private-doc h1 { font-size: 1.55rem; margin: 40px 0 14px; }
