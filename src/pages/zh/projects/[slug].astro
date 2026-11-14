@@ -27,43 +27,53 @@ const copy = t('zh').projects;
     <h1>{d.title}</h1>
     <p class="meta">
       {statusLabel(item.data.status, 'zh')}
+      {d.private && ` · ${copy.private}`}
       {d.period && ` · ${d.period}`}
       {d.role && ` · ${d.role}`}
     </p>
     <p class="lede">{d.summary}</p>
 
-    {d.todo && d.todo.length > 0 && (
-      <aside class="todo-card">
-        <h2>{copy.todo}</h2>
-        <ul>{d.todo.map((entry) => <li>{entry}</li>)}</ul>
+    {d.private ? (
+      <aside class="private-card">
+        <h2>{copy.private}</h2>
+        <p>{copy.privateNote}</p>
       </aside>
-    )}
-
-    {d.goal && <section class="work-block"><h2>{copy.goal}</h2><p>{d.goal}</p></section>}
-    {d.architecture && <section class="work-block"><h2>{copy.architecture}</h2><p>{d.architecture}</p></section>}
-    {d.role && <section class="work-block"><h2>{copy.role}</h2><p>{d.role}</p></section>}
-    {d.results && <section class="work-block"><h2>{copy.results}</h2><p>{d.results}</p></section>}
-
-    {d.body ? (
-      <div class="prose"><p>{d.body}</p></div>
     ) : (
-      <div class="prose"><Content /></div>
-    )}
+      <Fragment>
+        {d.todo && d.todo.length > 0 && (
+          <aside class="todo-card">
+            <h2>{copy.todo}</h2>
+            <ul>{d.todo.map((entry) => <li>{entry}</li>)}</ul>
+          </aside>
+        )}
 
-    {d.stack.length > 0 && (
-      <section class="work-block">
-        <h2>{copy.stack}</h2>
-        <div class="stack">{d.stack.map((tech) => <span>{tech}</span>)}</div>
-      </section>
-    )}
+        {d.goal && <section class="work-block"><h2>{copy.goal}</h2><p>{d.goal}</p></section>}
+        {d.architecture && <section class="work-block"><h2>{copy.architecture}</h2><p>{d.architecture}</p></section>}
+        {d.role && <section class="work-block"><h2>{copy.role}</h2><p>{d.role}</p></section>}
+        {d.results && <section class="work-block"><h2>{copy.results}</h2><p>{d.results}</p></section>}
 
-    {d.links.length > 0 && (
-      <section class="work-block">
-        <h2>{copy.links}</h2>
-        <div class="links">
-          {d.links.map((link) => <a href={link.url} target="_blank" rel="noopener">{link.label}</a>)}
-        </div>
-      </section>
+        {d.body ? (
+          <div class="prose"><p>{d.body}</p></div>
+        ) : (
+          <div class="prose"><Content /></div>
+        )}
+
+        {d.stack.length > 0 && (
+          <section class="work-block">
+            <h2>{copy.stack}</h2>
+            <div class="stack">{d.stack.map((tech) => <span>{tech}</span>)}</div>
+          </section>
+        )}
+
+        {d.links.length > 0 && (
+          <section class="work-block">
+            <h2>{copy.links}</h2>
+            <div class="links">
+              {d.links.map((link) => <a href={link.url} target="_blank" rel="noopener">{link.label}</a>)}
+            </div>
+          </section>
+        )}
+      </Fragment>
     )}
   </article>
 </BaseLayout>

@@ -81,8 +81,10 @@ src/
 3. Categories: `ai-agent`, `ai-application`, `enterprise-software`, `data-intelligence`,
    `research`.
 4. Optional fields: `status` (`complete` | `ongoing` | `planned`), `period`, `stack`,
-   `links`, `cover`, `goal`, `architecture`, `role`, `results`, `featured`, `order`.
+   `links`, `cover`, `goal`, `architecture`, `role`, `results`, `private`, `featured`, `order`.
 5. Use `todo: []` for missing facts. Never invent metrics, roles, or outcomes.
+6. `private: true` lists the project with a Private badge and replaces its detail page with a
+   confidentiality notice; details stay in the file but are not rendered publicly.
 
 ## Add a publication
 

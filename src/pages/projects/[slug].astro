@@ -3,6 +3,7 @@ import type { Project } from '../../lib/projects';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection, render } from 'astro:content';
 import { categoryLabel, statusLabel } from '../../lib/projects';
+import { t } from '../../i18n/ui';
 import { withBase } from '../../lib/url';
 
 export async function getStaticPaths() {
@@ -16,6 +17,7 @@ interface Props {
 const { item } = Astro.props;
 const { Content } = await render(item);
 const d = item.data;
+const copy = t('en').projects;
 ---
 <BaseLayout title={`${d.title} · Zicong Yang`} description={d.summary}>
   <article class="container reading work-detail" style="padding-top:48px">
@@ -25,39 +27,49 @@ const d = item.data;
     <h1>{d.title}</h1>
     <p class="meta">
       {statusLabel(d.status)}
+      {d.private && ` · ${copy.private}`}
       {d.period && ` · ${d.period}`}
       {d.role && ` · ${d.role}`}
     </p>
     <p class="lede">{d.summary}</p>
 
-    {d.todo.length > 0 && (
-      <aside class="todo-card">
-        <h2>待补充</h2>
-        <ul>{d.todo.map((entry) => <li>{entry}</li>)}</ul>
+    {d.private ? (
+      <aside class="private-card">
+        <h2>{copy.private}</h2>
+        <p>{copy.privateNote}</p>
       </aside>
-    )}
+    ) : (
+      <Fragment>
+        {d.todo.length > 0 && (
+          <aside class="todo-card">
+            <h2>待补充</h2>
+            <ul>{d.todo.map((entry) => <li>{entry}</li>)}</ul>
+          </aside>
+        )}
 
-    {d.goal && <section class="work-block"><h2>Goal</h2><p>{d.goal}</p></section>}
-    {d.architecture && <section class="work-block"><h2>Architecture</h2><p>{d.architecture}</p></section>}
-    {d.role && <section class="work-block"><h2>Role</h2><p>{d.role}</p></section>}
-    {d.results && <section class="work-block"><h2>Results</h2><p>{d.results}</p></section>}
+        {d.goal && <section class="work-block"><h2>Goal</h2><p>{d.goal}</p></section>}
+        {d.architecture && <section class="work-block"><h2>Architecture</h2><p>{d.architecture}</p></section>}
+        {d.role && <section class="work-block"><h2>Role</h2><p>{d.role}</p></section>}
+        {d.results && <section class="work-block"><h2>Results</h2><p>{d.results}</p></section>}
 
-    <div class="prose"><Content /></div>
+        <div class="prose"><Content /></div>
 
-    {d.stack.length > 0 && (
-      <section class="work-block">
-        <h2>Stack</h2>
-        <div class="stack">{d.stack.map((tech) => <span>{tech}</span>)}</div>
-      </section>
-    )}
+        {d.stack.length > 0 && (
+          <section class="work-block">
+            <h2>Stack</h2>
+            <div class="stack">{d.stack.map((tech) => <span>{tech}</span>)}</div>
+          </section>
+        )}
 
-    {d.links.length > 0 && (
-      <section class="work-block">
-        <h2>Links</h2>
-        <div class="links">
-          {d.links.map((link) => <a href={link.url} target="_blank" rel="noopener">{link.label}</a>)}
-        </div>
-      </section>
+        {d.links.length > 0 && (
+          <section class="work-block">
+            <h2>Links</h2>
+            <div class="links">
+              {d.links.map((link) => <a href={link.url} target="_blank" rel="noopener">{link.label}</a>)}
+            </div>
+          </section>
+        )}
+      </Fragment>
     )}
   </article>
 </BaseLayout>

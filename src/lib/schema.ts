@@ -166,6 +166,8 @@ export const projectSchema = z.object({
   role: z.string().optional(),
   results: z.string().optional(),
   todo: z.array(z.string()).default([]),
+  /** Internal project: listed with a Private badge, details withheld from public pages. */
+  private: z.boolean().default(false),
   featured: z.boolean().default(false),
   order: z.number().int().default(0),
 });

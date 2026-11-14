@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { publicationSchema, workSchema, blogSchema } from '../src/lib/schema.ts';
+import { publicationSchema, workSchema, blogSchema, projectSchema } from '../src/lib/schema.ts';
 
 const paper = {
   title: 'A paper',
@@ -157,4 +157,27 @@ test('blog accepts ordered changelog entries', () => {
     { date: '2026-08-01', note: 'Second' },
   ];
   assert.equal(blogSchema.safeParse({ ...post, changelog }).success, true);
+});
+
+const project = {
+  title: '企业级项目',
+  category: 'enterprise-software' as const,
+  summary: 'Internal enterprise project.',
+};
+
+test('project defaults private to false', () => {
+  const result = projectSchema.safeParse(project);
+  assert.equal(result.success, true);
+  assert.equal(result.success && result.data.private, false);
+});
+
+test('project accepts a private flag', () => {
+  const result = projectSchema.safeParse({ ...project, private: true });
+  assert.equal(result.success, true);
+  assert.equal(result.success && result.data.private, true);
+});
+
+test('project rejects a missing category', () => {
+  const { category, ...rest } = project;
+  assert.equal(projectSchema.safeParse(rest).success, false);
 });

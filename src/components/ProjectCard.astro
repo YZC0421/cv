@@ -15,9 +15,12 @@ const copy = t(lang).projects;
 <article class="project-card" data-category={item.data.category}>
   <div class="project-card-head">
     <span class="project-category">{categoryLabel(item.data.category, lang)}</span>
-    {item.data.status !== 'complete' && (
-      <span class="status-badge">{statusLabel(item.data.status, lang)}</span>
-    )}
+    <span class="project-badges">
+      {item.data.status !== 'complete' && (
+        <span class="status-badge">{statusLabel(item.data.status, lang)}</span>
+      )}
+      {item.data.private && <span class="status-badge is-private">{copy.private}</span>}
+    </span>
   </div>
   <h3><a href={localeUrl(`projects/${item.id}`, lang)}>{d.title}</a></h3>
   <p>{d.summary}</p>

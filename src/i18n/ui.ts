@@ -42,6 +42,9 @@ export const ui = {
       links: 'Links',
       todo: 'To be completed',
       back: 'Projects',
+      private: 'Private',
+      privateNote:
+        'Internal enterprise project. Scope, architecture, and outcomes are withheld due to confidentiality.',
     },
     resume: {
       title: 'Resume',
@@ -171,6 +174,8 @@ export const ui = {
       links: '链接',
       todo: '待补充',
       back: '项目',
+      private: '私有',
+      privateNote: '企业内部私有项目，范围、架构与业务细节受保密要求限制，不在公开站点展开。',
     },
     resume: {
       title: '简历',
