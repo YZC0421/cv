@@ -173,6 +173,19 @@ const ready = existsSync(`public/private/${slug}.json`);
       return section;
     };
 
+    const asideBlock = (label: string, value: string) => {
+      const element = document.createElement('div');
+      element.className = 'private-aside-block';
+      const name = document.createElement('span');
+      name.className = 'private-aside-label';
+      name.textContent = label;
+      const text = document.createElement('span');
+      text.className = 'private-aside-value';
+      text.textContent = value;
+      element.append(name, text);
+      return element;
+    };
+
     const safeUrl = (value: string): string | undefined => {
       try {
         const url = new URL(value, window.location.href);
@@ -227,6 +240,33 @@ const ready = existsSync(`public/private/${slug}.json`);
       if (!panel) return;
       panel.replaceChildren();
 
+      const documents = content.documents ?? [];
+      const latest = documents
+        .map((entry) => entry.date)
+        .filter((date): date is string => Boolean(date))
+        .sort()
+        .at(-1);
+
+      const workspace = document.createElement('div');
+      workspace.className = 'private-workspace';
+
+      const head = document.createElement('div');
+      head.className = 'private-workspace-head';
+      const tag = document.createElement('span');
+      tag.className = 'private-workspace-tag';
+      tag.textContent =
+        documents.length > 0 ? `${copy.privateTag} · ${copy.count(documents.length)}` : copy.privateTag;
+      head.append(tag);
+      if (latest) {
+        const updated = document.createElement('span');
+        updated.className = 'private-workspace-updated';
+        updated.textContent = `${copy.lastUpdated} ${latest}`;
+        head.append(updated);
+      }
+
+      const main = document.createElement('div');
+      main.className = 'private-main';
+
       const home = document.createElement('div');
       home.className = 'private-home';
 
@@ -260,20 +300,6 @@ const ready = existsSync(`public/private/${slug}.json`);
         home.append(figure);
       }
 
-      if (content.stack && content.stack.length > 0) {
-        const section = document.createElement('section');
-        section.className = 'work-block';
-        const stack = document.createElement('div');
-        stack.className = 'stack';
-        for (const tech of content.stack) {
-          const chip = document.createElement('span');
-          chip.textContent = tech;
-          stack.append(chip);
-        }
-        section.append(heading(labels.stack), stack);
-        home.append(section);
-      }
-
       if (content.links && content.links.length > 0) {
         const links = content.links
           .map((link) => ({ label: link.label, href: safeUrl(link.url) }))
@@ -300,19 +326,48 @@ const ready = existsSync(`public/private/${slug}.json`);
       reader.className = 'private-reader';
       reader.hidden = true;
 
-      const documents = content.documents ?? [];
+      const openDocument = (entry: PrivateDocument, trigger: HTMLButtonElement) => {
+        reader.replaceChildren();
+
+        const bar = document.createElement('div');
+        bar.className = 'private-reader-bar';
+        const back = document.createElement('button');
+        back.type = 'button';
+        back.className = 'private-back';
+        back.textContent = copy.backToList;
+        back.addEventListener('click', () => {
+          reader.hidden = true;
+          reader.replaceChildren();
+          home.hidden = false;
+          workspace.classList.remove('is-reading');
+          trigger.focus();
+        });
+        const current = document.createElement('span');
+        current.className = 'private-reader-title';
+        current.textContent = entry.title;
+        bar.append(back, current);
+
+        const prose = document.createElement('div');
+        prose.className = 'prose private-doc';
+        // Built at encryption time and authenticated by AES-GCM, so it cannot be
+        // altered without the password.
+        prose.innerHTML = entry.html;
+        decorate(prose);
+
+        reader.append(bar, prose);
+        home.hidden = true;
+        reader.hidden = false;
+        workspace.classList.add('is-reading');
+        reader.scrollIntoView({
+          behavior: reduceMotion ? 'auto' : 'smooth',
+          block: 'start',
+        });
+      };
+
       if (documents.length > 0) {
         const section = document.createElement('section');
         section.className = 'private-docs';
-        const head = document.createElement('div');
-        head.className = 'private-docs-head';
-        head.append(heading(copy.documents));
-        const count = document.createElement('span');
-        count.className = 'private-docs-count';
-        count.textContent = copy.count(documents.length);
-        head.append(count);
-        section.append(head);
-
+        section.append(heading(copy.documents));
         const list = document.createElement('ul');
         list.className = 'private-doc-list';
         documents.forEach((entry, index) => {
@@ -367,43 +422,31 @@ const ready = existsSync(`public/private/${slug}.json`);
         home.append(prose);
       }
 
-      const openDocument = (entry: PrivateDocument, trigger: HTMLButtonElement) => {
-        reader.replaceChildren();
+      main.append(home, reader);
 
-        const bar = document.createElement('div');
-        bar.className = 'private-reader-bar';
-        const back = document.createElement('button');
-        back.type = 'button';
-        back.className = 'private-back';
-        back.textContent = copy.backToList;
-        back.addEventListener('click', () => {
-          reader.hidden = true;
-          reader.replaceChildren();
-          home.hidden = false;
-          trigger.focus();
-        });
-        const current = document.createElement('span');
-        current.className = 'private-reader-title';
-        current.textContent = entry.title;
-        bar.append(back, current);
+      const aside = document.createElement('aside');
+      aside.className = 'private-aside';
+      aside.append(heading(copy.projectInfo));
+      if (content.stack && content.stack.length > 0) {
+        const stackBlock = document.createElement('div');
+        stackBlock.className = 'private-aside-block';
+        const stackLabel = document.createElement('span');
+        stackLabel.className = 'private-aside-label';
+        stackLabel.textContent = labels.stack;
+        const stack = document.createElement('div');
+        stack.className = 'stack';
+        for (const tech of content.stack) {
+          const chip = document.createElement('span');
+          chip.textContent = tech;
+          stack.append(chip);
+        }
+        stackBlock.append(stackLabel, stack);
+        aside.append(stackBlock);
+      }
+      aside.append(asideBlock(copy.access, copy.accessValue));
 
-        const prose = document.createElement('div');
-        prose.className = 'prose private-doc';
-        // Built at encryption time and authenticated by AES-GCM, so it cannot be
-        // altered without the password.
-        prose.innerHTML = entry.html;
-        decorate(prose);
-
-        reader.append(bar, prose);
-        home.hidden = true;
-        reader.hidden = false;
-        reader.scrollIntoView({
-          behavior: reduceMotion ? 'auto' : 'smooth',
-          block: 'start',
-        });
-      };
-
-      panel.append(home, reader);
+      workspace.append(head, main, aside);
+      panel.append(workspace);
     };
 
     reveal?.addEventListener('click', () => {
@@ -452,6 +495,7 @@ const ready = existsSync(`public/private/${slug}.json`);
         const content = bundle[lang] ?? bundle.en ?? bundle.zh;
         if (!content) throw new Error('empty bundle');
         render(content);
+        root.classList.add('is-open');
         panel.hidden = false;
         panel.classList.remove('is-revealed');
         void panel.offsetWidth;

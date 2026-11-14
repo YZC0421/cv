@@ -64,6 +64,11 @@ export const ui = {
       copy: 'Copy',
       copied: 'Copied',
       copyFailed: 'Failed',
+      privateTag: 'Private project',
+      projectInfo: 'Project info',
+      access: 'Access',
+      accessValue: 'Password',
+      lastUpdated: 'Updated',
     },
     resume: {
       title: 'Resume',
@@ -214,6 +219,11 @@ export const ui = {
       copy: '复制',
       copied: '已复制',
       copyFailed: '复制失败',
+      privateTag: '私有项目',
+      projectInfo: '项目信息',
+      access: '访问方式',
+      accessValue: '密码',
+      lastUpdated: '最近更新',
     },
     resume: {
       title: '简历',
