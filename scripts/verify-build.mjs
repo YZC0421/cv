@@ -299,6 +299,30 @@ const aboutZh = await read('dist/about/zh/index.html');
 const projectsHtml = await read('dist/projects/index.html');
 checks.push(['projects list has cards', /class="project-card"/.test(projectsHtml)]);
 
+const privatePayloads = existsSync('public/private')
+  ? (await readdir('public/private')).filter((file) => file.endsWith('.json'))
+  : [];
+for (const file of privatePayloads) {
+  const slug = file.replace(/\.json$/, '');
+  const enPage = await read(`dist/projects/${slug}/index.html`);
+  const zhPage = await read(`dist/zh/projects/${slug}/index.html`);
+  checks.push([
+    `private project ${slug} is password-gated`,
+    enPage.includes('data-private-project') &&
+      zhPage.includes('data-private-project') &&
+      existsSync(`dist/private/${file}`),
+  ]);
+  try {
+    const payload = JSON.parse(await read(`dist/private/${file}`));
+    checks.push([
+      `private payload ${slug} holds ciphertext only`,
+      payload.v === 1 && typeof payload.ciphertext === 'string' && payload.ciphertext.length > 0,
+    ]);
+  } catch {
+    checks.push([`private payload ${slug} parses`, false]);
+  }
+}
+
 const resumeHtml = await read('dist/resume/index.html');
 checks.push([
   'resume has core sections',

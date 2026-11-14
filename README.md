@@ -83,8 +83,25 @@ src/
 4. Optional fields: `status` (`complete` | `ongoing` | `planned`), `period`, `stack`,
    `links`, `cover`, `goal`, `architecture`, `role`, `results`, `private`, `featured`, `order`.
 5. Use `todo: []` for missing facts. Never invent metrics, roles, or outcomes.
-6. `private: true` lists the project with a Private badge and replaces its detail page with a
-   confidentiality notice; details stay in the file but are not rendered publicly.
+6. `private: true` lists the project with a Private badge and turns its detail page into a
+   password gate; details ship as ciphertext only. See below.
+
+## Private projects
+
+A static site cannot check a password on a server, so private details are encrypted at build
+time rather than hidden with CSS.
+
+1. Write the content in `private/<slug>.json` (git-ignored). Keys: `en` and/or `zh`; fields:
+   `summary`, `goal`, `architecture`, `role`, `results`, `stack`, `links`, `body`.
+2. Encrypt it with the access password:
+   `PRIVATE_PASSWORD='<password>' npm run private:encrypt -- <slug>`
+   Without the variable the script prompts with a silent input.
+3. Commit `public/private/<slug>.json` (salt, IV, ciphertext). Never commit `private/`.
+4. The detail page fetches the ciphertext and decrypts it in the browser with AES-256-GCM and
+   PBKDF2-SHA-256 (600,000 iterations). The password is stored nowhere: if it is lost, the
+   content can only be re-encrypted from the plaintext file.
+5. Anyone with the password can read the content, and a weak password can be attacked
+   offline. Do not put anything here that must survive a determined attacker.
 
 ## Add a publication
 

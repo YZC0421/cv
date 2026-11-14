@@ -818,6 +818,18 @@ a.subtopic-paper:hover { color: var(--accent); }
 .private-card { border: 1px dashed var(--border); border-radius: 10px; padding: 16px 20px; margin: 24px 0; background: var(--bg-soft); }
 .private-card h2 { font-family: var(--font-sans); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
 .private-card p { margin: 0; font-size: 0.9rem; color: var(--muted); }
+.private-gate { border: 1px dashed var(--border); border-radius: 10px; padding: 20px; margin: 24px 0; background: var(--bg-soft); }
+.private-gate h2 { font-size: 1rem; margin-bottom: 8px; }
+.private-gate > .private-content .lede { margin-top: 0; }
+.private-form { margin-top: 16px; }
+.private-form label { display: block; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.private-form-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.private-form input { flex: 1 1 220px; min-width: 0; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--fg); font: inherit; }
+.private-form button { padding: 8px 18px; border: 1px solid var(--border); border-radius: 8px; background: var(--fg); color: var(--bg); font: inherit; cursor: pointer; }
+.private-form button:disabled { opacity: 0.6; cursor: progress; }
+.private-status { min-height: 1.2em; margin: 10px 0 0; font-size: 0.85rem; color: var(--muted); }
+.private-status[data-state='error'] { color: var(--q1-fg); }
+.private-content { margin-top: 8px; outline: none; }
 .project-card h3 { font-size: 1.08rem; line-height: 1.35; }
 .project-card h3 a { color: var(--fg); }
 .project-card h3 a:hover { color: var(--accent); text-decoration: none; }

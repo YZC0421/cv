@@ -1,6 +1,7 @@
 ---
 import type { Project } from '../../../lib/projects';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PrivateProject from '../../../components/PrivateProject.astro';
 import { getCollection, render } from 'astro:content';
 import { categoryLabel, localizedProject, statusLabel } from '../../../lib/projects';
 import { localeUrl } from '../../../i18n/utils';
@@ -34,10 +35,7 @@ const copy = t('zh').projects;
     <p class="lede">{d.summary}</p>
 
     {d.private ? (
-      <aside class="private-card">
-        <h2>{copy.private}</h2>
-        <p>{copy.privateNote}</p>
-      </aside>
+      <PrivateProject slug={item.id} />
     ) : (
       <Fragment>
         {d.todo && d.todo.length > 0 && (

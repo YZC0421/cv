@@ -1,0 +1,211 @@
+---
+import { existsSync } from 'node:fs';
+import { langFromPath } from '../i18n/utils';
+import { t } from '../i18n/ui';
+import { withBase } from '../lib/url';
+
+interface Props {
+  slug: string;
+}
+const { slug } = Astro.props;
+const lang = langFromPath(Astro.url.pathname);
+const copy = t(lang).privateProject;
+const ready = existsSync(`public/private/${slug}.json`);
+---
+{ready ? (
+  <section
+    class="private-gate"
+    data-private-project
+    data-lang={lang}
+    data-payload={withBase(`private/${slug}.json`)}
+  >
+    <div class="private-lock">
+      <h2>{copy.title}</h2>
+      <p class="muted">{copy.intro}</p>
+      <form class="private-form">
+        <label for="private-password">{copy.label}</label>
+        <div class="private-form-row">
+          <input
+            id="private-password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            minlength="8"
+            required
+          />
+          <button type="submit">{copy.unlock}</button>
+        </div>
+      </form>
+      <p class="private-status" role="status" aria-live="polite"></p>
+      <noscript><p class="muted">{copy.noscript}</p></noscript>
+    </div>
+    <div class="private-content" tabindex="-1" hidden></div>
+  </section>
+) : (
+  <aside class="private-card">
+    <h2>{copy.title}</h2>
+    <p>{copy.unavailable}</p>
+  </aside>
+)}
+
+<script>
+  import { decryptBundle } from '../lib/private';
+  import type { PrivateContent, PrivatePayload } from '../lib/private';
+  import { t } from '../i18n/ui';
+
+  const root = document.querySelector<HTMLElement>('[data-private-project]');
+  if (root) {
+    const lang = root.dataset.lang === 'zh' ? 'zh' : 'en';
+    const copy = t(lang).privateProject;
+    const labels = t(lang).projects;
+    const payloadUrl = root.dataset.payload ?? '';
+    const form = root.querySelector('form');
+    const input = root.querySelector<HTMLInputElement>('input[type="password"]');
+    const button = root.querySelector<HTMLButtonElement>('button[type="submit"]');
+    const status = root.querySelector<HTMLElement>('.private-status');
+    const lock = root.querySelector<HTMLElement>('.private-lock');
+    const panel = root.querySelector<HTMLElement>('.private-content');
+    let pending: Promise<PrivatePayload> | undefined;
+
+    const loadPayload = () => {
+      pending ??= fetch(payloadUrl, { cache: 'no-store' }).then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json() as Promise<PrivatePayload>;
+      });
+      return pending;
+    };
+
+    const heading = (text: string) => {
+      const element = document.createElement('h2');
+      element.textContent = text;
+      return element;
+    };
+
+    const block = (label: string, text: string) => {
+      const section = document.createElement('section');
+      section.className = 'work-block';
+      const paragraph = document.createElement('p');
+      paragraph.textContent = text;
+      section.append(heading(label), paragraph);
+      return section;
+    };
+
+    const safeUrl = (value: string): string | undefined => {
+      try {
+        const url = new URL(value, window.location.href);
+        return url.protocol === 'https:' || url.protocol === 'http:' ? url.href : undefined;
+      } catch {
+        return undefined;
+      }
+    };
+
+    const render = (content: PrivateContent) => {
+      if (!panel) return;
+      panel.replaceChildren();
+
+      if (content.summary) {
+        const lede = document.createElement('p');
+        lede.className = 'lede';
+        lede.textContent = content.summary;
+        panel.append(lede);
+      }
+
+      const fields: [string, string | undefined][] = [
+        [labels.goal, content.goal],
+        [labels.architecture, content.architecture],
+        [labels.role, content.role],
+        [labels.results, content.results],
+      ];
+      for (const [label, text] of fields) {
+        if (text) panel.append(block(label, text));
+      }
+
+      if (content.stack && content.stack.length > 0) {
+        const section = document.createElement('section');
+        section.className = 'work-block';
+        const stack = document.createElement('div');
+        stack.className = 'stack';
+        for (const tech of content.stack) {
+          const chip = document.createElement('span');
+          chip.textContent = tech;
+          stack.append(chip);
+        }
+        section.append(heading(labels.stack), stack);
+        panel.append(section);
+      }
+
+      if (content.links && content.links.length > 0) {
+        const links = content.links
+          .map((link) => ({ label: link.label, href: safeUrl(link.url) }))
+          .filter((link): link is { label: string; href: string } => Boolean(link.href));
+        if (links.length > 0) {
+          const section = document.createElement('section');
+          section.className = 'work-block';
+          const list = document.createElement('div');
+          list.className = 'links';
+          for (const link of links) {
+            const anchor = document.createElement('a');
+            anchor.href = link.href;
+            anchor.target = '_blank';
+            anchor.rel = 'noopener noreferrer';
+            anchor.textContent = link.label;
+            list.append(anchor);
+          }
+          section.append(heading(labels.links), list);
+          panel.append(section);
+        }
+      }
+
+      if (content.body) {
+        const prose = document.createElement('div');
+        prose.className = 'prose';
+        for (const paragraph of content.body.split(/\n\s*\n/)) {
+          if (!paragraph.trim()) continue;
+          const element = document.createElement('p');
+          element.textContent = paragraph.trim();
+          prose.append(element);
+        }
+        panel.append(prose);
+      }
+    };
+
+    form?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!input || !status || !panel) return;
+      const password = input.value;
+      if (!password) return;
+
+      status.dataset.state = 'loading';
+      status.textContent = copy.loading;
+      if (button) button.disabled = true;
+
+      let payload: PrivatePayload;
+      try {
+        payload = await loadPayload();
+      } catch {
+        status.dataset.state = 'error';
+        status.textContent = copy.unavailable;
+        if (button) button.disabled = false;
+        return;
+      }
+
+      try {
+        const bundle = await decryptBundle(payload, password);
+        const content = bundle[lang] ?? bundle.en ?? bundle.zh;
+        if (!content) throw new Error('empty bundle');
+        render(content);
+        panel.hidden = false;
+        lock?.setAttribute('hidden', '');
+        status.textContent = '';
+        delete status.dataset.state;
+        panel.focus();
+      } catch {
+        status.dataset.state = 'error';
+        status.textContent = copy.error;
+        input.select();
+      } finally {
+        if (button) button.disabled = false;
+      }
+    });
+  }
+</script>

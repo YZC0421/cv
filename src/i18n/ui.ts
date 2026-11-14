@@ -46,6 +46,16 @@ export const ui = {
       privateNote:
         'Internal enterprise project. Scope, architecture, and outcomes are withheld due to confidentiality.',
     },
+    privateProject: {
+      title: 'Password required',
+      intro: 'This project is internal. Enter the password to decrypt its details in this browser.',
+      label: 'Password',
+      unlock: 'Unlock',
+      loading: 'Decrypting…',
+      error: 'Wrong password. Try again.',
+      unavailable: 'The encrypted details for this project are not available yet.',
+      noscript: 'JavaScript is required to decrypt this page.',
+    },
     resume: {
       title: 'Resume',
       print: 'Print / Save as PDF',
@@ -176,6 +186,16 @@ export const ui = {
       back: '项目',
       private: '私有',
       privateNote: '企业内部私有项目，范围、架构与业务细节受保密要求限制，不在公开站点展开。',
+    },
+    privateProject: {
+      title: '需要密码',
+      intro: '该条目为企业内部私有项目。请输入密码，在浏览器本地解密查看详情。',
+      label: '密码',
+      unlock: '解锁',
+      loading: '正在解密…',
+      error: '密码错误，请重试。',
+      unavailable: '该项目暂未配置加密内容。',
+      noscript: '需要启用 JavaScript 才能解密此页面。',
     },
     resume: {
       title: '简历',
