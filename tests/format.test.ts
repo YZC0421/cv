@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { boldSelf, readingMinutes, toBibtex } from '../src/lib/format.ts';
+import { boldSelf, readingMinutes, toBibtex, wordCount } from '../src/lib/format.ts';
 
 test('readingMinutes returns at least one minute for empty content', () => {
   assert.equal(readingMinutes(''), 1);
@@ -85,6 +85,12 @@ test('toBibtex includes volume and pages when provided', () => {
   });
   assert.match(bib, /volume = \{36\}/);
   assert.match(bib, /pages = \{116107\}/);
+});
+
+test('wordCount adds CJK characters and Latin words', () => {
+  assert.equal(wordCount('中文三个字'), 5);
+  assert.equal(wordCount('hello world'), 2);
+  assert.equal(wordCount('中文 and English'), 4);
 });
 
 test('toBibtex omits volume and pages when absent', () => {

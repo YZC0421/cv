@@ -117,3 +117,44 @@ test('work rejects a problem statement longer than 600 characters', () => {
   };
   assert.equal(workSchema.safeParse(job).success, false);
 });
+
+const post = {
+  title: 'A post',
+  date: '2026-01-01',
+  lang: 'zh' as const,
+  tags: ['astro'],
+  summary: 'Summary.',
+};
+
+test('blog accepts a minimal post and defaults its changelog', () => {
+  const result = blogSchema.safeParse(post);
+  assert.equal(result.success, true);
+  assert.deepEqual(result.success && result.data.changelog, []);
+});
+
+test('blog rejects an updated date before the published date', () => {
+  assert.equal(blogSchema.safeParse({ ...post, updated: '2025-12-31' }).success, false);
+});
+
+test('blog rejects a reviewed date before the last update', () => {
+  assert.equal(
+    blogSchema.safeParse({ ...post, updated: '2026-06-01', reviewed: '2026-05-01' }).success,
+    false
+  );
+});
+
+test('blog rejects changelog entries out of order', () => {
+  const changelog = [
+    { date: '2026-05-01', note: 'First' },
+    { date: '2026-03-01', note: 'Earlier' },
+  ];
+  assert.equal(blogSchema.safeParse({ ...post, changelog }).success, false);
+});
+
+test('blog accepts ordered changelog entries', () => {
+  const changelog = [
+    { date: '2026-05-01', note: 'First' },
+    { date: '2026-08-01', note: 'Second' },
+  ];
+  assert.equal(blogSchema.safeParse({ ...post, changelog }).success, true);
+});

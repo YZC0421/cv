@@ -527,6 +527,23 @@ a.subtopic-paper:hover { color: var(--accent); }
   background: rgba(217, 119, 6, 0.1);
   font-size: 0.86rem;
 }
+.stale-banner {
+  margin: 20px 0 0;
+  padding: 10px 14px;
+  border-left: 3px solid #d97706;
+  border-radius: 6px;
+  background: rgba(217, 119, 6, 0.1);
+  font-size: 0.86rem;
+}
+.post-changelog {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 0.88rem;
+}
+.post-changelog summary { cursor: pointer; color: var(--muted); }
+.post-changelog ul { margin: 10px 0 0; padding-left: 18px; }
+.post-changelog li { margin-bottom: 6px; }
 .post-header { padding: 48px 0 12px; }
 .post-header h1 { font-size: 2.1rem; }
 .post-meta { color: var(--muted); font-size: 0.82rem; margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
@@ -611,8 +628,24 @@ a.subtopic-paper:hover { color: var(--accent); }
 }
 .code-toggle:hover { color: var(--accent); }
 
-.mermaid-figure { margin: 0 0 24px; text-align: center; overflow-x: auto; }
+.mermaid-figure { margin: 28px 0; text-align: center; overflow-x: auto; }
 .mermaid-figure svg { max-width: 100%; height: auto; }
+.mermaid-figure figcaption,
+.post-figure figcaption {
+  margin-top: 8px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-align: center;
+}
+.post-figure { margin: 28px 0; }
+.post-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-soft);
+}
 .mermaid-error { border-color: #d97706; }
 
 .prose .katex-display { overflow-x: auto; overflow-y: hidden; padding: 4px 0; }

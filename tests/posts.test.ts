@@ -2,6 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   canonicalPostPath,
+  isStale,
+  lastReviewed,
+  monthsBetween,
   postTags,
   postsByLang,
   translationFor,
@@ -81,4 +84,28 @@ test('translationFor refuses to pair posts in the same language', () => {
   const a = make({ id: 'a', lang: 'zh', translationOf: 'b' });
   const b = make({ id: 'b', lang: 'zh' });
   assert.equal(translationFor([a, b], a), undefined);
+});
+
+test('monthsBetween counts whole months only', () => {
+  assert.equal(monthsBetween('2025-11-14', '2026-11-14'), 12);
+  assert.equal(monthsBetween('2025-11-15', '2026-11-14'), 11);
+  assert.equal(monthsBetween('2026-11-15', '2026-11-14'), -1);
+});
+
+test('lastReviewed prefers reviewed, then updated, then date', () => {
+  assert.equal(lastReviewed(make({ date: '2025-01-01' })), '2025-01-01');
+  assert.equal(lastReviewed(make({ date: '2025-01-01', updated: '2025-06-01' })), '2025-06-01');
+  assert.equal(
+    lastReviewed(make({ date: '2025-01-01', updated: '2025-06-01', reviewed: '2026-01-01' })),
+    '2026-01-01'
+  );
+});
+
+test('isStale flips at twelve months and honours reviewed', () => {
+  const old = make({ date: '2025-01-01' });
+  assert.equal(isStale(old, '2026-11-14'), true);
+  assert.equal(isStale(old, '2025-12-31'), false);
+  const reviewed = make({ date: '2023-01-01', reviewed: '2026-06-01' });
+  assert.equal(isStale(reviewed, '2026-11-14'), false);
+  assert.equal(isStale(reviewed, '2027-06-01'), true);
 });

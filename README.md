@@ -16,6 +16,9 @@ npm test         # unit tests for schema, ordering, and URL helpers
 npm run build    # astro build + pagefind index
 npm run verify   # assert build output, including internal links and anchors
 npm run new -- "标题" --slug my-post   # scaffold a draft post
+npm run new -- --paper 10.1109/...     # scaffold a paper note (DOI or publication id)
+npm run new -- --project <slug>        # scaffold a project note
+npm run new -- --translate-of <slug>   # scaffold the other-language draft
 npm run post:check                     # validate post frontmatter before publishing
 npm run og       # regenerate public/og.png (committed; manual only)
 ```
@@ -58,8 +61,8 @@ src/
 1. Run `npm run new -- "标题" --slug some-slug` (add `--lang en` for English). This writes a
    draft with valid frontmatter.
 2. Required: `title`, `date`, `lang` (`en` | `zh`), `summary` (≤160), `tags` (kebab-case).
-3. Optional: `category` (defaults to `notes`), `cover`, `updated`, `draft`, `translationOf`,
-   `paper`.
+3. Optional: `category` (defaults to `notes`), `cover`, `updated`, `reviewed`, `changelog`,
+   `draft`, `translationOf`, `paper`.
 4. `draft: true` is visible in `npm run dev` with a banner, and excluded from lists, RSS,
    sitemap and the build output.
 5. `paper: <publication id or DOI>` turns the post into a paper note: the post shows the paper
@@ -67,7 +70,9 @@ src/
    fail the build.
 6. Categories: `ai-agent`, `llm-engineering`, `ai-application`, `software-engineering`,
    `data-science`, `time-series`, `paper-reading`, `notes`.
-7. Run `npm run post:check && npm run check && npm run build && npm run verify`.
+7. `updated` shows as "updated on"; `changelog: [{date, note}]` renders a collapsed list.
+   Posts older than 12 months show a staleness banner until `reviewed` is bumped.
+8. Run `npm run post:check && npm run check && npm run build && npm run verify`.
 
 ## Add a project
 
@@ -101,6 +106,23 @@ pages and the home page.
 - Code fences accept `title="src/lib/posts.ts"` and highlight ranges like `{2-4,7}`. Blocks
   over 40 lines collapse behind a toggle.
 
+## Images
+
+- Put content images in `src/assets/images/` and reference them relatively from Markdown.
+- `![alt](../../assets/images/x.png "图 1：说明")` renders a `<figure>` with a caption. `alt`
+  is required; missing alt fails `npm run post:check` and `npm run verify` (the page shows a
+  placeholder instead of dropping the image).
+- In MDX, use `src/components/Figure.astro` directly.
+- Markdown images are emitted as responsive WebP with `srcset`, width and height.
+- Each post gets its own 1200×630 share image at `dist/og/<slug>.png` during `npm run build`;
+  pages without one fall back to `public/og.png`.
+
+## Feeds
+
+- `/rss.xml` and `/zh/rss.xml` carry the rendered HTML, not the Markdown source.
+- `/feed.json` and `/zh/feed.json` are JSON Feed 1.1.
+- Article links and images inside feeds are rewritten to absolute URLs.
+
 ## Search
 
 `npm run build` runs `pagefind --site dist` after the static build. Search UI lives at
@@ -108,8 +130,9 @@ pages and the home page.
 
 ## Deploy
 
-Pushing to `main` triggers `.github/workflows/deploy.yml` (test → check → build → verify →
-Pages). Pull requests run the same checks but skip the deploy job.
+Pushing to `main` triggers `.github/workflows/deploy.yml` (test → post:check → check → build
+→ verify → Pages). The workflow installs `fonts-noto-cjk` so Chinese share images render on
+Ubuntu. Pull requests run the same checks but skip the deploy job.
 
 ## TODO
 

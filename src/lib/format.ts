@@ -1,3 +1,10 @@
+/** CJK characters plus Latin words, used for schema.org wordCount. */
+export function wordCount(body: string): number {
+  const cjk = body.match(/[\u3400-\u9fff]/g)?.length ?? 0;
+  const latin = body.replace(/[\u3400-\u9fff]/g, ' ').match(/[A-Za-z0-9][A-Za-z0-9'_-]*/g)?.length ?? 0;
+  return cjk + latin;
+}
+
 export function readingMinutes(body: string): number {
   const cjk = body.match(/[\u4e00-\u9fa5]/g)?.length ?? 0;
   const latin = body.match(/[A-Za-z0-9]+/g)?.length ?? 0;

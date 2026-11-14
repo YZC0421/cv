@@ -4,7 +4,7 @@ import PostLayout from '../../layouts/PostLayout.astro';
 import BibtexButton from '../../components/BibtexButton.astro';
 import { getCollection, render } from 'astro:content';
 import { relatedPosts } from '../../lib/blog';
-import { readingMinutes } from '../../lib/format';
+import { readingMinutes, wordCount } from '../../lib/format';
 import { hasMermaid } from '../../lib/markdown';
 import { findPublication, publicationBibtex } from '../../lib/publications';
 import { t } from '../../i18n/ui';
@@ -12,6 +12,8 @@ import {
   canonicalPostPath,
   canonicalPostUrl,
   isCanonicalPath,
+  isStale,
+  lastReviewed,
   translationFor,
   visiblePosts,
 } from '../../lib/posts';
@@ -57,6 +59,7 @@ const langSwitchHref = counterpart
   ? new URL(canonicalPostUrl(counterpart), Astro.site).pathname
   : null;
 const copy = t(post.data.lang).blog;
+const staleSince = !post.data.draft && isStale(post) ? lastReviewed(post) : undefined;
 const paperRef = post.data.paper
   ? findPublication(await getCollection('publications'), post.data.paper)
   : undefined;
@@ -76,6 +79,12 @@ const paperRef = post.data.paper
   langSwitchHref={langSwitchHref}
   canonicalPath={canonicalPostPath(post)}
   hasMermaid={hasMermaid(post.body ?? '')}
+  updated={post.data.updated}
+  changelog={post.data.changelog}
+  staleSince={staleSince}
+  ogImagePath={`og/${post.id}.png`}
+  category={post.data.category}
+  words={wordCount(post.body ?? '')}
 >
   <Content />
 

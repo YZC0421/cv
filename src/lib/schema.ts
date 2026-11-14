@@ -73,26 +73,62 @@ export const blogCategories = [
   'notes',
 ] as const;
 
-export const blogSchema = z.object({
-  title: z.string().min(1),
+export const changelogEntrySchema = z.object({
   date: isoDate,
-  updated: isoDate.optional(),
-  lang: z.enum(['en', 'zh']),
-  category: z.enum(blogCategories).default('notes'),
-  tags: z
-    .array(z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'tag must be kebab-case'))
-    .min(1),
-  summary: z.string().min(1).max(160),
-  cover: z.string().optional(),
-  draft: z.boolean().default(false),
-  /** Publication id or DOI this note is about. Validated at build time. */
-  paper: z.string().min(3).optional(),
-  /** Slug of the post this one translates, in the other language. */
-  translationOf: z
-    .string()
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'translationOf must be a kebab-case slug')
-    .optional(),
+  note: z.string().min(1).max(200),
 });
+
+export const blogSchema = z
+  .object({
+    title: z.string().min(1),
+    date: isoDate,
+    updated: isoDate.optional(),
+    reviewed: isoDate.optional(),
+    lang: z.enum(['en', 'zh']),
+    category: z.enum(blogCategories).default('notes'),
+    tags: z
+      .array(z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'tag must be kebab-case'))
+      .min(1),
+    summary: z.string().min(1).max(160),
+    cover: z.string().optional(),
+    draft: z.boolean().default(false),
+    changelog: z.array(changelogEntrySchema).default([]),
+    /** Publication id or DOI this note is about. Validated at build time. */
+    paper: z.string().min(3).optional(),
+    /** Slug of the post this one translates, in the other language. */
+    translationOf: z
+      .string()
+      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'translationOf must be a kebab-case slug')
+      .optional(),
+  })
+  .superRefine((post, ctx) => {
+    if (post.updated && post.updated < post.date) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['updated'],
+        message: 'updated must not be earlier than date',
+      });
+    }
+    const lastChange = post.updated ?? post.date;
+    if (post.reviewed && post.reviewed < lastChange) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['reviewed'],
+        message: 'reviewed must not be earlier than updated',
+      });
+    }
+    let previous = post.date;
+    post.changelog.forEach((entry, index) => {
+      if (entry.date < previous) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['changelog', index, 'date'],
+          message: 'changelog entries must be in chronological order',
+        });
+      }
+      previous = entry.date;
+    });
+  });
 
 export const projectCategories = [
   'ai-agent',

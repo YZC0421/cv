@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { withBase, stripBase } from '../src/lib/url.ts';
+import { absolutizeHtml, withBase, stripBase } from '../src/lib/url.ts';
 
 test('withBase returns the site root for an empty path', () => {
   assert.equal(withBase('', '/cv'), '/cv/');
@@ -33,4 +33,17 @@ test('stripBase returns the site root and inner paths', () => {
 
 test('stripBase leaves unrelated paths untouched', () => {
   assert.equal(stripBase('/other/page', '/cv'), '/other/page');
+});
+
+test('absolutizeHtml rewrites root-relative links and assets', () => {
+  const html = '<a href="/cv/blog/x/">x</a><img src="/cv/a.png" alt=""><a href="#top">t</a>';
+  assert.equal(
+    absolutizeHtml(html, 'https://example.com'),
+    '<a href="https://example.com/cv/blog/x/">x</a><img src="https://example.com/cv/a.png" alt=""><a href="#top">t</a>'
+  );
+});
+
+test('absolutizeHtml leaves external and protocol-relative URLs alone', () => {
+  const html = '<a href="https://doi.org/10.1/x">d</a><img src="//cdn.example.com/a.png">';
+  assert.equal(absolutizeHtml(html, 'https://example.com'), html);
 });
