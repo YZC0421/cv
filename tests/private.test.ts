@@ -9,6 +9,7 @@ const bundle: PrivateBundle = {
     stack: ['TypeScript'],
     links: [{ label: 'Contact', url: 'https://example.com' }],
     images: [{ alt: 'Architecture', type: 'image/png', data: 'iVBORw0KGgo=' }],
+    documents: [{ id: 'notes', title: 'Notes', html: '<p>Notes</p>' }],
   },
   zh: { summary: '企业内部项目。' },
 };

@@ -6,6 +6,7 @@ import {
   encryptBundle,
   type PrivateBundle,
   type PrivateContent,
+  type PrivateDocument,
   type PrivateImage,
 } from '../src/lib/private.ts';
 
@@ -37,10 +38,18 @@ interface SourceImage {
   alt?: unknown;
   file?: unknown;
 }
-type SourceContent = Omit<PrivateContent, 'images' | 'html'> & { images?: SourceImage[] };
-type SourceBundle = Partial<Record<(typeof LANGUAGES)[number], SourceContent>> & {
-  document?: string;
+interface SourceDocument {
+  id?: unknown;
+  title?: unknown;
+  summary?: unknown;
+  date?: unknown;
+  file?: unknown;
+}
+type SourceContent = Omit<PrivateContent, 'images' | 'documents'> & {
+  images?: SourceImage[];
+  documents?: SourceDocument[];
 };
+type SourceBundle = Partial<Record<(typeof LANGUAGES)[number], SourceContent>>;
 interface Budget {
   total: number;
   images: number;
@@ -56,10 +65,7 @@ function assertSource(value: unknown): asserts value is SourceBundle {
     fail('source must be a JSON object keyed by "en" and/or "zh"');
   }
   const record = value as Record<string, unknown>;
-  if (record.document !== undefined && typeof record.document !== 'string') {
-    fail('"document" must be a .md file name inside private/');
-  }
-  const languages = Object.keys(record).filter((key) => key !== 'document');
+  const languages = Object.keys(record);
   if (languages.length === 0) fail('source must contain at least one language block');
   for (const language of languages) {
     if (!(LANGUAGES as readonly string[]).includes(language)) {
@@ -72,6 +78,10 @@ function assertSource(value: unknown): asserts value is SourceBundle {
     const images = (content as Record<string, unknown>).images;
     if (images !== undefined && !Array.isArray(images)) {
       fail(`"${language}.images" must be an array`);
+    }
+    const documents = (content as Record<string, unknown>).documents;
+    if (documents !== undefined && !Array.isArray(documents)) {
+      fail(`"${language}.documents" must be an array`);
     }
   }
 }
@@ -114,12 +124,15 @@ async function resolveImages(
   return resolved;
 }
 
-function slugifyHeading(html: string): string {
-  const text = html
+function decodeEntities(value: string): string {
+  return value
     .replace(/<[^>]+>/g, '')
     .replace(/&(?:amp|lt|gt|quot|#39|#x27|nbsp);/g, (entity) => ENTITIES[entity] ?? entity);
+}
+
+function slugifyHeading(html: string): string {
   let slug = '';
-  for (const char of text.trim().toLowerCase()) {
+  for (const char of decodeEntities(html).trim().toLowerCase()) {
     if (/[a-z0-9\u4e00-\u9fff-]/.test(char)) slug += char;
     else if (/\s/.test(char)) slug += '-';
   }
@@ -135,6 +148,13 @@ function addHeadingIds(html: string): string {
     const id = count === 0 ? base : `${base}-${count}`;
     return `<h${level} id="${id}">${inner}</h${level}>`;
   });
+}
+
+function extractTitle(html: string): string | undefined {
+  const match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/);
+  if (!match) return undefined;
+  const title = decodeEntities(match[1]).trim();
+  return title || undefined;
 }
 
 async function inlineDocumentImages(html: string, budget: Budget): Promise<string> {
@@ -172,7 +192,7 @@ async function inlineDocumentImages(html: string, budget: Budget): Promise<strin
 
 async function renderDocument(fileName: string, budget: Budget): Promise<string> {
   if (path.basename(fileName) !== fileName || !fileName.endsWith('.md')) {
-    fail('"document" must be a .md file name inside private/');
+    fail(`"${fileName}" must be a .md file name inside private/`);
   }
   const filePath = path.join(SOURCE_DIR, fileName);
   let markdown: string | undefined;
@@ -184,6 +204,55 @@ async function renderDocument(fileName: string, budget: Budget): Promise<string>
   if (!markdown) fail(`could not read ${filePath}`);
   const html = marked.parse(markdown, { async: false, gfm: true }) as string;
   return inlineDocumentImages(addHeadingIds(html), budget);
+}
+
+async function resolveDocuments(
+  language: string,
+  documents: SourceDocument[],
+  budget: Budget
+): Promise<PrivateDocument[]> {
+  const resolved: PrivateDocument[] = [];
+  const seen = new Set<string>();
+  for (const [index, document] of documents.entries()) {
+    const label = `${language}.documents[${index}]`;
+    if (!document || typeof document !== 'object' || Array.isArray(document)) {
+      fail(`${label} must be an object with "file"`);
+    }
+    const file = typeof document.file === 'string' ? document.file : '';
+    if (!file || path.basename(file) !== file || !file.endsWith('.md')) {
+      fail(`${label}.file must be a .md file name inside private/`);
+    }
+    const id =
+      typeof document.id === 'string' && document.id.trim()
+        ? document.id.trim()
+        : file.replace(/\.md$/, '');
+    if (!SLUG_PATTERN.test(id)) fail(`${label}.id must be kebab-case`);
+    if (seen.has(id)) fail(`${label}.id "${id}" is duplicated`);
+    seen.add(id);
+    if (
+      document.date !== undefined &&
+      (typeof document.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(document.date))
+    ) {
+      fail(`${label}.date must be YYYY-MM-DD`);
+    }
+    const html = await renderDocument(file, budget);
+    const title =
+      typeof document.title === 'string' && document.title.trim()
+        ? document.title.trim()
+        : extractTitle(html) ?? id;
+    const summary =
+      typeof document.summary === 'string' && document.summary.trim()
+        ? document.summary.trim()
+        : undefined;
+    resolved.push({
+      id,
+      title,
+      summary,
+      date: typeof document.date === 'string' ? document.date : undefined,
+      html,
+    });
+  }
+  return resolved;
 }
 
 async function readPassword(): Promise<string> {
@@ -250,20 +319,21 @@ assertSource(bundle);
 
 const budget: Budget = { total: 0, images: 0 };
 const resolved: PrivateBundle = {};
+let documentCount = 0;
 for (const language of LANGUAGES) {
   const content = bundle[language];
   if (!content) continue;
-  const { images, ...rest } = content;
+  const { images, documents, ...rest } = content;
   const resolvedImages = images ? await resolveImages(language, images, budget) : undefined;
-  resolved[language] = resolvedImages ? { ...rest, images: resolvedImages } : { ...rest };
-}
-
-if (bundle.document) {
-  const html = await renderDocument(bundle.document, budget);
-  for (const language of LANGUAGES) {
-    const content = resolved[language];
-    if (content) content.html = html;
-  }
+  const resolvedDocuments = documents
+    ? await resolveDocuments(language, documents, budget)
+    : undefined;
+  documentCount += resolvedDocuments?.length ?? 0;
+  resolved[language] = {
+    ...rest,
+    ...(resolvedImages ? { images: resolvedImages } : {}),
+    ...(resolvedDocuments ? { documents: resolvedDocuments } : {}),
+  };
 }
 
 const password = (await readPassword()).trim();
@@ -274,5 +344,5 @@ const targetPath = path.join(TARGET_DIR, `${slug}.json`);
 await mkdir(TARGET_DIR, { recursive: true });
 await writeFile(targetPath, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
 console.log(
-  `wrote ${targetPath} (${budget.images} image(s), PBKDF2 iterations: ${payload.iterations})`
+  `wrote ${targetPath} (${documentCount} document(s), ${budget.images} image(s), PBKDF2 iterations: ${payload.iterations})`
 );

@@ -100,15 +100,34 @@ const ready = existsSync(`public/private/${slug}.json`);
       }
     };
 
+    const decorate = (prose: HTMLElement) => {
+      for (const anchor of prose.querySelectorAll<HTMLAnchorElement>('a[href]')) {
+        if (anchor.getAttribute('href')?.startsWith('http')) {
+          anchor.target = '_blank';
+          anchor.rel = 'noopener noreferrer';
+        }
+      }
+      for (const table of prose.querySelectorAll('table')) {
+        if (table.parentElement?.classList.contains('table-scroll')) continue;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'table-scroll';
+        table.replaceWith(wrapper);
+        wrapper.append(table);
+      }
+    };
+
     const render = (content: PrivateContent) => {
       if (!panel) return;
       panel.replaceChildren();
+
+      const home = document.createElement('div');
+      home.className = 'private-home';
 
       if (content.summary) {
         const lede = document.createElement('p');
         lede.className = 'lede';
         lede.textContent = content.summary;
-        panel.append(lede);
+        home.append(lede);
       }
 
       const fields: [string, string | undefined][] = [
@@ -118,7 +137,7 @@ const ready = existsSync(`public/private/${slug}.json`);
         [labels.results, content.results],
       ];
       for (const [label, text] of fields) {
-        if (text) panel.append(block(label, text));
+        if (text) home.append(block(label, text));
       }
 
       for (const image of content.images ?? []) {
@@ -131,7 +150,7 @@ const ready = existsSync(`public/private/${slug}.json`);
         const caption = document.createElement('figcaption');
         caption.textContent = image.alt;
         figure.append(element, caption);
-        panel.append(figure);
+        home.append(figure);
       }
 
       if (content.stack && content.stack.length > 0) {
@@ -145,7 +164,7 @@ const ready = existsSync(`public/private/${slug}.json`);
           stack.append(chip);
         }
         section.append(heading(labels.stack), stack);
-        panel.append(section);
+        home.append(section);
       }
 
       if (content.links && content.links.length > 0) {
@@ -166,29 +185,65 @@ const ready = existsSync(`public/private/${slug}.json`);
             list.append(anchor);
           }
           section.append(heading(labels.links), list);
-          panel.append(section);
+          home.append(section);
         }
       }
 
-      if (content.html) {
-        const prose = document.createElement('div');
-        prose.className = 'prose private-doc';
-        // The HTML is produced at build time and authenticated by AES-GCM before it is
-        // decrypted here, so it cannot be altered without the password.
-        prose.innerHTML = content.html;
-        for (const anchor of prose.querySelectorAll<HTMLAnchorElement>('a[href]')) {
-          if (anchor.getAttribute('href')?.startsWith('http')) {
-            anchor.target = '_blank';
-            anchor.rel = 'noopener noreferrer';
+      const reader = document.createElement('section');
+      reader.className = 'private-reader';
+      reader.hidden = true;
+
+      const documents = content.documents ?? [];
+      if (documents.length > 0) {
+        const section = document.createElement('section');
+        section.className = 'private-docs';
+        section.append(heading(copy.documents));
+        const list = document.createElement('ul');
+        list.className = 'private-doc-list';
+        for (const entry of documents) {
+          const item = document.createElement('li');
+          const trigger = document.createElement('button');
+          trigger.type = 'button';
+          trigger.className = 'private-doc-item';
+          const title = document.createElement('span');
+          title.className = 'private-doc-title';
+          title.textContent = entry.title;
+          trigger.append(title);
+          const meta = [entry.date, entry.summary].filter(Boolean).join(' · ');
+          if (meta) {
+            const details = document.createElement('span');
+            details.className = 'private-doc-meta';
+            details.textContent = meta;
+            trigger.append(details);
           }
+          trigger.addEventListener('click', () => {
+            reader.replaceChildren();
+            const back = document.createElement('button');
+            back.type = 'button';
+            back.className = 'private-back';
+            back.textContent = copy.backToList;
+            back.addEventListener('click', () => {
+              reader.hidden = true;
+              reader.replaceChildren();
+              home.hidden = false;
+              trigger.focus();
+            });
+            const prose = document.createElement('div');
+            prose.className = 'prose private-doc';
+            // Built at encryption time and authenticated by AES-GCM, so it cannot be
+            // altered without the password.
+            prose.innerHTML = entry.html;
+            decorate(prose);
+            reader.append(back, prose);
+            home.hidden = true;
+            reader.hidden = false;
+            reader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+          item.append(trigger);
+          list.append(item);
         }
-        for (const table of prose.querySelectorAll('table')) {
-          const wrapper = document.createElement('div');
-          wrapper.className = 'table-scroll';
-          table.replaceWith(wrapper);
-          wrapper.append(table);
-        }
-        panel.append(prose);
+        section.append(list);
+        home.append(section);
       } else if (content.body) {
         const prose = document.createElement('div');
         prose.className = 'prose';
@@ -198,8 +253,10 @@ const ready = existsSync(`public/private/${slug}.json`);
           element.textContent = paragraph.trim();
           prose.append(element);
         }
-        panel.append(prose);
+        home.append(prose);
       }
+
+      panel.append(home, reader);
     };
 
     form?.addEventListener('submit', async (event) => {

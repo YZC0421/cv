@@ -55,6 +55,8 @@ export const ui = {
       error: 'Wrong password. Try again.',
       unavailable: 'The encrypted details for this project are not available yet.',
       noscript: 'JavaScript is required to decrypt this page.',
+      documents: 'Documents',
+      backToList: 'Back to documents',
     },
     resume: {
       title: 'Resume',
@@ -196,6 +198,8 @@ export const ui = {
       error: '密码错误，请重试。',
       unavailable: '该项目暂未配置加密内容。',
       noscript: '需要启用 JavaScript 才能解密此页面。',
+      documents: '文档',
+      backToList: '返回文档列表',
     },
     resume: {
       title: '简历',

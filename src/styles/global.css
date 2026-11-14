@@ -837,6 +837,16 @@ a.subtopic-paper:hover { color: var(--accent); }
 .private-doc th, .private-doc td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
 .private-doc thead th { background: var(--bg-soft); }
 .table-scroll { overflow-x: auto; margin: 0 0 24px; }
+.private-docs { margin-top: 30px; }
+.private-docs > h2 { font-family: var(--font-sans); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.private-doc-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.private-doc-item { display: flex; flex-direction: column; gap: 4px; width: 100%; text-align: left; padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--fg); font: inherit; cursor: pointer; transition: border-color 180ms var(--ease), background-color 180ms var(--ease); }
+.private-doc-item:hover { border-color: var(--accent); background: var(--bg-soft); }
+.private-doc-title { font-weight: 600; font-size: 1rem; }
+.private-doc-meta { color: var(--muted); font-size: 0.82rem; line-height: 1.5; }
+.private-back { margin: 0 0 14px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-soft); color: var(--muted); font: inherit; font-size: 0.82rem; cursor: pointer; }
+.private-back:hover { border-color: var(--accent); color: var(--accent); }
+.private-reader { scroll-margin-top: 84px; }
 .private-gate > .private-content .lede { margin-top: 0; }
 .private-form { margin-top: 16px; }
 .private-form label { display: block; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }

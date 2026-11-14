@@ -20,6 +20,15 @@ export interface PrivateImage {
   data: string;
 }
 
+export interface PrivateDocument {
+  id: string;
+  title: string;
+  summary?: string;
+  date?: string;
+  /** Pre-rendered HTML from a Markdown file; encrypted and injected after unlock. */
+  html: string;
+}
+
 export interface PrivateContent {
   summary?: string;
   goal?: string;
@@ -29,8 +38,7 @@ export interface PrivateContent {
   stack?: string[];
   links?: PrivateLink[];
   images?: PrivateImage[];
-  /** Pre-rendered HTML from a Markdown document; encrypted and injected after unlock. */
-  html?: string;
+  documents?: PrivateDocument[];
   body?: string;
 }
 
