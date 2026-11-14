@@ -25,6 +25,9 @@ interface Props {
   langSwitchHref?: string | null;
   /** Content-relative canonical path, e.g. "zh/blog/some-post". */
   canonicalPath?: string;
+  /** Site-relative share image, e.g. "og/some-post.png". */
+  ogImagePath?: string;
+  ogImageAlt?: string;
 }
 const {
   title,
@@ -36,6 +39,8 @@ const {
   alternates,
   langSwitchHref,
   canonicalPath,
+  ogImagePath = 'og.png',
+  ogImageAlt,
 } = Astro.props;
 
 const lang: Lang =
@@ -64,7 +69,9 @@ const alternateLinks = alternates
       { hreflang: 'zh-CN', href: zhHref.href, key: 'zh' },
       { hreflang: 'x-default', href: enHref.href, key: 'x-default' },
     ];
-const ogImage = new URL(withBase('og.png'), Astro.site);
+const ogImage = new URL(withBase(ogImagePath), Astro.site);
+const ogAlt =
+  ogImageAlt ?? `${site.name} — ${researchAreas.map((area) => area.name).join(' · ')}`;
 const personId = `${new URL(withBase(), Astro.site).href}#person`;
 const profile = {
   '@context': 'https://schema.org',
@@ -102,7 +109,7 @@ const profile = {
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content={`${site.name} — ${researchAreas.map((area) => area.name).join(' · ')}`} />
+    <meta property="og:image:alt" content={ogAlt} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content={ogImage} />
     <slot name="head" />

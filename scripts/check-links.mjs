@@ -69,9 +69,11 @@ export async function checkLinks({ distDir = 'dist', base = '/cv', srcDir = 'src
   const files = await walk(distDir, (file) => file.endsWith('.html'));
   const sources = await sourceIndex(srcDir);
   const errors = [];
+  const imageErrors = [];
   const htmlCache = new Map();
   const targetCache = new Map();
   let checked = 0;
+  let images = 0;
 
   const readHtml = async (file) => {
     if (!htmlCache.has(file)) htmlCache.set(file, await readFile(file, 'utf8'));
@@ -88,6 +90,14 @@ export async function checkLinks({ distDir = 'dist', base = '/cv', srcDir = 'src
     const suffix = rel.endsWith('index.html') ? rel.slice(0, -'index.html'.length) : rel;
     const pagePath = `${prefix}/${suffix}`;
     const html = await readHtml(file);
+
+    for (const match of html.matchAll(/<img\b[^>]*>/gi)) {
+      images += 1;
+      const alt = match[0].match(/\salt="([^"]*)"/i)?.[1];
+      if (alt === undefined || alt.trim() === '' || match[0].includes('data-missing-alt')) {
+        imageErrors.push(`${file}: <img> missing alt text: ${match[0].slice(0, 120)}`);
+      }
+    }
 
     const links = [
       ...[...html.matchAll(ASSET_ATTR)].map((match) => match[2]),
@@ -137,5 +147,5 @@ export async function checkLinks({ distDir = 'dist', base = '/cv', srcDir = 'src
     }
   }
 
-  return { checked, errors };
+  return { checked, errors, imageErrors, images };
 }

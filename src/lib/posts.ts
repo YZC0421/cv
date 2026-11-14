@@ -29,6 +29,23 @@ export function postTags<T extends Post>(posts: T[]): string[] {
   return [...new Set(posts.flatMap((post) => post.data.tags))].sort();
 }
 
+/** The most recent date the post was known to be accurate. */
+export function lastReviewed(post: Post): string {
+  return post.data.reviewed ?? post.data.updated ?? post.data.date;
+}
+
+/** Whole months between two YYYY-MM-DD dates; negative when `to` is earlier. */
+export function monthsBetween(from: string, to: string): number {
+  const [fromYear, fromMonth, fromDay] = from.split('-').map(Number);
+  const [toYear, toMonth, toDay] = to.split('-').map(Number);
+  const months = (toYear! - fromYear!) * 12 + (toMonth! - fromMonth!);
+  return toDay! < fromDay! ? months - 1 : months;
+}
+
+export function isStale(post: Post, today = localToday(), threshold = 12): boolean {
+  return monthsBetween(lastReviewed(post), today) >= threshold;
+}
+
 export function postsByLang<T extends Post>(posts: T[], lang: Lang): T[] {
   return posts.filter((post) => post.data.lang === lang);
 }

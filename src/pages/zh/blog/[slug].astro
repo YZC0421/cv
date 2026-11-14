@@ -4,13 +4,15 @@ import PostLayout from '../../../layouts/PostLayout.astro';
 import BibtexButton from '../../../components/BibtexButton.astro';
 import { getCollection, render } from 'astro:content';
 import { relatedPosts } from '../../../lib/blog';
-import { readingMinutes } from '../../../lib/format';
+import { readingMinutes, wordCount } from '../../../lib/format';
 import { hasMermaid } from '../../../lib/markdown';
 import { findPublication, publicationBibtex } from '../../../lib/publications';
 import {
   canonicalPostPath,
   canonicalPostUrl,
   isCanonicalPath,
+  isStale,
+  lastReviewed,
   translationFor,
   visiblePosts,
 } from '../../../lib/posts';
@@ -39,6 +41,7 @@ const { post, prev, next, related } = Astro.props;
 const { Content, headings } = await render(post);
 const readingTime = readingMinutes(post.body ?? '');
 const copy = t(post.data.lang).blog;
+const staleSince = !post.data.draft && isStale(post) ? lastReviewed(post) : undefined;
 const allPosts = visiblePosts(await getCollection('blog'));
 const counterpart = translationFor(allPosts, post);
 const canonical = canonicalPostUrl(post);
@@ -76,6 +79,12 @@ const paperRef = post.data.paper
   langSwitchHref={langSwitchHref}
   canonicalPath={canonicalPostPath(post)}
   hasMermaid={hasMermaid(post.body ?? '')}
+  updated={post.data.updated}
+  changelog={post.data.changelog}
+  staleSince={staleSince}
+  ogImagePath={`og/${post.id}.png`}
+  category={post.data.category}
+  words={wordCount(post.body ?? '')}
 >
   <Content />
 

@@ -1,0 +1,18 @@
+---
+import { Image } from 'astro:assets';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  caption?: string;
+  widths?: number[];
+  sizes?: string;
+}
+
+const { src, alt, caption, widths = [480, 768, 1200], sizes = '(max-width: 768px) 100vw, 768px' } =
+  Astro.props;
+---
+<figure class="post-figure">
+  <Image src={src} alt={alt} widths={widths} sizes={sizes} loading="lazy" decoding="async" />
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>

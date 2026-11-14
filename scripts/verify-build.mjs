@@ -127,6 +127,7 @@ checks.push(['404 is noindex', /name="robots"[^>]*noindex/.test(notFound)]);
 
 const sitemap = await read('dist/sitemap-0.xml');
 checks.push(['sitemap excludes 404', !sitemap.includes('/404')]);
+checks.push(['sitemap carries lastmod for posts', /<lastmod>/.test(sitemap)]);
 
 const blogList = await read('dist/blog/index.html');
 const zhBlogList = await read('dist/zh/blog/index.html');
@@ -181,6 +182,36 @@ checks.push([
   }),
 ]);
 
+const ogProblems = [];
+for (const [lang, slugs] of Object.entries(visibleByLang)) {
+  for (const slug of slugs) {
+    const ogFile = `dist/og/${slug}.png`;
+    if (!existsSync(ogFile)) {
+      ogProblems.push(`${slug}: missing ${ogFile}`);
+      continue;
+    }
+    const png = await readFile(ogFile);
+    if (png.length < 24 || png.readUInt32BE(16) !== 1200 || png.readUInt32BE(20) !== 630) {
+      ogProblems.push(`${slug}: not 1200x630`);
+      continue;
+    }
+    const page = await read(`dist/${lang === 'zh' ? 'zh/' : ''}blog/${slug}/index.html`);
+    if (!page.includes(`/cv/og/${slug}.png`)) {
+      ogProblems.push(`${slug}: page does not reference its own image`);
+    }
+  }
+}
+const visibleCount = visibleByLang.en.length + visibleByLang.zh.length;
+checks.push([`post og images exist and are referenced (${visibleCount})`, ogProblems.length === 0]);
+if (ogProblems.length > 0) {
+  console.log('\nog problems:');
+  for (const problem of ogProblems) console.log(`  ${problem}`);
+}
+checks.push([
+  'hidden posts have no og image',
+  hiddenPosts.every((slug) => !existsSync(`dist/og/${slug}.png`)),
+]);
+
 const zhRss = await read('dist/zh/rss.xml');
 checks.push([
   'rss feeds are language-scoped',
@@ -190,6 +221,25 @@ checks.push([
     !zhRss.includes('/cv/blog/') &&
     (visibleByLang.en.length === 0 || rss.includes('<item>')) &&
     (visibleByLang.zh.length === 0 || zhRss.includes('<item>')),
+]);
+
+await must('dist/feed.json', 'json feed');
+await must('dist/zh/feed.json', 'zh json feed');
+checks.push(['rss carries rendered html', zhRss.includes('&lt;pre') && !zhRss.includes('```')]);
+
+let zhJson = { items: [] };
+try {
+  zhJson = JSON.parse(await readFile('dist/zh/feed.json', 'utf8'));
+} catch {
+  checks.push(['zh json feed parses', false]);
+}
+checks.push([
+  'json feed carries content_html',
+  (zhJson.items ?? []).some((item) => (item.content_html ?? '').includes('<pre')),
+]);
+checks.push([
+  'json feed urls are absolute',
+  (zhJson.items ?? []).every((item) => /^https:\/\//.test(item.url ?? '')),
 ]);
 
 const duplicatedPosts = [
@@ -261,6 +311,9 @@ const searchHtml = await read('dist/search/index.html');
 checks.push(['search page wires Pagefind', searchHtml.includes('PagefindUI')]);
 await must('dist/pagefind/pagefind-entry.json', 'pagefind index');
 
+const zhPost = await read('dist/zh/blog/from-single-page-to-astro/index.html');
+checks.push(['post exposes dateModified', zhPost.includes('"dateModified"')]);
+
 const zhHome = await read('dist/zh/index.html');
 checks.push(['zh home is localized', zhHome.includes('精选项目') && zhHome.includes('研究方向')]);
 checks.push(['zh home sets lang', /<html lang="zh-CN"/.test(zhHome)]);
@@ -290,6 +343,15 @@ checks.push([
 if (linkResult.errors.length > 0) {
   console.log('\nbroken links:');
   for (const error of linkResult.errors.slice(0, 30)) console.log(`  ${error}`);
+}
+
+checks.push([
+  `images carry alt text (${linkResult.images} checked)`,
+  linkResult.imageErrors.length === 0,
+]);
+if (linkResult.imageErrors.length > 0) {
+  console.log('\nimages without alt:');
+  for (const error of linkResult.imageErrors.slice(0, 20)) console.log(`  ${error}`);
 }
 
 const failed = checks.filter(([, ok]) => !ok);
