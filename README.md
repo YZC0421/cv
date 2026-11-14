@@ -96,6 +96,10 @@ time rather than hidden with CSS.
    Images use `"images": [{ "alt": "Architecture", "file": "architecture.png" }]` with the
    files in `private/media/` (png/jpg/webp/gif, ≤2 MB each, ≤6 MB total); they are encrypted
    together with the text.
+   A top-level `"document": "notes.md"` (a file inside `private/`) renders Markdown to HTML at
+   encryption time, inlines `<img>` sources from `private/media/` as data URLs, and gives
+   headings ids so tables of contents work. The HTML is injected after decryption and is
+   authenticated by AES-GCM, so it cannot be altered without the password.
 2. Encrypt it with the access password:
    `PRIVATE_PASSWORD='<password>' npm run private:encrypt -- <slug>`
    Without the variable the script prompts with a silent input.

@@ -170,7 +170,26 @@ const ready = existsSync(`public/private/${slug}.json`);
         }
       }
 
-      if (content.body) {
+      if (content.html) {
+        const prose = document.createElement('div');
+        prose.className = 'prose private-doc';
+        // The HTML is produced at build time and authenticated by AES-GCM before it is
+        // decrypted here, so it cannot be altered without the password.
+        prose.innerHTML = content.html;
+        for (const anchor of prose.querySelectorAll<HTMLAnchorElement>('a[href]')) {
+          if (anchor.getAttribute('href')?.startsWith('http')) {
+            anchor.target = '_blank';
+            anchor.rel = 'noopener noreferrer';
+          }
+        }
+        for (const table of prose.querySelectorAll('table')) {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'table-scroll';
+          table.replaceWith(wrapper);
+          wrapper.append(table);
+        }
+        panel.append(prose);
+      } else if (content.body) {
         const prose = document.createElement('div');
         prose.className = 'prose';
         for (const paragraph of content.body.split(/\n\s*\n/)) {

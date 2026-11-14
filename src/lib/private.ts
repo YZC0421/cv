@@ -29,6 +29,8 @@ export interface PrivateContent {
   stack?: string[];
   links?: PrivateLink[];
   images?: PrivateImage[];
+  /** Pre-rendered HTML from a Markdown document; encrypted and injected after unlock. */
+  html?: string;
   body?: string;
 }
 

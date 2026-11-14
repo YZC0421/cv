@@ -819,7 +819,18 @@ a.subtopic-paper:hover { color: var(--accent); }
 .private-card h2 { font-family: var(--font-sans); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
 .private-card p { margin: 0; font-size: 0.9rem; color: var(--muted); }
 .private-gate { border: 1px dashed var(--border); border-radius: 10px; padding: 20px; margin: 24px 0; background: var(--bg-soft); }
-.private-gate h2 { font-size: 1rem; margin-bottom: 8px; }
+.private-lock h2 { font-size: 1rem; margin-bottom: 8px; }
+.private-doc { margin-top: 8px; }
+.private-doc h1 { font-size: 1.55rem; margin: 40px 0 14px; }
+.private-doc h2 { font-size: 1.25rem; }
+.private-doc h3 { font-size: 1.05rem; }
+.private-doc pre { background: var(--bg-soft); font-size: 0.82rem; }
+.private-doc img { max-width: 100%; height: auto; display: block; margin: 16px 0; border: 1px solid var(--border); border-radius: 8px; }
+.private-doc :is(h1, h2, h3, h4)[id] { scroll-margin-top: 84px; }
+.private-doc table { width: 100%; border-collapse: collapse; margin: 0; font-size: 0.88rem; }
+.private-doc th, .private-doc td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
+.private-doc thead th { background: var(--bg-soft); }
+.table-scroll { overflow-x: auto; margin: 0 0 24px; }
 .private-gate > .private-content .lede { margin-top: 0; }
 .private-form { margin-top: 16px; }
 .private-form label { display: block; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
