@@ -20,23 +20,101 @@ const ready = existsSync(`public/private/${slug}.json`);
     data-payload={withBase(`private/${slug}.json`)}
   >
     <div class="private-lock">
-      <h2>{copy.title}</h2>
-      <p class="muted">{copy.intro}</p>
+      <div class="private-lock-head">
+        <span class="private-lock-icon" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="4" y="10" width="16" height="10" rx="2"></rect>
+            <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+          </svg>
+        </span>
+        <div class="private-lock-copy">
+          <h2>{copy.title}</h2>
+          <p class="muted">{copy.intro}</p>
+        </div>
+      </div>
       <form class="private-form">
         <label for="private-password">{copy.label}</label>
         <div class="private-form-row">
-          <input
-            id="private-password"
-            name="password"
-            type="password"
-            autocomplete="current-password"
-            minlength="8"
-            required
-          />
-          <button type="submit">{copy.unlock}</button>
+          <div class="private-field">
+            <span class="private-field-icon" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="7.5" cy="15.5" r="4.5"></circle>
+                <path d="m11 12 9-9"></path>
+                <path d="m17 6 3 3"></path>
+              </svg>
+            </span>
+            <input
+              id="private-password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              minlength="8"
+              aria-describedby="private-status"
+              required
+            />
+            <button
+              type="button"
+              class="private-reveal"
+              data-private-reveal
+              aria-label={copy.showPassword}
+              aria-pressed="false"
+            >
+              <span data-reveal-show>
+                <svg
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"></path>
+                  <circle cx="12" cy="12" r="2.8"></circle>
+                </svg>
+              </span>
+              <span data-reveal-hide hidden>
+                <svg
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M9.9 4.24A11 11 0 0 1 12 4c6.4 0 10 8 10 8a18.6 18.6 0 0 1-3.1 4.3"></path>
+                  <path d="M6.1 6.1A18.6 18.6 0 0 0 2 12s3.6 8 10 8a11 11 0 0 0 4-.75"></path>
+                  <path d="M14.1 14.1a2.8 2.8 0 1 1-4-4"></path>
+                  <path d="m2 2 20 20"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+          <button type="submit" class="private-submit">{copy.unlock}</button>
         </div>
       </form>
-      <p class="private-status" role="status" aria-live="polite"></p>
+      <p id="private-status" class="private-status" role="status" aria-live="polite"></p>
       <noscript><p class="muted">{copy.noscript}</p></noscript>
     </div>
     <div class="private-content" tabindex="-1" hidden></div>
@@ -50,7 +128,7 @@ const ready = existsSync(`public/private/${slug}.json`);
 
 <script>
   import { decryptBundle } from '../lib/private';
-  import type { PrivateContent, PrivatePayload } from '../lib/private';
+  import type { PrivateContent, PrivateDocument, PrivatePayload } from '../lib/private';
   import { t } from '../i18n/ui';
 
   const root = document.querySelector<HTMLElement>('[data-private-project]');
@@ -60,9 +138,13 @@ const ready = existsSync(`public/private/${slug}.json`);
     const labels = t(lang).projects;
     const imageTypes = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif']);
     const payloadUrl = root.dataset.payload ?? '';
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const form = root.querySelector('form');
     const input = root.querySelector<HTMLInputElement>('input[type="password"]');
     const button = root.querySelector<HTMLButtonElement>('button[type="submit"]');
+    const reveal = root.querySelector<HTMLButtonElement>('[data-private-reveal]');
+    const revealShow = root.querySelector<HTMLElement>('[data-reveal-show]');
+    const revealHide = root.querySelector<HTMLElement>('[data-reveal-hide]');
     const status = root.querySelector<HTMLElement>('.private-status');
     const lock = root.querySelector<HTMLElement>('.private-lock');
     const panel = root.querySelector<HTMLElement>('.private-content');
@@ -100,6 +182,30 @@ const ready = existsSync(`public/private/${slug}.json`);
       }
     };
 
+    const addCopyButtons = (prose: HTMLElement) => {
+      for (const pre of prose.querySelectorAll('pre')) {
+        if (pre.parentElement?.classList.contains('code-block')) continue;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'code-block';
+        pre.replaceWith(wrapper);
+        wrapper.append(pre);
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'code-copy';
+        trigger.textContent = copy.copy;
+        trigger.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(pre.textContent ?? '');
+            trigger.textContent = copy.copied;
+            setTimeout(() => (trigger.textContent = copy.copy), 1500);
+          } catch {
+            trigger.textContent = copy.copyFailed;
+          }
+        });
+        wrapper.append(trigger);
+      }
+    };
+
     const decorate = (prose: HTMLElement) => {
       for (const anchor of prose.querySelectorAll<HTMLAnchorElement>('a[href]')) {
         if (anchor.getAttribute('href')?.startsWith('http')) {
@@ -114,6 +220,7 @@ const ready = existsSync(`public/private/${slug}.json`);
         table.replaceWith(wrapper);
         wrapper.append(table);
       }
+      addCopyButtons(prose);
     };
 
     const render = (content: PrivateContent) => {
@@ -197,53 +304,57 @@ const ready = existsSync(`public/private/${slug}.json`);
       if (documents.length > 0) {
         const section = document.createElement('section');
         section.className = 'private-docs';
-        section.append(heading(copy.documents));
+        const head = document.createElement('div');
+        head.className = 'private-docs-head';
+        head.append(heading(copy.documents));
+        const count = document.createElement('span');
+        count.className = 'private-docs-count';
+        count.textContent = copy.count(documents.length);
+        head.append(count);
+        section.append(head);
+
         const list = document.createElement('ul');
         list.className = 'private-doc-list';
-        for (const entry of documents) {
+        documents.forEach((entry, index) => {
           const item = document.createElement('li');
           const trigger = document.createElement('button');
           trigger.type = 'button';
           trigger.className = 'private-doc-item';
+
+          const number = document.createElement('span');
+          number.className = 'private-doc-index';
+          number.textContent = String(index + 1).padStart(2, '0');
+
+          const body = document.createElement('span');
+          body.className = 'private-doc-body';
           const title = document.createElement('span');
           title.className = 'private-doc-title';
           title.textContent = entry.title;
-          trigger.append(title);
+          body.append(title);
           const meta = [entry.date, entry.summary].filter(Boolean).join(' · ');
           if (meta) {
             const details = document.createElement('span');
             details.className = 'private-doc-meta';
             details.textContent = meta;
-            trigger.append(details);
+            body.append(details);
           }
-          trigger.addEventListener('click', () => {
-            reader.replaceChildren();
-            const back = document.createElement('button');
-            back.type = 'button';
-            back.className = 'private-back';
-            back.textContent = copy.backToList;
-            back.addEventListener('click', () => {
-              reader.hidden = true;
-              reader.replaceChildren();
-              home.hidden = false;
-              trigger.focus();
-            });
-            const prose = document.createElement('div');
-            prose.className = 'prose private-doc';
-            // Built at encryption time and authenticated by AES-GCM, so it cannot be
-            // altered without the password.
-            prose.innerHTML = entry.html;
-            decorate(prose);
-            reader.append(back, prose);
-            home.hidden = true;
-            reader.hidden = false;
-            reader.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          });
+
+          const arrow = document.createElement('span');
+          arrow.className = 'private-doc-arrow';
+          arrow.setAttribute('aria-hidden', 'true');
+
+          trigger.append(number, body, arrow);
+          trigger.addEventListener('click', () => openDocument(entry, trigger));
           item.append(trigger);
           list.append(item);
-        }
+        });
         section.append(list);
         home.append(section);
+      } else if (content.documents) {
+        const empty = document.createElement('p');
+        empty.className = 'muted private-empty';
+        empty.textContent = copy.noDocuments;
+        home.append(empty);
       } else if (content.body) {
         const prose = document.createElement('div');
         prose.className = 'prose';
@@ -256,18 +367,74 @@ const ready = existsSync(`public/private/${slug}.json`);
         home.append(prose);
       }
 
+      const openDocument = (entry: PrivateDocument, trigger: HTMLButtonElement) => {
+        reader.replaceChildren();
+
+        const bar = document.createElement('div');
+        bar.className = 'private-reader-bar';
+        const back = document.createElement('button');
+        back.type = 'button';
+        back.className = 'private-back';
+        back.textContent = copy.backToList;
+        back.addEventListener('click', () => {
+          reader.hidden = true;
+          reader.replaceChildren();
+          home.hidden = false;
+          trigger.focus();
+        });
+        const current = document.createElement('span');
+        current.className = 'private-reader-title';
+        current.textContent = entry.title;
+        bar.append(back, current);
+
+        const prose = document.createElement('div');
+        prose.className = 'prose private-doc';
+        // Built at encryption time and authenticated by AES-GCM, so it cannot be
+        // altered without the password.
+        prose.innerHTML = entry.html;
+        decorate(prose);
+
+        reader.append(bar, prose);
+        home.hidden = true;
+        reader.hidden = false;
+        reader.scrollIntoView({
+          behavior: reduceMotion ? 'auto' : 'smooth',
+          block: 'start',
+        });
+      };
+
       panel.append(home, reader);
     };
 
+    reveal?.addEventListener('click', () => {
+      if (!input) return;
+      const showing = input.type === 'text';
+      input.type = showing ? 'password' : 'text';
+      reveal.setAttribute('aria-pressed', String(!showing));
+      reveal.setAttribute('aria-label', showing ? copy.showPassword : copy.hidePassword);
+      revealShow?.toggleAttribute('hidden', !showing);
+      revealHide?.toggleAttribute('hidden', showing);
+      input.focus();
+    });
+
+    input?.addEventListener('input', () => {
+      input.removeAttribute('aria-invalid');
+      if (status?.dataset.state === 'error') {
+        status.textContent = '';
+        delete status.dataset.state;
+      }
+    });
+
     form?.addEventListener('submit', async (event) => {
       event.preventDefault();
-      if (!input || !status || !panel) return;
+      if (!input || !status || !panel || button?.disabled) return;
       const password = input.value;
       if (!password) return;
 
       status.dataset.state = 'loading';
       status.textContent = copy.loading;
       if (button) button.disabled = true;
+      input.readOnly = true;
 
       let payload: PrivatePayload;
       try {
@@ -276,6 +443,7 @@ const ready = existsSync(`public/private/${slug}.json`);
         status.dataset.state = 'error';
         status.textContent = copy.unavailable;
         if (button) button.disabled = false;
+        input.readOnly = false;
         return;
       }
 
@@ -285,16 +453,22 @@ const ready = existsSync(`public/private/${slug}.json`);
         if (!content) throw new Error('empty bundle');
         render(content);
         panel.hidden = false;
+        panel.classList.remove('is-revealed');
+        void panel.offsetWidth;
+        panel.classList.add('is-revealed');
         lock?.setAttribute('hidden', '');
         status.textContent = '';
         delete status.dataset.state;
+        input.removeAttribute('aria-invalid');
         panel.focus();
       } catch {
         status.dataset.state = 'error';
         status.textContent = copy.error;
+        input.setAttribute('aria-invalid', 'true');
         input.select();
       } finally {
         if (button) button.disabled = false;
+        input.readOnly = false;
       }
     });
   }
