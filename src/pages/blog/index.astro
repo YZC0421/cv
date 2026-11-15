@@ -75,11 +75,14 @@ const latestHref =
           </section>
         )}
 
-        <section class="blog-notes-section">
-          <div class="blog-section-head">
-            <h2>Backend notes</h2>
-            <span class="muted">{backendSections.length} sections · {backendNotes.length} notes</span>
-          </div>
+        <details class="backend-disclosure" id="backend-notes">
+          <summary class="backend-disclosure-summary">
+            <span class="backend-disclosure-title">Backend notes</span>
+            <span class="backend-disclosure-count">
+              {backendSections.length} sections · {backendNotes.length} notes
+            </span>
+            <span class="backend-disclosure-toggle" aria-hidden="true"></span>
+          </summary>
           <ul class="backend-sections">
             {backendSections.map((section) => {
               const count = counts.get(section.slug) ?? 0;
@@ -97,7 +100,7 @@ const latestHref =
               );
             })}
           </ul>
-        </section>
+        </details>
       </div>
 
       <aside class="blog-side">
@@ -108,7 +111,10 @@ const latestHref =
             <p class="muted">
               {latestSection.index} · {latestSection.titleEn} · {latestNote.data.date}
             </p>
-            <a class="blog-side-link" href={latestHref}>Read note →</a>
+            <div class="blog-side-actions">
+              <a href={latestHref}>Read note →</a>
+              <a href="#backend-notes" data-open-notes>All {backendSections.length} sections →</a>
+            </div>
           </section>
         )}
         <div class="blog-side-links">
@@ -144,6 +150,26 @@ const latestHref =
           }
         });
       });
+    })();
+  </script>
+
+  <script is:inline>
+    (() => {
+      const details = document.getElementById('backend-notes');
+      if (!(details instanceof HTMLDetailsElement)) return;
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      document.querySelectorAll('[data-open-notes]').forEach((link) => {
+        link.addEventListener('click', (event) => {
+          event.preventDefault();
+          details.open = true;
+          details.scrollIntoView({
+            behavior: reduceMotion ? 'auto' : 'smooth',
+            block: 'start',
+          });
+          history.replaceState(null, '', '#backend-notes');
+        });
+      });
+      if (location.hash === '#backend-notes') details.open = true;
     })();
   </script>
 </BaseLayout>

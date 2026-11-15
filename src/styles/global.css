@@ -495,7 +495,26 @@ a.subtopic-paper:hover { color: var(--accent); }
 .blog-section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
 .blog-section-head h2 { font-size: 1.15rem; font-weight: 600; }
 .blog-section-head .muted { font-size: 0.78rem; }
-.blog-notes-section .backend-sections { margin-top: 16px; }
+.backend-disclosure { scroll-margin-top: 84px; border-top: 1px solid var(--border); }
+.backend-disclosure-summary { display: grid; grid-template-columns: minmax(0, 1fr) auto 16px; align-items: center; gap: 12px; padding: 16px 4px; list-style: none; cursor: pointer; color: var(--fg); }
+.backend-disclosure-summary::-webkit-details-marker { display: none; }
+.backend-disclosure-summary:hover { color: var(--accent); }
+.backend-disclosure-title { font-size: 1.15rem; font-weight: 600; }
+.backend-disclosure-count { font-size: 0.78rem; color: var(--muted); }
+.backend-disclosure-toggle { position: relative; justify-self: end; width: 12px; height: 12px; }
+.backend-disclosure-toggle::before,
+.backend-disclosure-toggle::after { content: ''; position: absolute; background: currentColor; transition: transform 160ms var(--ease), opacity 160ms var(--ease); }
+.backend-disclosure-toggle::before { top: 5px; left: 0; width: 12px; height: 2px; }
+.backend-disclosure-toggle::after { top: 0; left: 5px; width: 2px; height: 12px; }
+.backend-disclosure[open] .backend-disclosure-toggle::after { transform: rotate(90deg); opacity: 0; }
+.backend-disclosure[open] .backend-sections { animation: backend-reveal 200ms var(--ease) both; }
+@keyframes backend-reveal { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.backend-disclosure .backend-sections { margin: 0 0 12px; border-top: 0; }
+.backend-disclosure:not([open]) > .backend-sections { display: none; }
+.blog-side-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 16px; font-size: 0.82rem; }
+@media (prefers-reduced-motion: reduce) {
+  .backend-disclosure[open] .backend-sections { animation: none; }
+}
 .blog-side { position: sticky; top: 88px; align-self: start; }
 .blog-side-card { border: 1px solid var(--border); border-radius: 12px; padding: 22px; background: var(--bg); }
 .blog-side-eyebrow { font-family: var(--font-sans); font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
