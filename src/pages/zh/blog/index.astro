@@ -16,6 +16,7 @@ const tags = postTags(posts);
     <h1>{copy.title}</h1>
     <p class="muted">
       {copy.intro} 共 {posts.length} 篇。
+      <a href={localeUrl('blog/backend', 'zh')}>后端笔记</a> ·
       <a href={localeUrl('search', 'zh')}>{copy.search}</a> ·
       <a href={localeUrl('rss.xml', 'zh')}>{copy.rss}</a>
     </p>

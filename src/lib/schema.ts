@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { backendSectionSlugs } from './backend';
 import { areaSlugs, subtopicSlugs } from './topics';
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date must be YYYY-MM-DD');
@@ -170,6 +171,16 @@ export const projectSchema = z.object({
   private: z.boolean().default(false),
   featured: z.boolean().default(false),
   order: z.number().int().default(0),
+});
+
+export const backendNoteSchema = z.object({
+  title: z.string().min(1),
+  date: isoDate,
+  section: z.enum(backendSectionSlugs),
+  summary: z.string().min(1).max(200),
+  tags: z.array(z.string()).default([]),
+  order: z.number().int().default(0),
+  draft: z.boolean().default(false),
 });
 
 export const pageSchema = z.object({

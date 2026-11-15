@@ -17,6 +17,7 @@ const tags = postTags(posts);
     <h1>Writing</h1>
     <p class="muted">
       Technical notes, mostly in Chinese. {posts.length} {posts.length === 1 ? 'post' : 'posts'}.
+      <a href={withBase('zh/blog/backend')}>Backend notes (中文)</a> ·
       <a href={withBase('search')}>Search</a> · <a href={withBase('rss.xml')}>RSS</a>
     </p>
     <TagFilter tags={tags} />

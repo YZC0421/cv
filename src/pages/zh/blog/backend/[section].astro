@@ -1,0 +1,58 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { backendSections, type BackendSection } from '../../../../lib/backend';
+import { withBase } from '../../../../lib/url';
+
+export async function getStaticPaths() {
+  const notes = (await getCollection('backend')).filter((note) => !note.data.draft);
+  return backendSections.map((section) => ({
+    params: { section: section.slug },
+    props: {
+      section,
+      notes: notes
+        .filter((note) => note.data.section === section.slug)
+        .sort((a, b) => b.data.date.localeCompare(a.data.date) || a.data.order - b.data.order),
+    },
+  }));
+}
+
+interface Props {
+  section: BackendSection;
+  notes: CollectionEntry<'backend'>[];
+}
+const { section, notes } = Astro.props;
+const backendHref = withBase('zh/blog/backend');
+---
+<BaseLayout
+  title={`${section.title} · 后端笔记 · 杨梓聪`}
+  description={`后端笔记：${section.title}`}
+  lang="zh-CN"
+  langSwitchHref={null}
+  alternates={[{ lang: 'zh', href: new URL(Astro.url.pathname, Astro.site).href }]}
+>
+  <div class="container" style="padding-top:48px">
+    <p class="eyebrow"><a href={backendHref}>后端笔记</a> / {section.index}</p>
+    <h1>{section.title}</h1>
+    <p class="muted">
+      {notes.length > 0 ? `共 ${notes.length} 篇笔记` : '这个板块还没有笔记。'}
+    </p>
+
+    {notes.length > 0 && (
+      <ul class="backend-notes">
+        {notes.map((note) => (
+          <li>
+            <time datetime={note.data.date}>{note.data.date}</time>
+            <a href={withBase(`zh/blog/backend/${section.slug}/${note.id.split('/').at(-1)}`)}>
+              {note.data.title}
+            </a>
+            <p>{note.data.summary}</p>
+          </li>
+        ))}
+      </ul>
+    )}
+
+    <p class="backend-back"><a href={backendHref}>← 返回后端笔记</a></p>
+  </div>
+</BaseLayout>

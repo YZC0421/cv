@@ -6,6 +6,7 @@ import {
   blogSchema,
   pageSchema,
   projectSchema,
+  backendNoteSchema,
 } from './lib/schema';
 
 const publications = defineCollection({
@@ -33,4 +34,9 @@ const projects = defineCollection({
   schema: projectSchema,
 });
 
-export const collections = { publications, work, blog, pages, projects };
+const backend = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/backend' }),
+  schema: backendNoteSchema,
+});
+
+export const collections = { publications, work, blog, pages, projects, backend };

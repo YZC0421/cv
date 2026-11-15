@@ -1,0 +1,106 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../../../../layouts/BaseLayout.astro';
+import Toc from '../../../../../components/Toc.astro';
+import { findBackendSection } from '../../../../../lib/backend';
+import { readingMinutes } from '../../../../../lib/format';
+import { hasMermaid } from '../../../../../lib/markdown';
+import { withBase } from '../../../../../lib/url';
+
+export async function getStaticPaths() {
+  const notes = (await getCollection('backend')).filter((note) => !note.data.draft);
+  return notes.map((note) => ({
+    params: {
+      section: note.data.section,
+      slug: note.id.split('/').at(-1) ?? note.id,
+    },
+    props: { note },
+  }));
+}
+
+interface Props {
+  note: CollectionEntry<'backend'>;
+}
+const { note } = Astro.props;
+const { Content, headings } = await render(note);
+const section = findBackendSection(note.data.section);
+const backendHref = withBase('zh/blog/backend');
+const sectionHref = withBase(`zh/blog/backend/${note.data.section}`);
+const readingTime = readingMinutes(note.body ?? '');
+const hasToc = headings.some(
+  (heading) => (heading.depth === 2 || heading.depth === 3) && heading.slug !== 'footnote-label'
+);
+---
+<BaseLayout
+  title={`${note.data.title} · 后端笔记 · 杨梓聪`}
+  description={note.data.summary}
+  lang="zh-CN"
+  type="article"
+  langSwitchHref={null}
+  alternates={[{ lang: 'zh', href: new URL(Astro.url.pathname, Astro.site).href }]}
+>
+  <div class="post-grid container" style="padding-top:24px">
+    <article>
+      <p class="eyebrow">
+        <a href={backendHref}>后端笔记</a> /
+        <a href={sectionHref}>{section?.title ?? note.data.section}</a>
+      </p>
+      <header class="post-header">
+        <h1>{note.data.title}</h1>
+        <div class="post-meta">
+          <time datetime={note.data.date}>{note.data.date}</time>
+          <span>·</span>
+          <span>约 {readingTime} 分钟</span>
+          <span class="lang-badge">中文</span>
+        </div>
+      </header>
+      {hasToc && (
+        <details class="toc-mobile">
+          <summary>目录</summary>
+          <Toc headings={headings} />
+        </details>
+      )}
+      <div class="prose"><Content /></div>
+      <p class="backend-back"><a href={sectionHref}>← 返回 {section?.title ?? '板块'}</a></p>
+    </article>
+    <aside class="toc-aside"><Toc headings={headings} /></aside>
+  </div>
+
+  {hasMermaid(note.body ?? '') && (
+    <script>
+      (async () => {
+        const blocks = document.querySelectorAll('pre[data-language="mermaid"]');
+        if (blocks.length === 0) return;
+        const { default: mermaid } = await import('mermaid');
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+        });
+        for (const block of blocks) {
+          const source = block.textContent ?? '';
+          try {
+            const { svg } = await mermaid.render(
+              `mermaid-${Math.random().toString(36).slice(2)}`,
+              source
+            );
+            const title = block.getAttribute('data-code-title') ?? '';
+            const figure = document.createElement('figure');
+            figure.className = 'mermaid-figure';
+            figure.setAttribute('role', 'img');
+            figure.setAttribute('aria-label', title || 'Mermaid diagram');
+            figure.innerHTML = svg;
+            if (title) {
+              const caption = document.createElement('figcaption');
+              caption.textContent = title;
+              figure.appendChild(caption);
+            }
+            block.replaceWith(figure);
+          } catch {
+            block.classList.add('mermaid-error');
+          }
+        }
+      })();
+    </script>
+  )}
+</BaseLayout>

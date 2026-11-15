@@ -61,6 +61,9 @@ const indexRoutes = [
   'dist/zh/about/index.html',
   'dist/zh/contact/index.html',
   'dist/zh/blog/index.html',
+  'dist/zh/blog/backend/index.html',
+  'dist/zh/blog/backend/08-authentication/index.html',
+  'dist/zh/blog/backend/08-authentication/sso/index.html',
   'dist/zh/publications/index.html',
   'dist/zh/search/index.html',
   'dist/zh/rss.xml',
@@ -298,6 +301,12 @@ checks.push([
 const aboutZh = await read('dist/about/zh/index.html');
 const projectsHtml = await read('dist/projects/index.html');
 checks.push(['projects list has cards', /class="project-card"/.test(projectsHtml)]);
+
+const backendIndex = await read('dist/zh/blog/backend/index.html');
+checks.push([
+  'backend notes list 16 sections',
+  (backendIndex.match(/class="backend-section-item"/g) ?? []).length === 16,
+]);
 
 const privatePayloads = existsSync('public/private')
   ? (await readdir('public/private')).filter((file) => file.endsWith('.json'))
