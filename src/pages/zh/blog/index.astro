@@ -3,53 +3,107 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import TagFilter from '../../../components/TagFilter.astro';
 import { getCollection } from 'astro:content';
 import { categoryLabel } from '../../../lib/blog';
+import { backendSections, findBackendSection } from '../../../lib/backend';
 import { postTags, postsByLang, visiblePosts } from '../../../lib/posts';
 import { localeUrl } from '../../../i18n/utils';
+import { withBase } from '../../../lib/url';
 import { t } from '../../../i18n/ui';
 
 const copy = t('zh').blog;
 const posts = postsByLang(visiblePosts(await getCollection('blog')), 'zh');
 const tags = postTags(posts);
+
+const backendNotes = (await getCollection('backend')).filter((note) => !note.data.draft);
+const latestNote = [...backendNotes].sort((a, b) => b.data.date.localeCompare(a.data.date))[0];
+const latestSection = latestNote ? findBackendSection(latestNote.data.section) : undefined;
+const latestHref =
+  latestNote && latestSection
+    ? withBase(`zh/blog/backend/${latestSection.slug}/${latestNote.id.split('/').at(-1)}`)
+    : undefined;
+const backendHref = withBase('zh/blog/backend');
 ---
 <BaseLayout title="博客 · 杨梓聪" description="关于 AI、软件工程与研究的技术笔记。" lang="zh">
-  <div class="container" style="padding-top:48px">
-    <h1>{copy.title}</h1>
-    <p class="muted">
-      {copy.intro} 共 {posts.length} 篇。
-      <a href={localeUrl('blog/backend', 'zh')}>后端笔记</a> ·
-      <a href={localeUrl('search', 'zh')}>{copy.search}</a> ·
-      <a href={localeUrl('rss.xml', 'zh')}>{copy.rss}</a>
-    </p>
+  <div class="container blog-index">
+    <header class="blog-head">
+      <h1>{copy.title}</h1>
+      <p class="muted">{copy.intro} 共 {posts.length} 篇。</p>
+    </header>
 
-    <TagFilter tags={tags} allLabel="全部" />
-    <ul class="post-list" id="post-list">
-      {posts.map((post) => (
-        <li data-tags={post.data.tags.join('|')}>
-          <time datetime={post.data.date}>{post.data.date}</time>
-          <a href={localeUrl(`blog/${post.id}`, 'zh')}>{post.data.title}</a>
-          <a class="category-badge" href={localeUrl(`blog/category/${post.data.category}`, 'zh')}>
-            {categoryLabel(post.data.category, 'zh')}
-          </a>
-          <span class="lang-badge">{post.data.lang === 'zh' ? '中文' : 'EN'}</span>
-          {post.data.tags.map((tag) => (
-            <a class="tag-badge" href={localeUrl(`blog/tag/${encodeURIComponent(tag)}`, 'zh')}>{tag}</a>
+    <div class="blog-layout">
+      <div class="blog-main">
+        <TagFilter tags={tags} allLabel="全部" />
+        <ul class="post-list blog-posts" id="post-list">
+          {posts.map((post) => (
+            <li class="blog-post" data-tags={post.data.tags.join('|')}>
+              <time datetime={post.data.date}>{post.data.date}</time>
+              <div class="blog-post-main">
+                <a class="blog-post-title" href={localeUrl(`blog/${post.id}`, 'zh')}>
+                  {post.data.title}
+                </a>
+                <p class="blog-post-summary">{post.data.summary}</p>
+                <div class="blog-post-tags">
+                  <a class="category-badge" href={localeUrl(`blog/category/${post.data.category}`, 'zh')}>
+                    {categoryLabel(post.data.category, 'zh')}
+                  </a>
+                  <span class="lang-badge">{post.data.lang === 'zh' ? '中文' : 'EN'}</span>
+                  {post.data.tags.map((tag) => (
+                    <a class="tag-badge" href={localeUrl(`blog/tag/${encodeURIComponent(tag)}`, 'zh')}>
+                      {tag}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </li>
           ))}
-        </li>
-      ))}
-    </ul>
+        </ul>
+        {posts.length === 0 && <p class="muted blog-empty">还没有文章。</p>}
+        <p id="blog-status" class="muted blog-status" role="status" aria-live="polite"></p>
+      </div>
+
+      <aside class="blog-side">
+        <section class="blog-side-card">
+          <p class="blog-side-eyebrow">结构化笔记</p>
+          <h2>后端笔记</h2>
+          <p class="muted">{backendSections.length} 个板块 · {backendNotes.length} 篇</p>
+          {latestNote && latestSection && latestHref && (
+            <a class="blog-side-note" href={latestHref}>
+              <span class="blog-side-note-section">{latestSection.index} · {latestSection.title}</span>
+              <span class="blog-side-note-title">{latestNote.data.title}</span>
+            </a>
+          )}
+          <a class="blog-side-link" href={backendHref}>浏览全部 →</a>
+        </section>
+        <div class="blog-side-links">
+          <a href={localeUrl('search', 'zh')}>{copy.search}</a>
+          <a href={localeUrl('rss.xml', 'zh')}>{copy.rss}</a>
+        </div>
+      </aside>
+    </div>
   </div>
 
-  <script is:inline>
+  <script
+    is:inline
+    define:vars={{ emptyText: '没有符合该标签的文章。', template: '显示 {v} / {t} 篇文章。' }}
+  >
     (() => {
       const buttons = document.querySelectorAll('.filters button');
-      const rows = document.querySelectorAll('#post-list li');
+      const rows = [...document.querySelectorAll('#post-list li')];
+      const status = document.getElementById('blog-status');
       buttons.forEach((btn) => {
         btn.addEventListener('click', () => {
-          buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+          buttons.forEach((other) => other.setAttribute('aria-pressed', String(other === btn)));
           const tag = btn.dataset.tag;
+          let visible = 0;
           rows.forEach((row) => {
             row.hidden = tag !== 'all' && !(row.dataset.tags ?? '').split('|').includes(tag);
+            if (!row.hidden) visible += 1;
           });
+          if (status) {
+            status.textContent =
+              visible === 0
+                ? emptyText
+                : template.replace('{v}', visible).replace('{t}', rows.length);
+          }
         });
       });
     })();

@@ -3,52 +3,112 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import TagFilter from '../../components/TagFilter.astro';
 import { getCollection } from 'astro:content';
 import { categoryLabel } from '../../lib/blog';
+import { backendSections, findBackendSection } from '../../lib/backend';
 import { postTags, postsByLang, visiblePosts } from '../../lib/posts';
 import { withBase } from '../../lib/url';
 
 const posts = postsByLang(visiblePosts(await getCollection('blog')), 'en');
 const tags = postTags(posts);
+
+const backendNotes = (await getCollection('backend')).filter((note) => !note.data.draft);
+const latestNote = [...backendNotes].sort((a, b) => b.data.date.localeCompare(a.data.date))[0];
+const latestSection = latestNote ? findBackendSection(latestNote.data.section) : undefined;
+const latestHref =
+  latestNote && latestSection
+    ? withBase(`zh/blog/backend/${latestSection.slug}/${latestNote.id.split('/').at(-1)}`)
+    : undefined;
+const backendHref = withBase('zh/blog/backend');
 ---
 <BaseLayout
   title="Writing · Zicong Yang"
   description="Notes on software engineering, computer vision, and research."
 >
-  <div class="container" style="padding-top:40px">
-    <h1>Writing</h1>
-    <p class="muted">
-      Technical notes, mostly in Chinese. {posts.length} {posts.length === 1 ? 'post' : 'posts'}.
-      <a href={withBase('zh/blog/backend')}>Backend notes (中文)</a> ·
-      <a href={withBase('search')}>Search</a> · <a href={withBase('rss.xml')}>RSS</a>
-    </p>
-    <TagFilter tags={tags} />
-    <ul class="post-list" id="post-list">
-      {posts.map((post) => (
-        <li data-tags={post.data.tags.join('|')}>
-          <time datetime={post.data.date}>{post.data.date}</time>
-          <a href={withBase(`blog/${post.id}`)}>{post.data.title}</a>
-          <a class="category-badge" href={withBase(`blog/category/${post.data.category}`)}>
-            {categoryLabel(post.data.category)}
-          </a>
-          <span class="lang-badge">{post.data.lang === 'zh' ? '中文' : 'EN'}</span>
-          {post.data.tags.map((tag) => (
-            <a class="tag-badge" href={withBase(`blog/tag/${encodeURIComponent(tag)}`)}>{tag}</a>
+  <div class="container blog-index">
+    <header class="blog-head">
+      <h1>Writing</h1>
+      <p class="muted">
+        Technical notes, mostly in Chinese. {posts.length} {posts.length === 1 ? 'post' : 'posts'}.
+      </p>
+    </header>
+
+    <div class="blog-layout">
+      <div class="blog-main">
+        <TagFilter tags={tags} />
+        <ul class="post-list blog-posts" id="post-list">
+          {posts.map((post) => (
+            <li class="blog-post" data-tags={post.data.tags.join('|')}>
+              <time datetime={post.data.date}>{post.data.date}</time>
+              <div class="blog-post-main">
+                <a class="blog-post-title" href={withBase(`blog/${post.id}`)}>{post.data.title}</a>
+                <p class="blog-post-summary">{post.data.summary}</p>
+                <div class="blog-post-tags">
+                  <a class="category-badge" href={withBase(`blog/category/${post.data.category}`)}>
+                    {categoryLabel(post.data.category)}
+                  </a>
+                  <span class="lang-badge">{post.data.lang === 'zh' ? '中文' : 'EN'}</span>
+                  {post.data.tags.map((tag) => (
+                    <a class="tag-badge" href={withBase(`blog/tag/${encodeURIComponent(tag)}`)}>
+                      {tag}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </li>
           ))}
-        </li>
-      ))}
-    </ul>
+        </ul>
+        {posts.length === 0 && (
+          <p class="muted blog-empty">
+            No English posts yet. <a href={withBase('zh/blog')}>Chinese posts</a> and backend notes are
+            still available.
+          </p>
+        )}
+        <p id="blog-status" class="muted blog-status" role="status" aria-live="polite"></p>
+      </div>
+
+      <aside class="blog-side">
+        <section class="blog-side-card">
+          <p class="blog-side-eyebrow">Structured notes</p>
+          <h2>Backend notes</h2>
+          <p class="muted">{backendSections.length} sections · {backendNotes.length} notes</p>
+          {latestNote && latestSection && latestHref && (
+            <a class="blog-side-note" href={latestHref}>
+              <span class="blog-side-note-section">{latestSection.index} · {latestSection.titleEn}</span>
+              <span class="blog-side-note-title">{latestNote.data.title}</span>
+            </a>
+          )}
+          <a class="blog-side-link" href={backendHref}>Browse all →</a>
+        </section>
+        <div class="blog-side-links">
+          <a href={withBase('search')}>Search</a>
+          <a href={withBase('rss.xml')}>RSS</a>
+        </div>
+      </aside>
+    </div>
   </div>
 
-  <script is:inline>
+  <script
+    is:inline
+    define:vars={{ emptyText: 'No posts with this tag.', template: 'Showing {v} of {t} posts.' }}
+  >
     (() => {
       const buttons = document.querySelectorAll('.filters button');
-      const rows = document.querySelectorAll('#post-list li');
+      const rows = [...document.querySelectorAll('#post-list li')];
+      const status = document.getElementById('blog-status');
       buttons.forEach((btn) => {
         btn.addEventListener('click', () => {
-          buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+          buttons.forEach((other) => other.setAttribute('aria-pressed', String(other === btn)));
           const tag = btn.dataset.tag;
+          let visible = 0;
           rows.forEach((row) => {
             row.hidden = tag !== 'all' && !(row.dataset.tags ?? '').split('|').includes(tag);
+            if (!row.hidden) visible += 1;
           });
+          if (status) {
+            status.textContent =
+              visible === 0
+                ? emptyText
+                : template.replace('{v}', visible).replace('{t}', rows.length);
+          }
         });
       });
     })();
