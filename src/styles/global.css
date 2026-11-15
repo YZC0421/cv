@@ -491,6 +491,11 @@ a.subtopic-paper:hover { color: var(--accent); }
 .blog-post-tags { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .blog-empty { margin: 24px 0; font-size: 0.9rem; }
 .blog-status { min-height: 1.2em; margin: 12px 0 0; font-size: 0.82rem; }
+.blog-posts-section { margin-bottom: 48px; }
+.blog-section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+.blog-section-head h2 { font-size: 1.15rem; font-weight: 600; }
+.blog-section-head .muted { font-size: 0.78rem; }
+.blog-notes-section .backend-sections { margin-top: 16px; }
 .blog-side { position: sticky; top: 88px; align-self: start; }
 .blog-side-card { border: 1px solid var(--border); border-radius: 12px; padding: 22px; background: var(--bg); }
 .blog-side-eyebrow { font-family: var(--font-sans); font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }

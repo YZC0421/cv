@@ -25,7 +25,7 @@ interface Props {
 const { note } = Astro.props;
 const { Content, headings } = await render(note);
 const section = findBackendSection(note.data.section);
-const backendHref = withBase('zh/blog/backend');
+const backendHref = withBase('zh/blog');
 const sectionHref = withBase(`zh/blog/backend/${note.data.section}`);
 const readingTime = readingMinutes(note.body ?? '');
 const hasToc = headings.some(

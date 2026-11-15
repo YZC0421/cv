@@ -23,7 +23,7 @@ interface Props {
   notes: CollectionEntry<'backend'>[];
 }
 const { section, notes } = Astro.props;
-const backendHref = withBase('zh/blog/backend');
+const backendHref = withBase('zh/blog');
 ---
 <BaseLayout
   title={`${section.title} · 后端笔记 · 杨梓聪`}

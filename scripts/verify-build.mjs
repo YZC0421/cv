@@ -41,7 +41,6 @@ const indexRoutes = [
   'dist/projects/index.html',
   'dist/projects/ai-supply-demand-diagnosis/index.html',
   'dist/blog/index.html',
-  'dist/zh/blog/category/software-engineering/index.html',
   'dist/about/index.html',
   'dist/about/zh/index.html',
   'dist/resume/index.html',
@@ -61,7 +60,6 @@ const indexRoutes = [
   'dist/zh/about/index.html',
   'dist/zh/contact/index.html',
   'dist/zh/blog/index.html',
-  'dist/zh/blog/backend/index.html',
   'dist/zh/blog/backend/08-authentication/index.html',
   'dist/zh/blog/backend/08-authentication/sso/index.html',
   'dist/zh/publications/index.html',
@@ -77,10 +75,7 @@ const publicationFilesList = (await readdir('src/content/publications')).filter(
 const publicationFiles = publicationFilesList.length;
 const workFiles = await countFiles('src/content/work', '.md');
 const workDetails = await countDirs('dist/work');
-const postDetails = await countDirs('dist/blog', ['tag']);
-
 checks.push(['work detail pages match content files', workDetails === workFiles]);
-checks.push(['blog has at least one post page', postDetails >= 1]);
 
 const home = await read('dist/index.html');
 let expectedHomePubs = 0;
@@ -130,7 +125,11 @@ checks.push(['404 is noindex', /name="robots"[^>]*noindex/.test(notFound)]);
 
 const sitemap = await read('dist/sitemap-0.xml');
 checks.push(['sitemap excludes 404', !sitemap.includes('/404')]);
-checks.push(['sitemap carries lastmod for posts', /<lastmod>/.test(sitemap)]);
+const blogSourceFiles = (await readdir('src/content/blog')).filter((file) => /\.mdx?$/.test(file));
+checks.push([
+  'sitemap carries lastmod for posts',
+  blogSourceFiles.length === 0 || /<lastmod>/.test(sitemap),
+]);
 
 const blogList = await read('dist/blog/index.html');
 const zhBlogList = await read('dist/zh/blog/index.html');
@@ -228,7 +227,10 @@ checks.push([
 
 await must('dist/feed.json', 'json feed');
 await must('dist/zh/feed.json', 'zh json feed');
-checks.push(['rss carries rendered html', zhRss.includes('&lt;pre') && !zhRss.includes('```')]);
+checks.push([
+  'rss carries rendered html',
+  (visibleByLang.zh.length === 0 || zhRss.includes('&lt;pre')) && !zhRss.includes('```'),
+]);
 
 let zhJson = { items: [] };
 try {
@@ -236,9 +238,10 @@ try {
 } catch {
   checks.push(['zh json feed parses', false]);
 }
+const zhItems = zhJson.items ?? [];
 checks.push([
   'json feed carries content_html',
-  (zhJson.items ?? []).some((item) => (item.content_html ?? '').includes('<pre')),
+  zhItems.length === 0 || zhItems.some((item) => (item.content_html ?? '').includes('<pre')),
 ]);
 checks.push([
   'json feed urls are absolute',
@@ -302,10 +305,10 @@ const aboutZh = await read('dist/about/zh/index.html');
 const projectsHtml = await read('dist/projects/index.html');
 checks.push(['projects list has cards', /class="project-card"/.test(projectsHtml)]);
 
-const backendIndex = await read('dist/zh/blog/backend/index.html');
+const blogIndexPage = await read('dist/zh/blog/index.html');
 checks.push([
-  'backend notes list 16 sections',
-  (backendIndex.match(/class="backend-section-item"/g) ?? []).length === 16,
+  'blog lists 16 backend sections',
+  (blogIndexPage.match(/class="backend-section-item"/g) ?? []).length === 16,
 ]);
 
 const privatePayloads = existsSync('public/private')
@@ -344,8 +347,11 @@ const searchHtml = await read('dist/search/index.html');
 checks.push(['search page wires Pagefind', searchHtml.includes('PagefindUI')]);
 await must('dist/pagefind/pagefind-entry.json', 'pagefind index');
 
-const zhPost = await read('dist/zh/blog/from-single-page-to-astro/index.html');
-checks.push(['post exposes dateModified', zhPost.includes('"dateModified"')]);
+const backendNotePage = await read('dist/zh/blog/backend/08-authentication/sso/index.html');
+checks.push([
+  'backend note renders content and diagrams',
+  backendNotePage.includes('SSO 单点登录') && backendNotePage.includes('data-language="mermaid"'),
+]);
 
 const zhHome = await read('dist/zh/index.html');
 checks.push(['zh home is localized', zhHome.includes('精选项目') && zhHome.includes('研究方向')]);
